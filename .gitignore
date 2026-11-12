@@ -2,4 +2,5 @@ build/
 **/target/
 deploy/.env
 deploy/certs/
+.env
 *.log
