@@ -1,8 +1,12 @@
 FROM maven:3.9.9-eclipse-temurin-17 AS build
 WORKDIR /workspace
+COPY pom.xml pom.xml
+COPY client/pom.xml client/pom.xml
+COPY common/pom.xml common/pom.xml
+COPY common/src common/src
 COPY server/pom.xml server/pom.xml
 COPY server/src server/src
-RUN mvn -B -f server/pom.xml -DskipTests package
+RUN mvn -B -f pom.xml -pl server -am -DskipTests package
 
 FROM nginx:1.27-alpine
 RUN apk add --no-cache openjdk17-jre

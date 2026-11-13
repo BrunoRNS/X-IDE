@@ -17,7 +17,38 @@ server to listen on `0.0.0.0:8081` so the container can reach it. `HTTP_PORT`
 and `MYSQL_PORT` change the host-published ports. `DB_HOST`, `DB_PORT`,
 `DB_NAME`, `DB_USER`, and `DB_PASSWORD` are passed to the application container.
 
-The current server code does not yet listen on `SERVER_PORT` or connect to
-MySQL. This configuration starts the JAR and prepares its environment, but the
-server must implement those features before it can expose endpoints or use the
-database.
+The WebSocket server is available through Nginx at `/ws/socket`. Messages are
+JSON objects with a `route` and `payload`; for example, route `/develop/ping`
+returns the payload `pong`. MySQL and the configured database environment are
+available for future server-side handlers.
+
+## Client route handlers
+
+There is no separate receive-only annotation. On the client, `@WebSocketRoute`
+marks a method that handles incoming messages for that route. Client route
+methods must be public, accept one `SocketMessage`, and return `void`; this
+signature makes them receive-only. Register the controller before connecting:
+
+```java
+import org.xide.client.WebSocketClient;
+import org.xide.protocol.SocketMessage;
+import org.xide.sockets.annotations.WebSocketController;
+import org.xide.sockets.annotations.WebSocketRoute;
+
+@WebSocketController
+public final class PingController {
+    @WebSocketRoute("/develop/ping")
+    public void onPong(SocketMessage response) {
+        System.out.println(response.payload().asText());
+    }
+}
+
+WebSocketClient client = new WebSocketClient();
+client.registerController(new PingController());
+```
+
+The client still supports sending messages independently with
+`client.send(SocketMessage.text("/develop/ping", "ping"))`. Incoming messages
+are dispatched to a matching annotated method and remain available through
+`client.receive(...)`. On the server, route methods instead accept and return a
+`SocketMessage`.
