@@ -1,5 +1,7 @@
 build/
 **/target/
+infra/nginx/certs/*
+!infra/nginx/certs/.gitkeep
 deploy/.env
 deploy/certs/
 .env

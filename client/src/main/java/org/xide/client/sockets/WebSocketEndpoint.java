@@ -1,6 +1,12 @@
 package org.xide.client.sockets;
 
 
+import java.io.IOException;
+import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
 import org.xide.sockets.annotations.WebSocketRouter;
 
@@ -8,26 +14,61 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.websocket.ClientEndpoint;
 import jakarta.websocket.OnMessage;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
 
 @ClientEndpoint
 public class WebSocketEndpoint {
     private static final Logger LOGGER = Logger.getLogger(WebSocketEndpoint.class.getName());
     private final WebSocketRouter router;
+    private final Consumer<SocketMessage> messageSink;
+    private volatile Session session;
 
     public WebSocketEndpoint(WebSocketRouter router) {
+        this(router, message -> {
+        });
+    }
+
+    public WebSocketEndpoint(WebSocketRouter router, Consumer<SocketMessage> messageSink) {
         this.router = router;
+        this.messageSink = messageSink;
+    }
+
+    @OnOpen
+    public void onOpen(Session session) {
+        this.session = session;
     }
 
     @OnMessage
     public void onMessage(String json) {
         try {
-            router.dispatch(SocketMessageCodec.decode(json));
+            SocketMessage message = SocketMessageCodec.decode(json);
+            messageSink.accept(message);
+            if (message.isPong()) {
+                // A pong is a response: receive-only controllers still handle it,
+                // but it is never answered back or the peers would ping-pong forever.
+                router.dispatch(message);
+            } else {
+                // A request: handle it and send the handler's response back.
+                send(router.dispatch(message));
+            }
         } catch (JsonProcessingException | IllegalArgumentException e) {
             LOGGER.log(Level.WARNING, "Invalid WebSocket response from server", e);
         } catch (IllegalStateException e) {
             LOGGER.log(Level.SEVERE, "Client response handler failed", e);
+        }
+    }
+
+    private void send(SocketMessage message) {
+        Session active = session;
+        if (active != null && active.isOpen()) {
+            try {
+                // Synchronous send so a reply is always flushed before the
+                // next inbound frame is processed (or before the client exits).
+                active.getBasicRemote().sendText(SocketMessageCodec.encode(message));
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, "Failed to send WebSocket response", e);
+            }
         }
     }
 }

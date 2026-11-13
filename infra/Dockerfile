@@ -11,8 +11,8 @@ RUN mvn -B -f pom.xml -pl server -am -DskipTests package
 FROM nginx:1.27-alpine
 RUN apk add --no-cache openjdk17-jre
 COPY --from=build /workspace/server/target/server-1.0-SNAPSHOT.jar /opt/xide/server.jar
-COPY infra/nginx.conf /etc/nginx/conf.d/default.conf
-COPY infra/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY infra/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+COPY infra/nginx/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE 8080

@@ -3,11 +3,17 @@ package org.xide.client.sockets;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import javax.net.ssl.SSLContext;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.glassfish.tyrus.client.ClientManager;
+import org.glassfish.tyrus.client.SslEngineConfigurator;
 import org.xide.Main;
 import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
@@ -22,17 +28,40 @@ public class WebSocketClient {
     private final WebSocketRouter router = new WebSocketRouter();
     private final ClientManager clientManager;
     private final Session session;
+    private final Map<String, LinkedBlockingQueue<SocketMessage>> responses = new ConcurrentHashMap<>();
 
-    private WebSocketClient(URI uri)throws IOException, DeploymentException{
+    private WebSocketClient(URI uri, SSLContext sslContext) throws IOException, DeploymentException {
         List<Object> controllers = WebSocketScanner.scan(Main.class.getPackageName());
         controllers.forEach(router::register);
         clientManager = ClientManager.createClient();
-        session = clientManager.connectToServer(new WebSocketEndpoint(router), uri);
+        if (sslContext != null) {
+            // Trust exactly the given context for wss:// endpoints (e.g. the
+            // self-signed development certificate of the X-IDE edge).
+            clientManager.getProperties().put(
+                ClientManager.SSL_ENGINE_CONFIGURATOR,
+                new SslEngineConfigurator(sslContext)
+            );
+        }
+        session = clientManager.connectToServer(new WebSocketEndpoint(router, this::recordResponse), uri);
     }
 
-    public static synchronized WebSocketClient getInstance(URI uri) throws IOException, DeploymentException{
-        if(instance == null){
-            instance = new WebSocketClient(uri);
+    private void recordResponse(SocketMessage message) {
+        responses.computeIfAbsent(message.route(), route -> new LinkedBlockingQueue<>()).add(message);
+    }
+
+    public static synchronized WebSocketClient getInstance(URI uri) throws IOException, DeploymentException {
+        return getInstance(uri, null);
+    }
+
+    /**
+     * Returns the shared client instance, optionally with an {@link SSLContext}
+     * that replaces the default trust store for {@code wss://} endpoints. The
+     * SSL context only applies when the instance does not exist yet.
+     */
+    public static synchronized WebSocketClient getInstance(URI uri, SSLContext sslContext)
+        throws IOException, DeploymentException {
+        if (instance == null) {
+            instance = new WebSocketClient(uri, sslContext);
         }
         return instance;
     }
@@ -47,6 +76,14 @@ public class WebSocketClient {
 
     public Future<Void> sendRequest(String path, JsonNode params) throws JsonProcessingException {
         return sendRequest(new SocketMessage(path, params));
+    }
+
+    /**
+     * Waits for the next response the server sent on the given route and
+     * returns it, or {@code null} when nothing arrives within the timeout.
+     */
+    public SocketMessage receive(String route, long timeout, TimeUnit unit) throws InterruptedException {
+        return responses.computeIfAbsent(route, key -> new LinkedBlockingQueue<>()).poll(timeout, unit);
     }
 
     public void close() throws IOException {

@@ -1,2 +1,96 @@
+name: CI
+
+
+on:
+  push:
+    branches-ignore:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
+  
+  test-native:
+    name: test · ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest     
+            label: linux-x64
+            dist: temurin
+          - os: ubuntu-24.04-arm  
+            label: linux-arm64
+            dist: temurin
+          - os: macos-15-intel    
+            label: mac-x64
+            dist: temurin
+          - os: macos-latest     
+            label: mac-arm64
+            dist: temurin
+          - os: windows-latest    
+            label: windows-x64
+            dist: temurin
+          - os: windows-11-arm    
+            label: windows-arm64  
+            dist: microsoft
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v4
+        with:
+          distribution: ${{ matrix.dist }}
+          java-version: '17'
+          cache: maven
+      - name: Run all module tests (common, client, server)
+        run: ./mvnw -B -ntp test
+      - name: Upload surefire reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-${{ matrix.label }}
+          path: '**/target/surefire-reports/**'
+          if-no-files-found: ignore
+
+  
+  test-emulated:
+    name: test · ${{ matrix.platform }} (qemu)
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - linux/386     
+          - linux/arm/v7  
+    steps:
+      - uses: actions/checkout@v5
+      - name: Restore Maven repository cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: maven-
+      - uses: docker/setup-qemu-action@v3
+      - name: Run tests inside ${{ matrix.platform }} container
+        run: |
+          docker run --rm \
+            --platform ${{ matrix.platform }} \
+            -v "$PWD":/workspace \
+            -v "$HOME/.m2":/root/.m2 \
+            -w /workspace \
+            debian:bookworm-slim \
+            bash -euc 'export DEBIAN_FRONTEND=noninteractive
+              apt-get update -qq
+              apt-get install -y -qq --no-install-recommends openjdk-17-jdk-headless curl unzip > /dev/null
+              ./mvnw -B -ntp test'

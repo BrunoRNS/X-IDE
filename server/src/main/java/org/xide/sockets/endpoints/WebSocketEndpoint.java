@@ -8,10 +8,12 @@ import jakarta.websocket.OnMessage;
 import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
+import org.xide.sockets.ClientSessions;
 import org.xide.sockets.WebSocketServer;
 import org.xide.sockets.annotations.WebSocketRouter;
 
@@ -23,6 +25,7 @@ public final class WebSocketEndpoint {
     @OnOpen
     public void onOpen(Session session) {
         router = WebSocketServer.getInstance().getRouter();
+        ClientSessions.register(session);
         LOGGER.info(() -> "WebSocket client connected: " + session.getId());
     }
 
@@ -35,8 +38,14 @@ public final class WebSocketEndpoint {
         }
 
         try {
-            SocketMessage request = SocketMessageCodec.decode(json);
-            send(session, activeRouter.dispatch(request));
+            SocketMessage message = SocketMessageCodec.decode(json);
+            if (message.isPong()) {
+                // The client answered our ping: record it, but never dispatch
+                // it back or the two peers would keep answering each other forever.
+                ClientSessions.recordPong(message);
+                return;
+            }
+            send(session, activeRouter.dispatch(message));
         } catch (JsonProcessingException | IllegalArgumentException e) {
             send(session, SocketMessage.text("/error", e.getMessage()));
         } catch (IllegalStateException e) {
@@ -47,6 +56,7 @@ public final class WebSocketEndpoint {
 
     @OnClose
     public void onClose(Session session, CloseReason reason) {
+        ClientSessions.unregister(session);
         LOGGER.info(() -> "WebSocket client disconnected: " + reason.getReasonPhrase());
     }
 
@@ -57,18 +67,12 @@ public final class WebSocketEndpoint {
 
     private static void send(Session session, SocketMessage message) {
         try {
-            String json = SocketMessageCodec.encode(message);
-            session.getAsyncRemote().sendText(json, result -> {
-                if (!result.isOK()) {
-                    LOGGER.log(
-                        Level.WARNING,
-                        "Failed to send WebSocket response",
-                        result.getException()
-                    );
-                }
-            });
-        } catch (JsonProcessingException e) {
-            LOGGER.log(Level.SEVERE, "Failed to serialize WebSocket response", e);
+            // Synchronous send: a response is always flushed before the next
+            // inbound frame is handled, and pushes are ordered before the
+            // reply that triggered them.
+            session.getBasicRemote().sendText(SocketMessageCodec.encode(message));
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Failed to send WebSocket response", e);
         }
     }
 }
