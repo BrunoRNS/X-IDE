@@ -3,9 +3,9 @@ package org.xide.sockets;
 import java.util.List;
 import org.glassfish.tyrus.server.Server;
 import org.xide.Main;
+import org.xide.sockets.annotations.WebSocketRouter;
+import org.xide.sockets.annotations.WebSocketScanner;
 import org.xide.sockets.endpoints.WebSocketEndpoint;
-import org.xide.sockets.utils.WebSocketRouter;
-import org.xide.sockets.utils.WebSocketScanner;
 
 public final class WebSocketServer {
     private static WebSocketServer instance;

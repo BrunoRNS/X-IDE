@@ -1,4 +1,4 @@
-package org.xide.sockets.utils;
+package org.xide.sockets.annotations;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -7,11 +7,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import org.xide.protocol.SocketMessage;
-import org.xide.sockets.annotations.WebSocketController;
-import org.xide.sockets.annotations.WebSocketRoute;
 
-public final class WebSocketRouter {
-    private final Map<String, RouteHandler> routes = new ConcurrentHashMap<>();
+public class WebSocketRouter {
+    private Map<String, RouteHandler> routes = new ConcurrentHashMap<>();
 
     public void register(Object controller) {
         Objects.requireNonNull(controller, "controller");

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.xide.protocol.SocketMessage;
+import org.xide.sockets.annotations.WebSocketRouter;
 import org.xide.sockets.controllers.develop.DevelopSocketController;
 
 public class WebSocketRouterTest {

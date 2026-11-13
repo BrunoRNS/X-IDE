@@ -1,4 +1,4 @@
-package org.xide.sockets.utils;
+package org.xide.sockets.annotations;
 
 import java.util.Comparator;
 import java.util.ArrayList;
@@ -9,7 +9,6 @@ import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.ScanResult;
-import org.xide.sockets.annotations.WebSocketController;
 
 public final class WebSocketScanner {
     private WebSocketScanner() {

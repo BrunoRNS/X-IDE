@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
 import org.xide.sockets.WebSocketServer;
-import org.xide.sockets.utils.WebSocketRouter;
+import org.xide.sockets.annotations.WebSocketRouter;
 
 @ServerEndpoint("/socket")
 public final class WebSocketEndpoint {
