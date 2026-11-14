@@ -19,21 +19,26 @@ Inside the prompt:
 ```text
 xide> run-server
 Create password for default X-IDE user (default): [hidden input]
-xide> run-client --user default --password 'your-password' --trust-cert deploy/certs/server.crt
-xide> run-clients --user default --password 'your-password' --count 10 --trust-cert deploy/certs/server.crt
+xide> run-client wss://<TLS_HOST>:8443/ws/socket
+xide> run-clients --count 10
 xide> stop-server
 ```
 
 `run-server` asks for a password (minimum 12 characters) or accepts `--password` at runtime.
-It generates random database secrets in ignored `deploy/.env` and a self-signed localhost
-certificate in ignored `deploy/certs/`. The first server start creates the default account
+It generates random database secrets in ignored `deploy/.env` and a self-signed TLS
+certificate in a persistent Compose volume. The first server start creates the default account
 in MySQL. Later starts verify the supplied password against the existing account and do not
 overwrite it. `communication-test` generates a random temporary password for its test user.
 
-The public local endpoint is `wss://localhost:8443/ws` (TLS 1.3 only). Local self-signed
-certificate trust is explicit via `--trust-cert deploy/certs/server.crt`; the wrapper
-adds it automatically for the default localhost client URL. Replace the certificate for
-any public deployment.
+The WebSocket edge uses WSS with TLS 1.3 at `wss://localhost:8443/ws/socket`. The server
+creates a self-signed certificate on first start and keeps it in a persistent Compose
+volume. For clients on the LAN, set `TLS_HOST` in `.env` to the server's private IP or a
+hostname resolving to it. On first connection, compare the client-displayed SHA-256
+fingerprint with the one in the server logs and enter it to trust the certificate; the
+client stores that pin locally. No public certificate or domain is required.
+For automated clients, set `XIDE_TLS_FINGERPRINT` to the fingerprint verified by the
+instructor. Set `TLS_HOST` before the server's first start; changing it requires replacing
+the persisted certificate only after verifying the new fingerprint.
 
 ## CMake/Maven build scopes
 
@@ -66,8 +71,9 @@ security, deployment and test strategy.
 
 The sample account is `default`; multiple simultaneous clients may share it. Authentication
 uses a credential-bearing negotiated WebSocket subprotocol during the TLS-protected handshake and PBKDF2-HMAC-SHA256 hashes stored in MySQL.
-The Nginx edge only permits TLS 1.3. The local self-signed cert is strictly for localhost
-smoke tests. For production, replace it with a trusted certificate, use runtime secrets,
+The Nginx edge only permits TLS 1.3. Changed self-signed certificates are rejected until
+the pin is deliberately removed after verification. For public deployments, replace the
+certificate with one signed by a trusted public CA, use runtime secrets,
 rotate the default password deliberately, and add account lifecycle, rate limiting, auditing,
 backups and DB TLS as required. This is not yet a sandbox for running untrusted submissions:
 execute submissions only in separately hardened workers.

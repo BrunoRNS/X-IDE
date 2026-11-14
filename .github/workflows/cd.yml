@@ -1,0 +1,129 @@
+name: CD
+
+# Same light matrix as the develop CI (one mac, linux and windows runner for
+# common, client and server), plus two publishing targets:
+#   1. a multi-arch Docker image to Docker Hub for every container platform
+#      with a JRE 17 (linux/amd64, linux/arm64, linux/386, linux/arm/v7).
+#      macOS and Windows have no container platform; use the release bundles.
+#   2. native release bundles (macOS, Windows x64/x86, Linux x64/x86) attached
+#      to the GitHub Release created for a v*.*.* tag. The Java bytecode is
+#      identical on every OS/architecture; only launchers and JRE guidance
+#      differ.
+# Requires the following repository secrets:
+#   DOCKERHUB_USERNAME – Docker Hub user or organization name
+#   DOCKERHUB_TOKEN    – Docker Hub access token (read/write scope)
+#
+# Image tags produced:
+#   push to main   -> <user>/x-ide:latest + sha tag
+#   push to develop-> <user>/x-ide:develop + sha tag
+#   push tag v1.2.3-> <user>/x-ide:1.2.3 and 1.2 + sha tag
+on:
+  push:
+    branches:
+      - main
+      - develop
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test · ${{ matrix.module }} · ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        module: [common, client, server]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Run ${{ matrix.module }} tests
+        run: ./mvnw -B -ntp -pl ${{ matrix.module }} -am test
+
+  docker:
+    name: docker · publish multi-arch image to Docker Hub
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check Docker Hub secrets
+        run: |
+          if [ -z "${DOCKERHUB_USERNAME:-}" ] || [ -z "${DOCKERHUB_TOKEN:-}" ]; then
+            echo "::error::Set the DOCKERHUB_USERNAME and DOCKERHUB_TOKEN repository secrets first."
+            exit 1
+          fi
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/x-ide
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=develop,enable=${{ github.ref == 'refs/heads/develop' }}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/Dockerfile
+          platforms: linux/amd64,linux/arm64,linux/386,linux/arm/v7
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  release:
+    name: release · native bundles (macos, windows x64/x86, linux x64/x86)
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Build shaded JARs
+        run: ./mvnw -B -ntp -DskipTests package
+      - name: Assemble per-target bundles
+        run: |
+          case "$GITHUB_REF_NAME" in
+            v*) VERSION="${GITHUB_REF_NAME#v}" ;;
+            *)  VERSION="0.0.0+${GITHUB_SHA::7}" ;;
+          esac
+          ./scripts/package-release.sh "$VERSION" dist
+      - name: Publish to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          fail_on_unmatched_files: true
