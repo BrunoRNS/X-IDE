@@ -12,7 +12,7 @@ import org.xide.protocol.SocketMessageCodec;
 
 public final class Main {
     
-    private static final String DEFAULT_ENDPOINT = "ws://localhost:8080/ws/socket";
+    private static final String DEFAULT_ENDPOINT = "wss://localhost:8443/ws/socket";
     private static final String DEFAULT_ROUTE = "/develop/ping";
     private static final String DEFAULT_MESSAGE = "";
 

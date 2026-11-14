@@ -9,6 +9,7 @@ import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.xide.protocol.SocketMessage;
@@ -33,25 +34,27 @@ public final class WebSocketEndpoint {
     public void onMessage(Session session, String json) {
         WebSocketRouter activeRouter = router;
         if (activeRouter == null) {
-            send(session, SocketMessage.text("/error", "WebSocket router is not ready"));
+            send(session, SocketMessage.response(
+                "/error",
+                SocketMessageCodec.toJsonNode("WebSocket router is not ready")
+            ));
             return;
         }
 
         try {
             SocketMessage message = SocketMessageCodec.decode(json);
-            if (message.isPong()) {
-                // The client answered our ping: record it, but never dispatch
-                // it back or the two peers would keep answering each other forever.
+            if (message.response()) {
                 ClientSessions.recordPong(message);
                 return;
             }
-            send(session, activeRouter.dispatch(message));
-        } catch (JsonProcessingException | IllegalArgumentException e) {
-            send(session, SocketMessage.text("/error", e.getMessage()));
-        } catch (IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "WebSocket route handler failed", e);
-            send(session, SocketMessage.text("/error", "Internal route error"));
-        }
+            Optional<SocketMessage> response = activeRouter.dispatch(message);
+            response.ifPresent(result -> send(session, result));
+        } catch (Exception e) {
+            send(session, SocketMessage.response(
+                "/error",
+                SocketMessageCodec.toJsonNode(e.getMessage())
+            ));
+        } 
     }
 
     @OnClose
@@ -71,7 +74,7 @@ public final class WebSocketEndpoint {
             // inbound frame is handled, and pushes are ordered before the
             // reply that triggered them.
             session.getBasicRemote().sendText(SocketMessageCodec.encode(message));
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to send WebSocket response", e);
         }
     }

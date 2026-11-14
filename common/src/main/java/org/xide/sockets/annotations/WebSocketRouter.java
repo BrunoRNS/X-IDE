@@ -5,8 +5,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import org.xide.protocol.SocketMessage;
+import org.xide.protocol.SocketMessageCodec;
 
 public class WebSocketRouter {
     private Map<String, RouteHandler> routes = new ConcurrentHashMap<>();
@@ -34,7 +36,11 @@ public class WebSocketRouter {
         }
     }
 
-    public SocketMessage dispatch(SocketMessage request) {
+    /**
+     * Dispatches a request and wraps a non-null handler result in its response payload.
+     * Void and null results produce no response.
+     */
+    public Optional<SocketMessage> dispatch(SocketMessage request) {
         Objects.requireNonNull(request, "request");
         RouteHandler handler = routes.get(request.route());
         if (handler == null) {
@@ -42,14 +48,13 @@ public class WebSocketRouter {
         }
 
         try {
-            SocketMessage response =
-                (SocketMessage) handler.method().invoke(handler.controller(), request);
-            if (response == null) {
-                throw new IllegalStateException(
-                    "WebSocket route returned null: " + request.route()
-                );
+            Object result = handler.method().invoke(handler.controller(), request);
+            if (result == null) {
+                return Optional.empty();
             }
-            return response;
+            return Optional.of(
+                SocketMessage.response(request.route(), SocketMessageCodec.toJsonNode(result))
+            );
         } catch (InvocationTargetException e) {
             throw new IllegalStateException(
                 "WebSocket route failed: " + request.route(),
@@ -68,11 +73,10 @@ public class WebSocketRouter {
         }
         if (!Modifier.isPublic(method.getModifiers())
                 || method.getParameterCount() != 1
-                || method.getParameterTypes()[0] != SocketMessage.class
-                || method.getReturnType() != SocketMessage.class) {
+                || method.getParameterTypes()[0] != SocketMessage.class) {
             throw new IllegalArgumentException(
                 "Route " + path + " on " + controller.getClass().getName()
-                    + " must be public and accept/return SocketMessage"
+                    + " must be public and accept SocketMessage"
             );
         }
     }

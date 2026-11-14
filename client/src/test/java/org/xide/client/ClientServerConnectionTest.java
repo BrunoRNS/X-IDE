@@ -77,7 +77,7 @@ public class ClientServerConnectionTest {
         SocketMessage response =
             client.receive("/develop/ping", RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
-        assertEquals(SocketMessage.text("/develop/ping", SocketMessage.PONG), response);
+        assertEquals(SocketMessage.textResponse("/develop/ping", SocketMessage.PONG), response);
     }
 
     @Test(timeout = 60_000)
@@ -99,7 +99,10 @@ public class ClientServerConnectionTest {
             Thread.sleep(200);
         }
 
-        assertEquals(SocketMessage.text("/develop/last-pong", SocketMessage.PONG), response);
+        assertEquals(
+            SocketMessage.textResponse("/develop/last-pong", SocketMessage.PONG),
+            response
+        );
     }
 
     private static void requireDocker() {

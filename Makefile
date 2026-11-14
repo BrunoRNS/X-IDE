@@ -5,7 +5,7 @@ COMPOSE_ARGS ?=
 COMPOSE := docker compose --env-file .env -f infra/compose.yaml
 
 CLIENT_JAR := client/target/client-1.0-SNAPSHOT-all.jar
-CLIENT_ENDPOINT ?= ws://localhost:8080/ws/socket
+CLIENT_ENDPOINT ?= wss://localhost:8443/ws/socket
 CLIENT_ROUTE ?= /develop/ping
 CLIENT_MESSAGE ?= ping
 MODEL_NAME ?= qwen2.5-coder:3b
@@ -60,28 +60,26 @@ help:
 		"" \
 		"Runtime:" \
 		"  run-server                          Start MySQL + Java server + Nginx." \
-		"                                      Runs gen-certs first; the edge is http" \
-		"                                      only: WSS at /ws/socket (self-signed dev" \
-		"                                      certificate in infra/nginx/certs/)." \
+		"                                      Generates a persistent self-signed TLS" \
+		"                                      certificate. Set TLS_HOST in .env to the" \
+		"                                      server IP or hostname used by clients." \
 		"                                      --user/--password: not yet implemented." \
-		"  gen-certs                           Generate the self-signed dev certificate" \
-		"                                      on the host (Linux/macOS/Windows, via" \
-		"                                      Docker) so the container receives it." \
 		"  stop-server | server-logs | stack-status" \
 		"  run-model                           Start Ollama and download MODEL_NAME." \
 		"                                      Default: qwen2.5-coder:3b (CPU)." \
 		"                                      Use MODEL_NAME=qwen2.5-coder:1.5b for faster inference." \
 		"  run-client                          Send CLIENT_MESSAGE to CLIENT_ROUTE at" \
 		"                                      CLIENT_ENDPOINT and print the response." \
-		"                                      CLIENT_TRUST_CERT is trusted for WSS." \
+		"                                      First WSS connection verifies a server fingerprint." \
+		"                                      XIDE_TLS_FINGERPRINT supports automation." \
 		"                                      --user/--password: not yet implemented." \
 		"  communication-test                  Verify ping/pong in both directions through" \
 		"                                      the running stack (bash script)." \
 		"  communication-test-windows          Same check via Windows PowerShell." \
 		"  run-clients --count N               not yet implemented" \
-		"  remote-test                         Send a ping to URL=ws://host:8080/ws/socket." \
-		"                                      REMOTE_TRUST_CERT is trusted for WSS; omit it" \
-		"                                      for hosts with trusted certificates." \
+		"  remote-test                         Send a ping to URL=wss://host:8443/ws/socket." \
+		"                                      Verify the server fingerprint on first contact;" \
+		"                                      XIDE_TLS_FINGERPRINT supports automation." \
 		"                                      --user/--password: not yet implemented." \
 		"" \
 		"Project:" \
@@ -91,7 +89,7 @@ help:
 		"  run-server                          # starts the stack " \
 		"  communication-test                  # ping/pong both ways through the stack" \
 		"  run-client                          # CLIENT_MESSAGE defaults to ping -> prints pong" \
-		"  run-client CLIENT_ENDPOINT=ws://localhost:8080/ws/socket" \
+		"  run-client CLIENT_ENDPOINT=wss://localhost:8443/ws/socket" \
 		"  stop-server" \
 		"" \
 		"Optional Maven options: MVN_ARGS='-DskipTests'" \
@@ -179,7 +177,7 @@ run-clients:
 
 remote-test:
 	@test -n "$(URL)" || { \
-		echo "remote-test: URL is required, e.g. make remote-test URL=ws://host:8080/ws/socket"; exit 1; }
+		echo "remote-test: URL is required, e.g. make remote-test URL=wss://host:8443/ws/socket"; exit 1; }
 	./mvnw $(MVN_ARGS) -pl client -am package
 	java -jar $(CLIENT_JAR) "$(URL)" "$(CLIENT_ROUTE)" \
 		--message "$(CLIENT_MESSAGE)"

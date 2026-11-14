@@ -7,8 +7,8 @@ import org.xide.sockets.annotations.WebSocketRoute;
 @WebSocketController 
 public class PingController {
     @WebSocketRoute("/develop/ping")
-    public SocketMessage ping(SocketMessage request) {
+    public String ping(SocketMessage request) {
         System.out.println("Pong");
-        return SocketMessage.text(request.route(), "pong");
+        return SocketMessage.PONG;
     }
 }

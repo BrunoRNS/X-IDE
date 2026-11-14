@@ -55,9 +55,9 @@ Pass options on the same command line:
 ```sh
 make build-all MVN_ARGS='-DskipTests'
 make run-server COMPOSE_ARGS='--remove-orphans'
-make run-client CLIENT_ENDPOINT=ws://localhost:8080/ws/socket \
+make run-client CLIENT_ENDPOINT=wss://localhost:8443/ws/socket \
   CLIENT_ROUTE=/develop/ping CLIENT_MESSAGE=ping
-make remote-test URL=ws://host:8080/ws/socket
+make remote-test URL=wss://host:8443/ws/socket
 make run-model MODEL_NAME=qwen2.5-coder:3b
 ```
 
@@ -65,8 +65,16 @@ make run-model MODEL_NAME=qwen2.5-coder:3b
 |---|---|---|
 | `MVN_ARGS` | Additional arguments passed to Maven. | empty |
 | `COMPOSE_ARGS` | Additional arguments passed to Docker Compose by stack commands. | empty |
-| `CLIENT_ENDPOINT` | WebSocket endpoint used by the client and communication tests. | `ws://localhost:8080/ws/socket` |
+| `CLIENT_ENDPOINT` | WebSocket endpoint used by the client and communication tests. | `wss://localhost:8443/ws/socket` |
 | `CLIENT_ROUTE` | Route sent by the client. | `/develop/ping` |
 | `CLIENT_MESSAGE` | Message sent by the client. | `ping` |
 | `MODEL_NAME` | Ollama model pulled by `run-model`; use `qwen2.5-coder:1.5b` for faster inference with less memory. | `qwen2.5-coder:3b` |
 | `URL` | WebSocket destination for `remote-test`. | required for this command |
+
+For clients on other machines, set `TLS_HOST` in `.env` to the server's LAN IP (or a
+hostname resolving to it), then connect to `wss://<TLS_HOST>:8443/ws/socket`. On first
+connection, compare the client-displayed SHA-256 fingerprint with the fingerprint in
+`make server-logs` and enter it to trust the server. The client remembers the pin in
+`~/.xide/trusted-certificates.properties`; non-interactive clients can set
+`XIDE_TLS_FINGERPRINT` to the verified fingerprint. Run `make run-client` once before
+the communication test so the interactive first-contact pin can be confirmed.

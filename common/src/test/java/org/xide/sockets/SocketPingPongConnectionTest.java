@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.net.URI;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -42,11 +43,9 @@ import jakarta.websocket.server.ServerEndpoint;
  * sources because common cannot depend on the client and server modules
  * (Maven forbids cyclic module dependencies).</p>
  *
- * <p>Handshake rule: a frame whose payload is {@code ping} is a request and is
- * dispatched through the router; the controller answers {@code pong}. A pong
- * is a response, never a request: it is captured for the assertions instead of
- * being dispatched again, otherwise the two peers would answer each other
- * forever.</p>
+ * <p>Requests are dispatched through the router and responses are identified
+ * independently of their payload, so a response containing {@code pong} is
+ * never dispatched as another request.</p>
  */
 public class SocketPingPongConnectionTest {
 
@@ -84,7 +83,7 @@ public class SocketPingPongConnectionTest {
             send(session, SocketMessage.text("/develop/ping", "ping"));
 
             assertEquals(
-                SocketMessage.text("/develop/ping", "pong"),
+                SocketMessage.textResponse("/develop/ping", "pong"),
                 receivedByClient.awaitPong()
             );
         } finally {
@@ -103,7 +102,7 @@ public class SocketPingPongConnectionTest {
             send(Hub.clientSessionOnServer, SocketMessage.text("/develop/ping", "ping"));
 
             assertEquals(
-                SocketMessage.text("/develop/ping", "pong"),
+                SocketMessage.textResponse("/develop/ping", "pong"),
                 Hub.receivedByServer.awaitPong()
             );
         } finally {
@@ -172,19 +171,18 @@ public class SocketPingPongConnectionTest {
                                     WebSocketRouter router, ResponseSink sink) {
         try {
             SocketMessage message = SocketMessageCodec.decode(json);
-            if (isPing(message)) {
-                session.getAsyncRemote()
-                    .sendText(SocketMessageCodec.encode(router.dispatch(message)));
-            } else {
+            if (message.response()) {
                 sink.receive(message);
+            } else {
+                Optional<SocketMessage> response = router.dispatch(message);
+                if (response.isPresent()) {
+                    session.getAsyncRemote()
+                        .sendText(SocketMessageCodec.encode(response.get()));
+                }
             }
         } catch (Exception e) {
             sink.receiveError(e);
         }
-    }
-
-    private static boolean isPing(SocketMessage message) {
-        return "ping".equals(message.payload().asText());
     }
 
     /**
@@ -205,8 +203,8 @@ public class SocketPingPongConnectionTest {
     @WebSocketController
     public static final class PingController {
         @WebSocketRoute("/develop/ping")
-        public SocketMessage ping(SocketMessage request) {
-            return SocketMessage.text(request.route(), "pong");
+        public String ping(SocketMessage request) {
+            return "pong";
         }
     }
 

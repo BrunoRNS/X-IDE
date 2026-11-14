@@ -1,6 +1,6 @@
 
 param(
-    [string]$Endpoint = "ws://localhost:8080/ws/socket"
+    [string]$Endpoint = "wss://localhost:8443/ws/socket"
 )
 
 $ErrorActionPreference = "Continue"
@@ -18,7 +18,7 @@ if (-not (Test-Path $Jar)) {
 
 $uri = [Uri]$Endpoint
 $targetHost = if ($uri.Host) { $uri.Host } else { "127.0.0.1" }
-$targetPort = if ($uri.Port -gt 0) { $uri.Port } else { 8080 }
+$targetPort = if ($uri.Port -gt 0) { $uri.Port } else { 8443 }
 
 try {
     $probe = New-Object System.Net.Sockets.TcpClient
@@ -40,7 +40,7 @@ $script:failed = 0
 
 function Expect {
     param([string]$Name, [string]$Expected, [string[]]$ClientArgs)
-    $output = (& java -jar $Jar @ClientArgs 2>$null | Out-String).Trim()
+    $output = (& java -jar $Jar @ClientArgs | Out-String).Trim()
     if ($LASTEXITCODE -eq 0 -and $output.Contains($Expected)) {
         Write-Host "PASS $Name"
         $script:passed = $script:passed + 1

@@ -1,7 +1,8 @@
 package org.xide.client.sockets;
 
 
-import java.io.IOException;
+
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -10,7 +11,7 @@ import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
 import org.xide.sockets.annotations.WebSocketRouter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+
 
 import jakarta.websocket.ClientEndpoint;
 import jakarta.websocket.OnMessage;
@@ -44,19 +45,14 @@ public class WebSocketEndpoint {
         try {
             SocketMessage message = SocketMessageCodec.decode(json);
             messageSink.accept(message);
-            if (message.isPong()) {
-                // A pong is a response: receive-only controllers still handle it,
-                // but it is never answered back or the peers would ping-pong forever.
-                router.dispatch(message);
-            } else {
-                // A request: handle it and send the handler's response back.
-                send(router.dispatch(message));
+            if (message.response()) {
+                return;
             }
-        } catch (JsonProcessingException | IllegalArgumentException e) {
+            Optional<SocketMessage> response = router.dispatch(message);
+            response.ifPresent(this::send);
+        } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Invalid WebSocket response from server", e);
-        } catch (IllegalStateException e) {
-            LOGGER.log(Level.SEVERE, "Client response handler failed", e);
-        }
+        } 
     }
 
     private void send(SocketMessage message) {
@@ -66,7 +62,7 @@ public class WebSocketEndpoint {
                 // Synchronous send so a reply is always flushed before the
                 // next inbound frame is processed (or before the client exits).
                 active.getBasicRemote().sendText(SocketMessageCodec.encode(message));
-            } catch (IOException e) {
+            } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to send WebSocket response", e);
             }
         }

@@ -1,6 +1,6 @@
 package org.xide.sockets.controllers.develop;
 
-import java.io.IOException;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,9 +16,9 @@ public final class DevelopSocketController {
     private static final Logger LOGGER = Logger.getLogger(DevelopSocketController.class.getName());
 
     @WebSocketRoute("/develop/ping")
-    public SocketMessage ping(SocketMessage request) {
+    public String ping(SocketMessage request) {
         System.out.println("Pong");
-        return SocketMessage.text(request.route(), SocketMessage.PONG);
+        return SocketMessage.PONG;
     }
 
     /**
@@ -26,18 +26,18 @@ public final class DevelopSocketController {
      * that the server records and {@link #lastPong(SocketMessage)} can read.
      */
     @WebSocketRoute("/develop/ping-clients")
-    public SocketMessage pingClients(SocketMessage request) {
+    public String pingClients(SocketMessage request) {
         for (Session session : ClientSessions.all()) {
             send(session, SocketMessage.text("/develop/ping", SocketMessage.PING));
         }
-        return SocketMessage.text(request.route(), "pinged");
+        return "pinged";
     }
 
     /** Returns the payload of the last pong a client sent back ("none" before that). */
     @WebSocketRoute("/develop/last-pong")
-    public SocketMessage lastPong(SocketMessage request) {
+    public String lastPong(SocketMessage request) {
         SocketMessage last = ClientSessions.lastPong();
-        return SocketMessage.text(request.route(), last == null ? "none" : last.payload().asText());
+        return last == null ? "none" : last.payload().asText();
     }
 
     private static void send(Session session, SocketMessage message) {
@@ -45,7 +45,7 @@ public final class DevelopSocketController {
             // Synchronous push so it reaches the client before the reply to
             // the request that triggered it.
             session.getBasicRemote().sendText(SocketMessageCodec.encode(message));
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to push WebSocket message", e);
         }
     }

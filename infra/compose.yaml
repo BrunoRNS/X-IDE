@@ -6,6 +6,7 @@ services:
     restart: unless-stopped
     environment:
       SERVER_PORT: "8081"
+      TLS_HOST: ${TLS_HOST:-localhost}
       DB_HOST: mysql
       DB_PORT: "3306"
       DB_NAME: ${DB_NAME:?Set DB_NAME in the root .env file}
@@ -17,8 +18,9 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
-      
-      - "${HTTP_PORT:-8080}:8080"
+      - "${HTTPS_PORT:-8443}:8443"
+    volumes:
+      - tls_certs:/etc/nginx/certs
 
   mysql:
     image: mysql:8.4
@@ -60,3 +62,4 @@ services:
 volumes:
   mysql_data:
   ollama_data:
+  tls_certs:
