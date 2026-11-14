@@ -85,21 +85,12 @@ jobs:
           key: maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: maven-
       - uses: docker/setup-qemu-action@v3
-      - name: Prepare Maven distribution
-        run: |
-          curl -fsSL \
-            https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.tar.gz \
-            -o "$RUNNER_TEMP/apache-maven.tar.gz"
-          mkdir -p "$RUNNER_TEMP/apache-maven"
-          tar -xzf "$RUNNER_TEMP/apache-maven.tar.gz" \
-            --strip-components=1 -C "$RUNNER_TEMP/apache-maven"
       - name: Run tests inside ${{ matrix.platform }} container
         run: |
           docker run --rm \
             --platform ${{ matrix.platform }} \
             -v "$PWD":/workspace \
             -v "$HOME/.m2":/root/.m2 \
-            -v "$RUNNER_TEMP/apache-maven":/opt/apache-maven:ro \
             -w /workspace \
             debian:bookworm-slim \
             bash -euc '
@@ -111,6 +102,6 @@ jobs:
 
               java -version
 
-              /opt/apache-maven/bin/mvn -B -ntp test
+              ./mvnw -B -ntp test
             '
 
