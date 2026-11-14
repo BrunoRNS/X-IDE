@@ -2,8 +2,7 @@ name: CD
 
 # Same light matrix as the develop CI (one mac, linux and windows runner for
 # common, client and server), plus two publishing targets:
-#   1. a multi-arch Docker image to Docker Hub for every container platform
-#      with a JRE 17 (linux/amd64, linux/arm64, linux/386, linux/arm/v7).
+#   1. a multi-arch Docker image to Docker Hub for linux/amd64 and linux/arm64.
 #      macOS and Windows have no container platform; use the release bundles.
 #   2. native release bundles (macOS, Windows x64/x86, Linux x64/x86) attached
 #      to the GitHub Release created for a v*.*.* tag. The Java bytecode is
@@ -92,7 +91,7 @@ jobs:
         with:
           context: .
           file: infra/Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/386,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

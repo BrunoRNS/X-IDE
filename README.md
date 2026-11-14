@@ -32,13 +32,15 @@ overwrite it. `communication-test` generates a random temporary password for its
 
 The WebSocket edge uses WSS with TLS 1.3 at `wss://localhost:8443/ws/socket`. The server
 creates a self-signed certificate on first start and keeps it in a persistent Compose
-volume. For clients on the LAN, set `TLS_HOST` in `.env` to the server's private IP or a
-hostname resolving to it. On first connection, compare the client-displayed SHA-256
-fingerprint with the one in the server logs and enter it to trust the certificate; the
-client stores that pin locally. No public certificate or domain is required.
+volume. The Compose stack binds WSS to `127.0.0.1` by default, does not publish MySQL, and
+publishes Ollama only on localhost. To allow clients on the LAN, set both `BIND_ADDRESS`
+and `TLS_HOST` in `.env` to the server's private IP. The client stores a TOFU pin on first
+connection; no public certificate or domain is required.
 For automated clients, set `XIDE_TLS_FINGERPRINT` to the fingerprint verified by the
 instructor. Set `TLS_HOST` before the server's first start; changing it requires replacing
-the persisted certificate only after verifying the new fingerprint.
+the persisted certificate only after verifying the new fingerprint. Do not forward WSS
+from the internet router; isolate student devices on a guest VLAN and restrict access with
+router/host firewall rules. WSS does not replace application authentication and authorization.
 
 ## CMake/Maven build scopes
 

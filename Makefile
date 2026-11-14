@@ -61,8 +61,9 @@ help:
 		"Runtime:" \
 		"  run-server                          Start MySQL + Java server + Nginx." \
 		"                                      Generates a persistent self-signed TLS" \
-		"                                      certificate. Set TLS_HOST in .env to the" \
-		"                                      server IP or hostname used by clients." \
+		"                                      certificate. Binds to 127.0.0.1 by default;" \
+		"                                      set BIND_ADDRESS and TLS_HOST to the LAN IP" \
+		"                                      to allow student clients to connect." \
 		"                                      --user/--password: not yet implemented." \
 		"  stop-server | server-logs | stack-status" \
 		"  run-model                           Start Ollama and download MODEL_NAME." \

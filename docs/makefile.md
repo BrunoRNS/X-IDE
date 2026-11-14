@@ -71,10 +71,17 @@ make run-model MODEL_NAME=qwen2.5-coder:3b
 | `MODEL_NAME` | Ollama model pulled by `run-model`; use `qwen2.5-coder:1.5b` for faster inference with less memory. | `qwen2.5-coder:3b` |
 | `URL` | WebSocket destination for `remote-test`. | required for this command |
 
-For clients on other machines, set `TLS_HOST` in `.env` to the server's LAN IP (or a
-hostname resolving to it), then connect to `wss://<TLS_HOST>:8443/ws/socket`. On first
-connection, compare the client-displayed SHA-256 fingerprint with the fingerprint in
-`make server-logs` and enter it to trust the server. The client remembers the pin in
-`~/.xide/trusted-certificates.properties`; non-interactive clients can set
-`XIDE_TLS_FINGERPRINT` to the verified fingerprint. Run `make run-client` once before
-the communication test so the interactive first-contact pin can be confirmed.
+The server binds to loopback by default. To allow students on the LAN, set both
+`BIND_ADDRESS` and `TLS_HOST` in `.env` to the server's private IP (for example
+`192.168.1.50`), then connect to `wss://192.168.1.50:8443/ws/socket`. The MySQL service
+is private to the Compose network; Ollama is published only on localhost. On first
+connection, TOFU stores the server certificate pin in
+`~/.xide/trusted-certificates.properties`; for non-interactive clients, configure
+`XIDE_TLS_FINGERPRINT` with the fingerprint obtained from the server through a trusted
+channel.
+
+Do not forward port 8443 from the internet router. Put student devices on a guest VLAN
+or use router/host firewall rules to allow only the class network. Docker-published
+ports may bypass UFW rules, so verify filtering at the router or Docker firewall layer.
+The application still needs authentication and authorization before untrusted students
+can safely access its routes; WSS alone only encrypts transport.
