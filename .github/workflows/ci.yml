@@ -69,10 +69,8 @@ jobs:
   # Full JVM test runs under QEMU arm32 emulation are unreliable (known QEMU
   # limitation; the same suite passes on real ARM hardware), so the armv7
   # leg is best-effort: a failure there does not fail the workflow.
-  # linux/386 is required. Maven comes from Debian's apt instead of ./mvnw:
-  # the wrapper's download/extract/move bootstrap is fragile under emulation
-  # and can leave a partially populated Maven distribution behind
-  # (ClassNotFoundException: org.apache.maven.cli.MavenCli).
+  # linux/386 is required. Prepare Maven on the native runner and mount the
+  # distribution into QEMU to avoid bootstrapping it under emulation.
   test-emulated:
     name: test · ${{ matrix.platform }} (qemu)
     runs-on: ubuntu-latest
@@ -95,16 +93,25 @@ jobs:
           key: maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: maven-
       - uses: docker/setup-qemu-action@v3
+      - name: Prepare Maven distribution
+        run: |
+          curl -fsSL \
+            https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.tar.gz \
+            -o "$RUNNER_TEMP/apache-maven.tar.gz"
+          mkdir -p "$RUNNER_TEMP/apache-maven"
+          tar -xzf "$RUNNER_TEMP/apache-maven.tar.gz" \
+            --strip-components=1 -C "$RUNNER_TEMP/apache-maven"
       - name: Run tests inside ${{ matrix.platform }} container
         run: |
           docker run --rm \
             --platform ${{ matrix.platform }} \
             -v "$PWD":/workspace \
             -v "$HOME/.m2":/root/.m2 \
+            -v "$RUNNER_TEMP/apache-maven":/opt/apache-maven:ro \
             -w /workspace \
             debian:bookworm-slim \
             bash -euc 'export DEBIAN_FRONTEND=noninteractive
               apt-get update -qq
-              apt-get install -y -qq --no-install-recommends openjdk-17-jdk-headless maven
+              apt-get install -y -qq --no-install-recommends openjdk-17-jdk-headless
               java -version
-              mvn -B -ntp test'
+              /opt/apache-maven/bin/mvn -B -ntp test'
