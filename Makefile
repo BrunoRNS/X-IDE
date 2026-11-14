@@ -12,7 +12,7 @@ CLIENT_TRUST_CERT ?= infra/nginx/certs/server.crt
 
 .PHONY: all build-client build-server build-common build-integration build-all package-all
 .PHONY: test-client test-server test-common test-integration test-all
-.PHONY: run-server stop-server server-logs stack-status
+.PHONY: run-server stop-server server-logs stack-status gen-certs
 .PHONY: run-client run-clients communication-test communication-test-windows remote-test
 .PHONY: configure help exit quit
 
@@ -59,9 +59,13 @@ help:
 		"" \
 		"Runtime:" \
 		"  run-server                          Start MySQL + Java server + Nginx." \
-		"                                      The edge is TLS 1.3 only: WSS at /ws/socket" \
-		"                                      (self-signed dev certificate in infra/nginx/certs/)." \
+		"                                      Runs gen-certs first; the edge is TLS 1.3" \
+		"                                      only: WSS at /ws/socket (self-signed dev" \
+		"                                      certificate in infra/nginx/certs/)." \
 		"                                      --user/--password: not yet implemented." \
+		"  gen-certs                           Generate the self-signed dev certificate" \
+		"                                      on the host (Linux/macOS/Windows, via" \
+		"                                      Docker) so the container receives it." \
 		"  stop-server | server-logs | stack-status" \
 		"  run-client                          Send CLIENT_MESSAGE to CLIENT_ROUTE at" \
 		"                                      CLIENT_ENDPOINT and print the response." \
@@ -132,7 +136,10 @@ configure:
 		echo "Created .env from .env.example; replace the example database passwords before starting."; \
 	fi
 
-run-server: configure
+gen-certs:
+	bash infra/gen-certs.sh
+
+run-server: configure gen-certs
 	$(COMPOSE) up --build $(COMPOSE_ARGS)
 
 stop-server:

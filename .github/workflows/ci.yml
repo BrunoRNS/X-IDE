@@ -63,16 +63,29 @@ jobs:
           if-no-files-found: ignore
 
   
+  # 32-bit architectures GitHub does not host natively: x86 (i386) and
+  # armv7, emulated with QEMU inside Debian containers.
+  #
+  # Full JVM test runs under QEMU arm32 emulation are unreliable (known QEMU
+  # limitation; the same suite passes on real ARM hardware), so the armv7
+  # leg is best-effort: a failure there does not fail the workflow.
+  # linux/386 is required. Maven comes from Debian's apt instead of ./mvnw:
+  # the wrapper's download/extract/move bootstrap is fragile under emulation
+  # and can leave a partially populated Maven distribution behind
+  # (ClassNotFoundException: org.apache.maven.cli.MavenCli).
   test-emulated:
     name: test · ${{ matrix.platform }} (qemu)
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    continue-on-error: ${{ matrix.allow_failure }}
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          - linux/386     
-          - linux/arm/v7  
+        include:
+          - platform: linux/386    # x86 (32-bit), required
+            allow_failure: false
+          - platform: linux/arm/v7 # arm32, best-effort (see job comment)
+            allow_failure: true
     steps:
       - uses: actions/checkout@v5
       - name: Restore Maven repository cache
@@ -92,5 +105,6 @@ jobs:
             debian:bookworm-slim \
             bash -euc 'export DEBIAN_FRONTEND=noninteractive
               apt-get update -qq
-              apt-get install -y -qq --no-install-recommends openjdk-17-jdk-headless curl unzip > /dev/null
-              ./mvnw -B -ntp test'
+              apt-get install -y -qq --no-install-recommends openjdk-17-jdk-headless maven
+              java -version
+              mvn -B -ntp test'

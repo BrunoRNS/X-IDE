@@ -9,7 +9,7 @@ COPY server/src server/src
 RUN mvn -B -f pom.xml -pl server -am -DskipTests package
 
 FROM nginx:1.27-alpine
-RUN apk add --no-cache openjdk17-jre
+RUN apk add --no-cache openjdk17-jre openssl
 COPY --from=build /workspace/server/target/server-1.0-SNAPSHOT.jar /opt/xide/server.jar
 COPY infra/nginx/nginx.conf /etc/nginx/conf.d/default.conf
 COPY infra/nginx/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
