@@ -16,7 +16,6 @@ permissions:
   contents: read
 
 jobs:
-  
   test-native:
     name: test · ${{ matrix.label }}
     runs-on: ${{ matrix.os }}
@@ -27,23 +26,23 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest     
+          - os: ubuntu-24.04
             label: linux-x64
             dist: temurin
-          - os: ubuntu-24.04-arm  
+          - os: ubuntu-24.04-arm
             label: linux-arm64
             dist: temurin
-          - os: macos-15-intel    
+          - os: macos-15-intel
             label: mac-x64
             dist: temurin
-          - os: macos-latest     
+          - os: macos-latest
             label: mac-arm64
             dist: temurin
-          - os: windows-latest    
+          - os: windows-latest
             label: windows-x64
             dist: temurin
-          - os: windows-11-arm    
-            label: windows-arm64  
+          - os: windows-11-arm
+            label: windows-arm64
             dist: microsoft
     steps:
       - uses: actions/checkout@v5
@@ -61,90 +60,113 @@ jobs:
           name: surefire-${{ matrix.label }}
           path: '**/target/surefire-reports/**'
           if-no-files-found: ignore
-  test-emulated:
-    name: test · ${{ matrix.platform }} (qemu)
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
-    continue-on-error: ${{ matrix.allow_failure }}
 
+  # 32-bit Linux without QEMU:
+  #   linux/386  -> native IA32 execution on the x86_64 runner kernel
+  #   linux/arm/v7 -> native AArch32 EL0 execution on the ARM64 runner
+  #                   (Neoverse N2 + Ubuntu CONFIG_COMPAT=y)
+  # The default Docker bridge network is used so the container gets Docker's
+  # embedded DNS resolver instead of the runner's host resolv.conf.
+  test-linux-32bit:
+    name: test · ${{ matrix.label }} (native, no QEMU)
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         include:
-          - platform: linux/386
-            allow_failure: false
-          - platform: linux/arm/v7
-            allow_failure: true
-
+          - os: ubuntu-24.04
+            label: linux-x86
+            platform: linux/386
+            arch: i386
+          - os: ubuntu-24.04-arm
+            label: linux-armv7
+            platform: linux/arm/v7
+            arch: armhf
     steps:
       - uses: actions/checkout@v5
-
+      - name: Verify that no QEMU binfmt handler is registered
+        run: |
+          echo "binfmt handlers:"
+          ls /proc/sys/fs/binfmt_misc/ 2>/dev/null || true
+          case "${{ matrix.platform }}" in
+            linux/386)    qemu_handler=qemu-i386 ;;
+            linux/arm/v7) qemu_handler=qemu-arm ;;
+            *)            echo "::error::unsupported platform"; exit 1 ;;
+          esac
+          if [ -e "/proc/sys/fs/binfmt_misc/$qemu_handler" ]; then
+            echo "::error::QEMU handler $qemu_handler is registered; refusing to run emulated tests."
+            exit 1
+          fi
       - name: Restore Maven repository cache
         uses: actions/cache@v4
         with:
-          path: ~/.m2/repository
-          key: maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: maven-
-
-      - name: Prepare Maven distribution
-        run: |
-          mkdir -p "$RUNNER_TEMP/apache-maven"
-
-          curl -fsSL \
-            https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.tar.gz \
-            -o "$RUNNER_TEMP/apache-maven.tar.gz"
-
-          tar -xzf "$RUNNER_TEMP/apache-maven.tar.gz" \
-            --strip-components=1 \
-            -C "$RUNNER_TEMP/apache-maven"
-
-          "$RUNNER_TEMP/apache-maven/bin/mvn" -version
-
-      - uses: docker/setup-qemu-action@v3
-
+          path: ~/.m2
+          key: maven-${{ matrix.label }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: maven-${{ matrix.label }}-
       - name: Run tests inside ${{ matrix.platform }} container
         run: |
-          mkdir -p "$HOME/.m2/repository"
-
+          mkdir -p "$HOME/.m2"
           docker run --rm \
             --platform ${{ matrix.platform }} \
-            --network host \
+            -e EXPECTED_ARCH=${{ matrix.arch }} \
             -v "$PWD":/workspace \
-            -v "$HOME/.m2/repository":/root/.m2/repository \
-            -v "$RUNNER_TEMP/apache-maven":/opt/apache-maven:ro \
+            -v "$HOME/.m2":/root/.m2 \
             -w /workspace \
             debian:bookworm-slim \
             bash -euc '
               export DEBIAN_FRONTEND=noninteractive
-              export MAVEN_HOME=/opt/apache-maven
-
-              echo "=== INSTALL JAVA 17 ==="
-
               apt-get update -qq
-
               apt-get install -y -qq --no-install-recommends \
-                ca-certificates \
-                openjdk-17-jdk-headless
-
-              echo "=== JAVA VERSION ==="
-              java -version
-
-              echo "=== ARCHITECTURE ==="
-              uname -m
-              java -XshowSettings:properties -version 2>&1 | grep os.arch
-
+                ca-certificates curl unzip openjdk-17-jdk-headless
+              echo "=== TARGET ARCHITECTURE ==="
+              echo "container: $(dpkg --print-architecture)"
+              echo "long bit: $(getconf LONG_BIT)"
+              test "$(dpkg --print-architecture)" = "$EXPECTED_ARCH"
+              test "$(getconf LONG_BIT)" = "32"
+              java -XshowSettings:properties -version 2>&1 \
+                | grep -E "os.arch|os.version|java.version"
+              java -XshowSettings:properties -version 2>&1 \
+                | grep -q "sun.arch.data.model = 32"
               echo "=== MAVEN VERSION ==="
-              /opt/apache-maven/bin/mvn -version
-
+              ./mvnw -version
               echo "=== RUN TESTS ==="
-              /opt/apache-maven/bin/mvn -B -ntp test
+              ./mvnw -B -ntp test
             '
-
       - name: Upload surefire reports
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: surefire-${{ matrix.platform == 'linux/386' && 'linux-x86' || 'linux-armv7' }}
+          name: surefire-${{ matrix.label }}
           path: '**/target/surefire-reports/**'
           if-no-files-found: ignore
- 
+
+  test-windows-x86:
+    name: test · windows-x86 (32-bit JVM)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          architecture: x86
+          cache: maven
+      - name: Verify 32-bit JVM
+        run: |
+          java -XshowSettings:properties -version 2>&1 \
+            | grep -E "os.arch|sun.arch.data.model|java.version"
+          java -XshowSettings:properties -version 2>&1 \
+            | grep -q "sun.arch.data.model = 32"
+      - name: Run all module tests (common, client, server)
+        run: ./mvnw -B -ntp test
+      - name: Upload surefire reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-windows-x86
+          path: '**/target/surefire-reports/**'
+          if-no-files-found: ignore

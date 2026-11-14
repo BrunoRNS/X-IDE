@@ -1,8 +1,15 @@
 name: CD
 
 # Same light matrix as the develop CI (one mac, linux and windows runner for
-# common, client and server), plus publishing a multi-arch Docker image to
-# Docker Hub. Requires the following repository secrets:
+# common, client and server), plus two publishing targets:
+#   1. a multi-arch Docker image to Docker Hub for every container platform
+#      with a JRE 17 (linux/amd64, linux/arm64, linux/386, linux/arm/v7).
+#      macOS and Windows have no container platform; use the release bundles.
+#   2. native release bundles (macOS, Windows x64/x86, Linux x64/x86) attached
+#      to the GitHub Release created for a v*.*.* tag. The Java bytecode is
+#      identical on every OS/architecture; only launchers and JRE guidance
+#      differ.
+# Requires the following repository secrets:
 #   DOCKERHUB_USERNAME – Docker Hub user or organization name
 #   DOCKERHUB_TOKEN    – Docker Hub access token (read/write scope)
 #
@@ -49,7 +56,7 @@ jobs:
         run: ./mvnw -B -ntp -pl ${{ matrix.module }} -am test
 
   docker:
-    name: docker · publish to Docker Hub
+    name: docker · publish multi-arch image to Docker Hub
     needs: test
     runs-on: ubuntu-latest
     steps:
@@ -85,9 +92,38 @@ jobs:
         with:
           context: .
           file: infra/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/arm64,linux/386,linux/arm/v7
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  release:
+    name: release · native bundles (macos, windows x64/x86, linux x64/x86)
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Build shaded JARs
+        run: ./mvnw -B -ntp -DskipTests package
+      - name: Assemble per-target bundles
+        run: |
+          case "$GITHUB_REF_NAME" in
+            v*) VERSION="${GITHUB_REF_NAME#v}" ;;
+            *)  VERSION="0.0.0+${GITHUB_SHA::7}" ;;
+          esac
+          ./scripts/package-release.sh "$VERSION" dist
+      - name: Publish to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          fail_on_unmatched_files: true
