@@ -8,12 +8,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import javax.net.ssl.SSLContext;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.glassfish.tyrus.client.ClientManager;
-import org.glassfish.tyrus.client.SslEngineConfigurator;
 import org.xide.Main;
 import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
@@ -30,18 +28,10 @@ public class WebSocketClient {
     private final Session session;
     private final Map<String, LinkedBlockingQueue<SocketMessage>> responses = new ConcurrentHashMap<>();
 
-    private WebSocketClient(URI uri, SSLContext sslContext) throws IOException, DeploymentException {
+    private WebSocketClient(URI uri) throws IOException, DeploymentException {
         List<Object> controllers = WebSocketScanner.scan(Main.class.getPackageName());
         controllers.forEach(router::register);
         clientManager = ClientManager.createClient();
-        if (sslContext != null) {
-            // Trust exactly the given context for wss:// endpoints (e.g. the
-            // self-signed development certificate of the X-IDE edge).
-            clientManager.getProperties().put(
-                ClientManager.SSL_ENGINE_CONFIGURATOR,
-                new SslEngineConfigurator(sslContext)
-            );
-        }
         session = clientManager.connectToServer(new WebSocketEndpoint(router, this::recordResponse), uri);
     }
 
@@ -50,18 +40,8 @@ public class WebSocketClient {
     }
 
     public static synchronized WebSocketClient getInstance(URI uri) throws IOException, DeploymentException {
-        return getInstance(uri, null);
-    }
-
-    /**
-     * Returns the shared client instance, optionally with an {@link SSLContext}
-     * that replaces the default trust store for {@code wss://} endpoints. The
-     * SSL context only applies when the instance does not exist yet.
-     */
-    public static synchronized WebSocketClient getInstance(URI uri, SSLContext sslContext)
-        throws IOException, DeploymentException {
         if (instance == null) {
-            instance = new WebSocketClient(uri, sslContext);
+            instance = new WebSocketClient(uri);
         }
         return instance;
     }

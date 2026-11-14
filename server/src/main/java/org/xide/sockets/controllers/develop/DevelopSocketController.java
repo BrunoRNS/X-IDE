@@ -17,6 +17,7 @@ public final class DevelopSocketController {
 
     @WebSocketRoute("/develop/ping")
     public SocketMessage ping(SocketMessage request) {
+        System.out.println("Pong");
         return SocketMessage.text(request.route(), SocketMessage.PONG);
     }
 
