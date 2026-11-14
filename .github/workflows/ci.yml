@@ -61,64 +61,90 @@ jobs:
           name: surefire-${{ matrix.label }}
           path: '**/target/surefire-reports/**'
           if-no-files-found: ignore
-
-  
   test-emulated:
     name: test · ${{ matrix.platform }} (qemu)
     runs-on: ubuntu-latest
     timeout-minutes: 120
     continue-on-error: ${{ matrix.allow_failure }}
+
     strategy:
       fail-fast: false
       matrix:
         include:
-          - platform: linux/386    # x86 (32-bit), required
+          - platform: linux/386
             allow_failure: false
-          - platform: linux/arm/v7 # arm32, best-effort (see job comment)
+          - platform: linux/arm/v7
             allow_failure: true
+
     steps:
       - uses: actions/checkout@v5
+
       - name: Restore Maven repository cache
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository
           key: maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: maven-
-      - name: Ensure Maven repository cache directory exists
-        run: mkdir -p "$HOME/.m2/repository"
+
+      - name: Prepare Maven distribution
+        run: |
+          mkdir -p "$RUNNER_TEMP/apache-maven"
+
+          curl -fsSL \
+            https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.tar.gz \
+            -o "$RUNNER_TEMP/apache-maven.tar.gz"
+
+          tar -xzf "$RUNNER_TEMP/apache-maven.tar.gz" \
+            --strip-components=1 \
+            -C "$RUNNER_TEMP/apache-maven"
+
+          "$RUNNER_TEMP/apache-maven/bin/mvn" -version
+
       - uses: docker/setup-qemu-action@v3
+
       - name: Run tests inside ${{ matrix.platform }} container
         run: |
+          mkdir -p "$HOME/.m2/repository"
+
           docker run --rm \
             --platform ${{ matrix.platform }} \
-            --dns 1.1.1.1 \
-            --dns 8.8.8.8 \
+            --network host \
             -v "$PWD":/workspace \
             -v "$HOME/.m2/repository":/root/.m2/repository \
+            -v "$RUNNER_TEMP/apache-maven":/opt/apache-maven:ro \
             -w /workspace \
             debian:bookworm-slim \
-            sh -ec '
+            bash -euc '
               export DEBIAN_FRONTEND=noninteractive
-              export MAVEN_USER_HOME=/tmp/maven-user-home
+              export MAVEN_HOME=/opt/apache-maven
 
-              for attempt in 1 2 3; do
-                if apt-get -o APT::Update::Error-Mode=any \
-                  -o Acquire::Retries=3 update -qq; then
-                  break
-                fi
-                if [ "$attempt" -eq 3 ]; then
-                  exit 1
-                fi
-                sleep 5
-              done
+              echo "=== INSTALL JAVA 17 ==="
 
-              apt-get -o Acquire::Retries=3 install -y -qq --no-install-recommends \
+              apt-get update -qq
+
+              apt-get install -y -qq --no-install-recommends \
                 ca-certificates \
-                curl \
                 openjdk-17-jdk-headless
 
+              echo "=== JAVA VERSION ==="
               java -version
 
-              ./mvnw -B -ntp test
+              echo "=== ARCHITECTURE ==="
+              uname -m
+              java -XshowSettings:properties -version 2>&1 | grep os.arch
+
+              echo "=== MAVEN VERSION ==="
+              /opt/apache-maven/bin/mvn -version
+
+              echo "=== RUN TESTS ==="
+              /opt/apache-maven/bin/mvn -B -ntp test
             '
+
+      - name: Upload surefire reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-${{ matrix.platform == 'linux/386' && 'linux-x86' || 'linux-armv7' }}
+          path: '**/target/surefire-reports/**'
+          if-no-files-found: ignore
  
