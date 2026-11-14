@@ -114,4 +114,9 @@ jobs:
               apt-get update -qq
               apt-get install -y -qq --no-install-recommends openjdk-17-jdk-headless
               java -version
-              /opt/apache-maven/bin/mvn -B -ntp test'
+              java \
+                -Dmaven.home=/opt/apache-maven \
+                -Dclassworlds.conf=/opt/apache-maven/bin/m2.conf \
+                -Dmaven.multiModuleProjectDirectory=/workspace \
+                -cp "/opt/apache-maven/lib/*:/opt/apache-maven/boot/plexus-classworlds-2.8.0.jar" \
+                org.apache.maven.cli.MavenCli -B -ntp test'
