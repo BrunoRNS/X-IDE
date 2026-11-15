@@ -69,8 +69,8 @@ help:
 		"  run-model                           Start Ollama and download MODEL_NAME." \
 		"                                      Default: qwen2.5-coder:3b (CPU)." \
 		"                                      Use MODEL_NAME=qwen2.5-coder:1.5b for faster inference." \
-		"  run-client                          Send CLIENT_MESSAGE to CLIENT_ROUTE at" \
-		"                                      CLIENT_ENDPOINT and print the response." \
+		"  run-client                          Open the client window to enter the server IP," \
+		"                                      then send CLIENT_MESSAGE to CLIENT_ROUTE." \
 		"                                      First WSS connection verifies a server fingerprint." \
 		"                                      XIDE_TLS_FINGERPRINT supports automation." \
 		"                                      --user/--password: not yet implemented." \
@@ -89,8 +89,8 @@ help:
 		"Example local workflow:" \
 		"  run-server                          # starts the stack " \
 		"  communication-test                  # ping/pong both ways through the stack" \
-		"  run-client                          # CLIENT_MESSAGE defaults to ping -> prints pong" \
-		"  run-client CLIENT_ENDPOINT=wss://localhost:8443/ws/socket" \
+		"  run-client                          # opens the server connection window" \
+		"  run-client CLIENT_ROUTE=/develop/ping" \
 		"  stop-server" \
 		"" \
 		"Optional Maven options: MVN_ARGS='-DskipTests'" \
@@ -159,7 +159,7 @@ stack-status:
 
 run-client:
 	./mvnw $(MVN_ARGS) -pl client -am package
-	java -jar $(CLIENT_JAR) "$(CLIENT_ENDPOINT)" "$(CLIENT_ROUTE)" \
+	java -jar $(CLIENT_JAR) "$(CLIENT_ROUTE)" \
 		--message "$(CLIENT_MESSAGE)"
 
 communication-test:
@@ -180,7 +180,7 @@ remote-test:
 	@test -n "$(URL)" || { \
 		echo "remote-test: URL is required, e.g. make remote-test URL=wss://host:8443/ws/socket"; exit 1; }
 	./mvnw $(MVN_ARGS) -pl client -am package
-	java -jar $(CLIENT_JAR) "$(URL)" "$(CLIENT_ROUTE)" \
+	java -jar $(CLIENT_JAR) --endpoint "$(URL)" "$(CLIENT_ROUTE)" \
 		--message "$(CLIENT_MESSAGE)"
 
 exit quit:

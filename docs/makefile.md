@@ -35,7 +35,7 @@ a command displays the help (`help`).
 | `make stop-server` | Stops and removes the Compose stack services. |
 | `make server-logs` | Follows the Compose services' logs. |
 | `make stack-status` | Shows the status of the Compose services. |
-| `make run-client` | Packages the client and sends a message to the configured endpoint and route; defaults to `ping` at `/develop/ping`. |
+| `make run-client` | Packages the client, opens a window to enter the server IP, then sends a message to the route. Defaults to `ping` at `/develop/ping`. |
 | `make communication-test` | Packages the client and runs the communication test using the Bash script. |
 | `make communication-test-windows` | Runs the same test using the PowerShell script. |
 | `make remote-test URL=<address>` | Packages the client and sends a message to the specified WebSocket address. `URL` is required. |
@@ -55,8 +55,7 @@ Pass options on the same command line:
 ```sh
 make build-all MVN_ARGS='-DskipTests'
 make run-server COMPOSE_ARGS='--remove-orphans'
-make run-client CLIENT_ENDPOINT=wss://localhost:8443/ws/socket \
-  CLIENT_ROUTE=/develop/ping CLIENT_MESSAGE=ping
+make run-client CLIENT_ROUTE=/develop/ping CLIENT_MESSAGE=ping
 make remote-test URL=wss://host:8443/ws/socket
 make run-model MODEL_NAME=qwen2.5-coder:3b
 ```
@@ -65,11 +64,20 @@ make run-model MODEL_NAME=qwen2.5-coder:3b
 |---|---|---|
 | `MVN_ARGS` | Additional arguments passed to Maven. | empty |
 | `COMPOSE_ARGS` | Additional arguments passed to Docker Compose by stack commands. | empty |
-| `CLIENT_ENDPOINT` | WebSocket endpoint used by the client and communication tests. | `wss://localhost:8443/ws/socket` |
+| `CLIENT_ENDPOINT` | WebSocket endpoint used by communication tests. | `wss://localhost:8443/ws/socket` |
 | `CLIENT_ROUTE` | Route sent by the client. | `/develop/ping` |
 | `CLIENT_MESSAGE` | Message sent by the client. | `ping` |
 | `MODEL_NAME` | Ollama model pulled by `run-model`; use `qwen2.5-coder:1.5b` for faster inference with less memory. | `qwen2.5-coder:3b` |
 | `URL` | WebSocket destination for `remote-test`. | required for this command |
+
+When running the client JAR directly, omit `--endpoint` to enter the server IP in the
+window. To connect without the window, pass the endpoint using `--endpoint`; the route
+is the first positional argument:
+
+```sh
+java -jar client/target/client-1.0-SNAPSHOT-all.jar \
+  --endpoint wss://localhost:8443/ws/socket /develop/ping --message ping
+```
 
 The server binds to loopback by default. To allow students on the LAN, set both
 `BIND_ADDRESS` and `TLS_HOST` in `.env` to the server's private IP (for example
