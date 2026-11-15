@@ -2,8 +2,8 @@ package org.xide.repository;
 
 import java.sql.Connection;
 import java.sql.Statement;
-
 import org.xide.models.*;
+import org.xide.models.User;
 
 public class InitDatabase {
     private static Connection databaseConection;

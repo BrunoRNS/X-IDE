@@ -3,8 +3,8 @@ package org.xide.client.tls;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -21,11 +21,8 @@ import javax.net.ssl.X509TrustManager;
 
 public final class ServerCertificateTrustManager implements X509TrustManager {
     private static final Object STORE_LOCK = new Object();
-    private static final Path PIN_FILE = Path.of(
-        System.getProperty("user.home"),
-        ".xide",
-        "trusted-certificates.properties"
-    );
+    private static final Path PIN_FILE =
+            Path.of(System.getProperty("user.home"), ".xide", "trusted-certificates.properties");
 
     private final X509TrustManager systemTrustManager;
     private final String endpoint;
@@ -57,10 +54,12 @@ public final class ServerCertificateTrustManager implements X509TrustManager {
             if (savedFingerprint != null) {
                 if (!savedFingerprint.equals(fingerprint)) {
                     throw new CertificateException(
-                        "The pinned certificate for " + endpoint + " changed. "
-                            + "Verify the new server fingerprint, then remove its entry from "
-                            + PIN_FILE + " to trust it."
-                    );
+                            "The pinned certificate for "
+                                    + endpoint
+                                    + " changed. "
+                                    + "Verify the new server fingerprint, then remove its entry from "
+                                    + PIN_FILE
+                                    + " to trust it.");
                 }
                 return;
             }
@@ -112,14 +111,12 @@ public final class ServerCertificateTrustManager implements X509TrustManager {
                 }
             } catch (IllegalArgumentException e) {
                 throw new CertificateException(
-                    "XIDE_TLS_FINGERPRINT must contain a SHA-256 certificate fingerprint",
-                    e
-                );
+                        "XIDE_TLS_FINGERPRINT must contain a SHA-256 certificate fingerprint", e);
             }
             throw new CertificateException(
-                "The server certificate does not match XIDE_TLS_FINGERPRINT. "
-                    + "Server fingerprint: " + displayFingerprint(fingerprint)
-            );
+                    "The server certificate does not match XIDE_TLS_FINGERPRINT. "
+                            + "Server fingerprint: "
+                            + displayFingerprint(fingerprint));
         }
         savePin(fingerprint);
     }
@@ -130,7 +127,8 @@ public final class ServerCertificateTrustManager implements X509TrustManager {
             try (Reader reader = Files.newBufferedReader(PIN_FILE)) {
                 pins.load(reader);
             } catch (IOException e) {
-                throw new CertificateException("Unable to read certificate pins from " + PIN_FILE, e);
+                throw new CertificateException(
+                        "Unable to read certificate pins from " + PIN_FILE, e);
             }
         }
 
@@ -146,11 +144,10 @@ public final class ServerCertificateTrustManager implements X509TrustManager {
             }
             try {
                 Files.move(
-                    temporaryFile,
-                    PIN_FILE,
-                    StandardCopyOption.ATOMIC_MOVE,
-                    StandardCopyOption.REPLACE_EXISTING
-                );
+                        temporaryFile,
+                        PIN_FILE,
+                        StandardCopyOption.ATOMIC_MOVE,
+                        StandardCopyOption.REPLACE_EXISTING);
             } catch (AtomicMoveNotSupportedException | FileAlreadyExistsException e) {
                 Files.move(temporaryFile, PIN_FILE, StandardCopyOption.REPLACE_EXISTING);
             }
@@ -169,14 +166,14 @@ public final class ServerCertificateTrustManager implements X509TrustManager {
             }
         }
         if (failure != null) {
-            throw new CertificateException("Unable to save the certificate pin to " + PIN_FILE, failure);
+            throw new CertificateException(
+                    "Unable to save the certificate pin to " + PIN_FILE, failure);
         }
     }
 
     private static X509TrustManager createSystemTrustManager() throws GeneralSecurityException {
-        TrustManagerFactory factory = TrustManagerFactory.getInstance(
-            TrustManagerFactory.getDefaultAlgorithm()
-        );
+        TrustManagerFactory factory =
+                TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         factory.init((java.security.KeyStore) null);
         for (TrustManager manager : factory.getTrustManagers()) {
             if (manager instanceof X509TrustManager x509TrustManager) {
@@ -204,9 +201,8 @@ public final class ServerCertificateTrustManager implements X509TrustManager {
     }
 
     private static String displayFingerprint(String fingerprint) {
-        return HexFormat.ofDelimiter(":").withUpperCase().formatHex(
-            HexFormat.of().parseHex(fingerprint)
-        );
+        return HexFormat.ofDelimiter(":")
+                .withUpperCase()
+                .formatHex(HexFormat.of().parseHex(fingerprint));
     }
-
 }

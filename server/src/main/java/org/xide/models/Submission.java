@@ -17,10 +17,9 @@ public class Submission {
         this.id = id;
     }
 
-
     public Submission() {}
 
-    public static String getTableCreate(){
+    public static String getTableCreate() {
         return """
                 CREATE TABLE IF NOT EXISTS submissions(
                     id INT NOT NULL AUTO_INCREMENT,
@@ -28,24 +27,54 @@ public class Submission {
                     code_id INT NOT NULL,
                     id_problem INT NOT NULL,
                     CONSTRAINT uq_submission_code UNIQUE (code_id),
-                    CONSTRAINT fk_submission_code FOREIGN KEY(code_id) 
+                    CONSTRAINT fk_submission_code FOREIGN KEY(code_id)
                     REFERENCES code(id)
                     ON DELETE CASCADE
                     ON UPDATE CASCADE,
                     CONSTRAINT fk_submission_problem FOREIGN KEY(id_problem) REFERENCES problem(id),
                     PRIMARY KEY (id)
                 );
-                """.formatted(SubmissionState.getTableCreate());
+                """
+                .formatted(SubmissionState.getTableCreate());
     }
-    
-    public User getUser() {return user;}
-    public void setUser(User user) {this.user = user;}
-    public Code getCode() {return code;}
-    public void setCode(Code code) {this.code = code;}
-    public Problem getProblem() {return problem;}
-    public void setProblem(Problem problem) {this.problem = problem;}
-    public SubmissionState getState() {return state;}
-    public void setState(SubmissionState state) {this.state = state;}
-    public Long getId() {return id;}
-    public void setId(Long id) {this.id = id;}
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Code getCode() {
+        return code;
+    }
+
+    public void setCode(Code code) {
+        this.code = code;
+    }
+
+    public Problem getProblem() {
+        return problem;
+    }
+
+    public void setProblem(Problem problem) {
+        this.problem = problem;
+    }
+
+    public SubmissionState getState() {
+        return state;
+    }
+
+    public void setState(SubmissionState state) {
+        this.state = state;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

@@ -1,7 +1,6 @@
 package org.xide.repository;
 
 import java.sql.DriverManager;
-
 import org.xide.utils.EnvRead;
 
 public class Connection {
@@ -19,5 +18,4 @@ public class Connection {
         }
         return connection;
     }
-
 }

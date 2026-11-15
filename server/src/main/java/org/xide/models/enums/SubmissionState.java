@@ -7,7 +7,7 @@ public enum SubmissionState {
     TIME_LIMITE_EXCEEDED,
     MEMORY_EXCEEDED;
 
-    public static String getTableCreate(){
+    public static String getTableCreate() {
         return """
                 ENUM('wa', 'accepted', 'presentation_error', 'time_limite_exceeded', 'memory_exceeded') NOT NULL
                 """;

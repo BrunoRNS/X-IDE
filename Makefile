@@ -15,6 +15,7 @@ MODEL_NAME ?= qwen2.5-coder:3b
 .PHONY: run-server stop-server server-logs stack-status
 .PHONY: run-client run-clients communication-test communication-test-windows remote-test
 .PHONY: run-model
+.PHONY: format lint
 .PHONY: configure help exit quit
 
 help:
@@ -57,6 +58,10 @@ help:
 		"" \
 		"JUnit scopes:" \
 		"  test-common | test-client | test-server | test-integration | test-all" \
+		"" \
+		"Code style (Spotless, configured in pom.xml):" \
+		"  format                              Rewrite all Java sources in the style." \
+		"  lint                                Fail when a source is not formatted." \
 		"" \
 		"Runtime:" \
 		"  run-server                          Start MySQL + Java server + Nginx." \
@@ -130,6 +135,12 @@ test-integration:
 
 test-all:
 	./mvnw $(MVN_ARGS) test
+
+format:
+	./mvnw $(MVN_ARGS) spotless:apply
+
+lint:
+	./mvnw $(MVN_ARGS) spotless:check
 
 configure:
 	@if [ -e .env ]; then \

@@ -4,20 +4,18 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 import org.xide.client.sockets.WebSocketClient;
 import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
+import org.xide.ui.ConnectFrame;
 import org.xide.ui.LoginFrame;
 
-
 public final class Main {
-    
+
     private static final String DEFAULT_ROUTE = "/develop/ping";
     private static final String DEFAULT_MESSAGE = "";
 
-    
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
         String endpoint = null;
         String route = null;
         String message = null;
@@ -54,7 +52,7 @@ public final class Main {
         }
         URI uri;
         if (endpoint == null) {
-            LoginFrame loginFrame = new LoginFrame();
+            ConnectFrame loginFrame = new ConnectFrame();
             endpoint = loginFrame.awaitEndpoint();
         }
         uri = URI.create(endpoint);
@@ -62,15 +60,21 @@ public final class Main {
         String payload = message != null ? message : DEFAULT_MESSAGE;
 
         WebSocketClient client = WebSocketClient.getInstance(uri);
-        
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                client.close();
-            } catch (IOException e) {
-                System.err.println("Failed to close WebSocket client: " + e.getMessage());
-            }
-        }, "websocket-client-shutdown"));
 
+        Runtime.getRuntime()
+                .addShutdownHook(
+                        new Thread(
+                                () -> {
+                                    try {
+                                        client.close();
+                                    } catch (IOException e) {
+                                        System.err.println(
+                                                "Failed to close WebSocket client: "
+                                                        + e.getMessage());
+                                    }
+                                },
+                                "websocket-client-shutdown"));
+        new LoginFrame();
         client.sendRequest(effectiveRoute, payload).get();
         SocketMessage response = client.receive(effectiveRoute, 10, TimeUnit.SECONDS);
         if (response == null) {

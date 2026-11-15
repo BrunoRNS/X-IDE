@@ -9,13 +9,13 @@ public class Code {
     private Problem problem;
     private User user;
 
-    public Code(Path pathFile, Problem problem, Long id) {
+    public Code(Path pathFile, Problem problem, Long id, User user) {
         this.pathFile = pathFile;
         this.problem = problem;
         this.id = id;
     }
 
-    public static String getTableCreate(){
+    public static String getTableCreate() {
         return """
                 CREATE TABLE IF NOT EXISTS code(
                     id INT NOT NULL AUTO_INCREMENT,
@@ -23,7 +23,7 @@ public class Code {
                     id_user INT NOT NULL,
                     id_problem INT NOT NULL,
                     PRIMARY KEY(id),
-                    CONSTRAINT fk_code_user FOREIGN KEY(id_user) 
+                    CONSTRAINT fk_code_user FOREIGN KEY(id_user)
                     REFERENCES users(id)
                     ON DELETE CASCADE
                     ON UPDATE CASCADE,
@@ -35,11 +35,36 @@ public class Code {
     }
 
     public Code() {}
-    public Path getPathFile() {return pathFile;}
-    public void setPathFile(Path pathFile) {this.pathFile = pathFile;}
-    public Problem getProblem() {return problem;}
-    public void setProblem(Problem problem) {this.problem = problem;}
-    public Long getId() {return id;}
-    public void setId(Long id) {this.id = id;}
-    
+
+    public Path getPathFile() {
+        return pathFile;
+    }
+
+    public void setPathFile(Path pathFile) {
+        this.pathFile = pathFile;
+    }
+
+    public Problem getProblem() {
+        return problem;
+    }
+
+    public void setProblem(Problem problem) {
+        this.problem = problem;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }

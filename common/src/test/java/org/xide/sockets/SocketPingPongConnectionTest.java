@@ -4,12 +4,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import jakarta.websocket.ClientEndpoint;
+import jakarta.websocket.DeploymentException;
+import jakarta.websocket.OnError;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
+import jakarta.websocket.server.ServerEndpoint;
 import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.glassfish.tyrus.client.ClientManager;
 import org.glassfish.tyrus.server.Server;
 import org.junit.AfterClass;
@@ -22,30 +28,19 @@ import org.xide.sockets.annotations.WebSocketController;
 import org.xide.sockets.annotations.WebSocketRoute;
 import org.xide.sockets.annotations.WebSocketRouter;
 
-import jakarta.websocket.ClientEndpoint;
-import jakarta.websocket.DeploymentException;
-import jakarta.websocket.OnError;
-import jakarta.websocket.OnMessage;
-import jakarta.websocket.OnOpen;
-import jakarta.websocket.Session;
-import jakarta.websocket.server.ServerEndpoint;
-
 /**
- * Connection tests for the shared socket protocol: a real WebSocket server and
- * a real WebSocket client exchanging frames over the wire, with the ping/pong
- * handshake driven by the common classes ({@link SocketMessage},
- * {@link SocketMessageCodec}, {@link WebSocketRouter} and the
- * {@link WebSocketController} routes).
+ * Connection tests for the shared socket protocol: a real WebSocket server and a real WebSocket
+ * client exchanging frames over the wire, with the ping/pong handshake driven by the common classes
+ * ({@link SocketMessage}, {@link SocketMessageCodec}, {@link WebSocketRouter} and the {@link
+ * WebSocketController} routes).
  *
- * <p>The endpoints below mirror the production ones (server:
- * {@code org.xide.sockets.endpoints.WebSocketEndpoint}, client:
- * {@code org.xide.client.sockets.WebSocketEndpoint}), but live in the test
- * sources because common cannot depend on the client and server modules
- * (Maven forbids cyclic module dependencies).</p>
+ * <p>The endpoints below mirror the production ones (server: {@code
+ * org.xide.sockets.endpoints.WebSocketEndpoint}, client: {@code
+ * org.xide.client.sockets.WebSocketEndpoint}), but live in the test sources because common cannot
+ * depend on the client and server modules (Maven forbids cyclic module dependencies).
  *
- * <p>Requests are dispatched through the router and responses are identified
- * independently of their payload, so a response containing {@code pong} is
- * never dispatched as another request.</p>
+ * <p>Requests are dispatched through the router and responses are identified independently of their
+ * payload, so a response containing {@code pong} is never dispatched as another request.
  */
 public class SocketPingPongConnectionTest {
 
@@ -77,15 +72,15 @@ public class SocketPingPongConnectionTest {
     @Test(timeout = 30_000)
     public void serverRespondsWithPongWhenClientSendsPing() throws Exception {
         ResponseSink receivedByClient = new ResponseSink();
-        Session session = ClientManager.createClient()
-            .connectToServer(new TestClientEndpoint(receivedByClient), serverUri);
+        Session session =
+                ClientManager.createClient()
+                        .connectToServer(new TestClientEndpoint(receivedByClient), serverUri);
         try {
             send(session, SocketMessage.text("/develop/ping", "ping"));
 
             assertEquals(
-                SocketMessage.textResponse("/develop/ping", "pong"),
-                receivedByClient.awaitPong()
-            );
+                    SocketMessage.textResponse("/develop/ping", "pong"),
+                    receivedByClient.awaitPong());
         } finally {
             session.close();
         }
@@ -93,27 +88,27 @@ public class SocketPingPongConnectionTest {
 
     @Test(timeout = 30_000)
     public void clientRespondsWithPongWhenServerSendsPing() throws Exception {
-        Session session = ClientManager.createClient()
-            .connectToServer(new TestClientEndpoint(new ResponseSink()), serverUri);
+        Session session =
+                ClientManager.createClient()
+                        .connectToServer(new TestClientEndpoint(new ResponseSink()), serverUri);
         try {
-            assertTrue("Server did not accept the connection in time",
-                Hub.serverReady.await(TIMEOUT_SECONDS, TimeUnit.SECONDS));
+            assertTrue(
+                    "Server did not accept the connection in time",
+                    Hub.serverReady.await(TIMEOUT_SECONDS, TimeUnit.SECONDS));
 
             send(Hub.clientSessionOnServer, SocketMessage.text("/develop/ping", "ping"));
 
             assertEquals(
-                SocketMessage.textResponse("/develop/ping", "pong"),
-                Hub.receivedByServer.awaitPong()
-            );
+                    SocketMessage.textResponse("/develop/ping", "pong"),
+                    Hub.receivedByServer.awaitPong());
         } finally {
             session.close();
         }
     }
 
     /**
-     * Server side of the connection: decodes the frame, dispatches pings
-     * through the router and sends the response back, while capturing pongs
-     * sent by the client.
+     * Server side of the connection: decodes the frame, dispatches pings through the router and
+     * sends the response back, while capturing pongs sent by the client.
      */
     @ServerEndpoint("/socket")
     public static final class TestServerEndpoint {
@@ -137,9 +132,8 @@ public class SocketPingPongConnectionTest {
     }
 
     /**
-     * Client side of the connection: decodes the frame, dispatches pings
-     * through the router and sends the response back, while capturing pongs
-     * sent by the server.
+     * Client side of the connection: decodes the frame, dispatches pings through the router and
+     * sends the response back, while capturing pongs sent by the server.
      */
     @ClientEndpoint
     public static final class TestClientEndpoint {
@@ -167,8 +161,8 @@ public class SocketPingPongConnectionTest {
         }
     }
 
-    private static void handleFrame(Session session, String json,
-                                    WebSocketRouter router, ResponseSink sink) {
+    private static void handleFrame(
+            Session session, String json, WebSocketRouter router, ResponseSink sink) {
         try {
             SocketMessage message = SocketMessageCodec.decode(json);
             if (message.response()) {
@@ -176,8 +170,7 @@ public class SocketPingPongConnectionTest {
             } else {
                 Optional<SocketMessage> response = router.dispatch(message);
                 if (response.isPresent()) {
-                    session.getAsyncRemote()
-                        .sendText(SocketMessageCodec.encode(response.get()));
+                    session.getAsyncRemote().sendText(SocketMessageCodec.encode(response.get()));
                 }
             }
         } catch (Exception e) {
@@ -186,8 +179,8 @@ public class SocketPingPongConnectionTest {
     }
 
     /**
-     * Mirrors the real deployment, where each side registers its own ping
-     * controller (server: DevelopSocketController, client: PingController).
+     * Mirrors the real deployment, where each side registers its own ping controller (server:
+     * DevelopSocketController, client: PingController).
      */
     private static WebSocketRouter routerWithPingController() {
         WebSocketRouter router = new WebSocketRouter();

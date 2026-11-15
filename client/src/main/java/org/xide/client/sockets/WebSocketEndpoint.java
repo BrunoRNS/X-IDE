@@ -1,22 +1,16 @@
 package org.xide.client.sockets;
 
-
-
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.xide.protocol.SocketMessage;
-import org.xide.protocol.SocketMessageCodec;
-import org.xide.sockets.annotations.WebSocketRouter;
-
-
-
 import jakarta.websocket.ClientEndpoint;
 import jakarta.websocket.OnMessage;
 import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.xide.protocol.SocketMessage;
+import org.xide.protocol.SocketMessageCodec;
+import org.xide.sockets.annotations.WebSocketRouter;
 
 @ClientEndpoint
 public class WebSocketEndpoint {
@@ -26,8 +20,7 @@ public class WebSocketEndpoint {
     private volatile Session session;
 
     public WebSocketEndpoint(WebSocketRouter router) {
-        this(router, message -> {
-        });
+        this(router, message -> {});
     }
 
     public WebSocketEndpoint(WebSocketRouter router, Consumer<SocketMessage> messageSink) {
@@ -45,14 +38,16 @@ public class WebSocketEndpoint {
         try {
             SocketMessage message = SocketMessageCodec.decode(json);
             messageSink.accept(message);
-            if (message.response()) {
+            // Server responses to our requests reach the client controllers
+            // just like pushes do; unknown routes are only recorded for receive().
+            if (!router.hasRoute(message.route())) {
                 return;
             }
             Optional<SocketMessage> response = router.dispatch(message);
             response.ifPresent(this::send);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Invalid WebSocket response from server", e);
-        } 
+            LOGGER.log(Level.WARNING, "Invalid WebSocket message from server", e);
+        }
     }
 
     private void send(SocketMessage message) {

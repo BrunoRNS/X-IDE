@@ -25,6 +25,14 @@ public record SocketMessage(
         return new SocketMessage(route, TextNode.valueOf(payload));
     }
 
+    /**
+     * Builds a message whose payload is the given object converted to JSON (strings stay as text
+     * payloads). The conversion to a string happens when the message is encoded for sending.
+     */
+    public static SocketMessage text(String route, Object payload) {
+        return new SocketMessage(route, SocketMessageCodec.toJsonNode(payload));
+    }
+
     public static SocketMessage response(String route, JsonNode payload) {
         return new SocketMessage(route, payload, true);
     }

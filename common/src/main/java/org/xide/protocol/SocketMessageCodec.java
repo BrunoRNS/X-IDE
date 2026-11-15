@@ -1,15 +1,12 @@
 package org.xide.protocol;
 
-
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SocketMessageCodec {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    public  SocketMessageCodec() {
-    }
+    public SocketMessageCodec() {}
 
     public static SocketMessage decode(String json) throws Exception {
         SocketMessage message = MAPPER.readValue(json, SocketMessage.class);

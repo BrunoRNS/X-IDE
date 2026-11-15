@@ -3,7 +3,6 @@ package org.xide.models;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-
 import org.xide.models.enums.BigO;
 import org.xide.models.enums.Lang;
 
@@ -17,7 +16,11 @@ public class Problem {
     private BigO bigO;
     private Map<Lang, Double> times;
 
-    public Problem(String titile, Path pdf, List<String> restrictions, BigO bigO,
+    public Problem(
+            String titile,
+            Path pdf,
+            List<String> restrictions,
+            BigO bigO,
             Map<Lang, Double> times) {
         this.titile = titile;
         this.pdf = pdf;
@@ -28,8 +31,7 @@ public class Problem {
         this.times = times;
     }
 
-    public Problem() {
-    }
+    public Problem() {}
 
     public static String getRestrictionTableCreate() {
         return """
@@ -52,7 +54,8 @@ public class Problem {
                     pdf TEXT NOT NULL,
                     PRIMARY KEY(id)
                 );
-                """.formatted(BigO.getTableCreate());
+                """
+                .formatted(BigO.getTableCreate());
     }
 
     public static String getProblemTimesTableCreate() {
@@ -65,7 +68,8 @@ public class Problem {
                     CONSTRAINT fk_pt_problem FOREIGN KEY(id_problem)
                         REFERENCES problem(id) ON DELETE CASCADE
                 );
-                """.formatted(Lang.getTableCreate());
+                """
+                .formatted(Lang.getTableCreate());
     }
 
     public String getTitile() {

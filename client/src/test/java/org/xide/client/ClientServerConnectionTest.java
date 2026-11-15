@@ -15,14 +15,12 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.AfterClass;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xide.client.sockets.WebSocketClient;
 import org.xide.protocol.SocketMessage;
-
 
 public class ClientServerConnectionTest {
 
@@ -40,15 +38,18 @@ public class ClientServerConnectionTest {
     @BeforeClass
     public static void startStackAndConnect() throws Exception {
         Assume.assumeTrue(
-            "Integration test disabled: enable it with `make test-integration` (or -Dsocket.it=true)",
-            Boolean.getBoolean("socket.it")
-        );
+                "Integration test disabled: enable it with `make test-integration` (or -Dsocket.it=true)",
+                Boolean.getBoolean("socket.it"));
         projectRoot = findProjectRoot();
         requireDocker();
         ensureEnvFile();
         httpPort = readPort("HTTP_PORT", 8080);
 
-        stackAlreadyRunning = !compose(STACK_TIMEOUT_MINUTES * 60_000L, false, "ps", "-q").output().trim().isEmpty();
+        stackAlreadyRunning =
+                !compose(STACK_TIMEOUT_MINUTES * 60_000L, false, "ps", "-q")
+                        .output()
+                        .trim()
+                        .isEmpty();
         if (!stackAlreadyRunning) {
             compose(STACK_TIMEOUT_MINUTES * 60_000L, true, "up", "--build", "--detach");
         }
@@ -75,7 +76,7 @@ public class ClientServerConnectionTest {
         client.sendRequest("/develop/ping", SocketMessage.PING).get();
 
         SocketMessage response =
-            client.receive("/develop/ping", RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                client.receive("/develop/ping", RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
         assertEquals(SocketMessage.textResponse("/develop/ping", SocketMessage.PONG), response);
     }
@@ -100,17 +101,17 @@ public class ClientServerConnectionTest {
         }
 
         assertEquals(
-            SocketMessage.textResponse("/develop/last-pong", SocketMessage.PONG),
-            response
-        );
+                SocketMessage.textResponse("/develop/last-pong", SocketMessage.PONG), response);
     }
 
     private static void requireDocker() {
         CommandResult result = run(15_000L, "docker", "info");
         if (!result.success()) {
-            fail("Docker is required for this integration test but is not usable"
-                + " (try 'docker ps' yourself; on permission denied: sudo usermod -aG docker $USER"
-                + " and re-login): " + result.output().trim());
+            fail(
+                    "Docker is required for this integration test but is not usable"
+                            + " (try 'docker ps' yourself; on permission denied: sudo usermod -aG docker $USER"
+                            + " and re-login): "
+                            + result.output().trim());
         }
     }
 
@@ -123,8 +124,8 @@ public class ClientServerConnectionTest {
             directory = directory.getParent();
         }
         throw new IllegalStateException(
-            "Project root with infra/compose.yaml not found from " + System.getProperty("user.dir")
-        );
+                "Project root with infra/compose.yaml not found from "
+                        + System.getProperty("user.dir"));
     }
 
     private static void ensureEnvFile() throws IOException {
@@ -142,24 +143,33 @@ public class ClientServerConnectionTest {
         return defaultPort;
     }
 
-    private static CommandResult compose(long timeoutMillis, boolean inheritOutput, String... args) {
-        List<String> command = new ArrayList<>(List.of(
-            "docker", "compose", "--env-file", ".env", "-f", "infra/compose.yaml"
-        ));
+    private static CommandResult compose(
+            long timeoutMillis, boolean inheritOutput, String... args) {
+        List<String> command =
+                new ArrayList<>(
+                        List.of(
+                                "docker",
+                                "compose",
+                                "--env-file",
+                                ".env",
+                                "-f",
+                                "infra/compose.yaml"));
         command.addAll(List.of(args));
         return run(timeoutMillis, inheritOutput, command.toArray(new String[0]));
     }
 
     private static void awaitHealthy() throws Exception {
         HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create("http://127.0.0.1:" + httpPort + "/healthz"))
-            .timeout(Duration.ofSeconds(5))
-            .build();
+        HttpRequest request =
+                HttpRequest.newBuilder()
+                        .uri(URI.create("http://127.0.0.1:" + httpPort + "/healthz"))
+                        .timeout(Duration.ofSeconds(5))
+                        .build();
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(HEALTH_TIMEOUT_SECONDS);
         while (System.nanoTime() < deadline) {
             try {
-                HttpResponse<String> response = http.send(request, HttpResponse.BodyHandlers.ofString());
+                HttpResponse<String> response =
+                        http.send(request, HttpResponse.BodyHandlers.ofString());
                 if (response.statusCode() == 200) {
                     return;
                 }
@@ -172,7 +182,7 @@ public class ClientServerConnectionTest {
     }
 
     private static WebSocketClient connect() throws Exception {
-        
+
         URI uri = URI.create("ws://127.0.0.1:" + httpPort + WS_PATH);
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(CONNECT_TIMEOUT_SECONDS);
         while (true) {
@@ -192,9 +202,10 @@ public class ClientServerConnectionTest {
     }
 
     private static CommandResult run(long timeoutMillis, boolean inheritOutput, String... command) {
-        ProcessBuilder builder = new ProcessBuilder(command)
-            .directory(projectRoot.toFile())
-            .redirectErrorStream(true);
+        ProcessBuilder builder =
+                new ProcessBuilder(command)
+                        .directory(projectRoot.toFile())
+                        .redirectErrorStream(true);
         if (inheritOutput) {
             builder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
         }
@@ -204,15 +215,17 @@ public class ClientServerConnectionTest {
                 process.destroyForcibly();
                 return new CommandResult(false, "timed out after " + timeoutMillis + "ms");
             }
-            String output = inheritOutput
-                ? "(output above)"
-                : new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            String output =
+                    inheritOutput
+                            ? "(output above)"
+                            : new String(
+                                    process.getInputStream().readAllBytes(),
+                                    StandardCharsets.UTF_8);
             return new CommandResult(process.exitValue() == 0, output);
         } catch (Exception e) {
             return new CommandResult(false, e.toString());
         }
     }
 
-    private record CommandResult(boolean success, String output) {
-    }
+    private record CommandResult(boolean success, String output) {}
 }

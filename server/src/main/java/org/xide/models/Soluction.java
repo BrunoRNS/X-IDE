@@ -13,7 +13,7 @@ public class Soluction {
         this.id = id;
     }
 
-    public static String getTableCreate(){
+    public static String getTableCreate() {
         return """
                 CREATE TABLE IF NOT EXISTS soluctions(
                     id INT NOT NULL AUTO_INCREMENT,
@@ -26,11 +26,27 @@ public class Soluction {
                 """;
     }
 
-    public String getIn() {return in;}
-    public void setIn(String in) {this.in = in;}
-    public String getOut() {return out;}
-    public void setOut(String out) {this.out = out;}
-    public Long getId() {return id;}
-    public void setId(Long id) {this.id = id;}
-    
+    public String getIn() {
+        return in;
+    }
+
+    public void setIn(String in) {
+        this.in = in;
+    }
+
+    public String getOut() {
+        return out;
+    }
+
+    public void setOut(String out) {
+        this.out = out;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

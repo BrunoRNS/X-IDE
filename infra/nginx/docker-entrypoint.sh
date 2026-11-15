@@ -20,11 +20,17 @@ if [ ! -e "$CERT_FILE" ] && [ ! -e "$KEY_FILE" ]; then
             exit 1
             ;;
         *[!0-9.]*)
-            SAN="DNS:$TLS_HOST"
+            HOST_SAN="DNS:$TLS_HOST"
             ;;
         *)
-            SAN="IP:$TLS_HOST"
+            HOST_SAN="IP:$TLS_HOST"
             ;;
+    esac
+
+    SAN="DNS:localhost,IP:127.0.0.1"
+    case "$HOST_SAN" in
+        DNS:localhost|IP:127.0.0.1) ;;
+        *) SAN="$SAN,$HOST_SAN" ;;
     esac
 
     openssl req -x509 -newkey rsa:3072 -sha256 -nodes -days 3650 \
@@ -44,21 +50,27 @@ elif [ ! -s "$CERT_FILE" ] || [ ! -s "$KEY_FILE" ]; then
     exit 1
 fi
 
+if ! openssl x509 -in "$CERT_FILE" -noout -checkhost localhost >/dev/null; then
+    echo "TLS certificate must cover localhost; replace the persistent tls_certs volume." >&2
+    exit 1
+fi
+
 case "$TLS_HOST" in
     *[!0-9.]*)
         if ! openssl x509 -in "$CERT_FILE" -noout -checkhost "$TLS_HOST" >/dev/null; then
-            echo "TLS certificate does not cover TLS_HOST=$TLS_HOST; verify TLS_HOST or replace the persistent certificate." >&2
+            echo "TLS certificate does not cover TLS_HOST=$TLS_HOST; verify TLS_HOST or replace the persistent tls_certs volume." >&2
             exit 1
         fi
         ;;
     *)
         if ! openssl x509 -in "$CERT_FILE" -noout -checkip "$TLS_HOST" >/dev/null; then
-            echo "TLS certificate does not cover TLS_HOST=$TLS_HOST; verify TLS_HOST or replace the persistent certificate." >&2
+            echo "TLS certificate does not cover TLS_HOST=$TLS_HOST; verify TLS_HOST or replace the persistent tls_certs volume." >&2
             exit 1
         fi
         ;;
 esac
 
+printf 'WSS certificate covers localhost, 127.0.0.1, and TLS_HOST=%s\n' "$TLS_HOST"
 printf 'WSS certificate SHA-256 fingerprint: '
 openssl x509 -in "$CERT_FILE" -noout -fingerprint -sha256 | sed 's/.*=//'
 

@@ -11,6 +11,7 @@ public class HtmlUtil {
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         }
     }
+
     public static String render(String template, Map<String, String> params) {
         String result = template;
         for (var entry : params.entrySet()) {
@@ -18,6 +19,4 @@ public class HtmlUtil {
         }
         return result;
     }
-
-
 }

@@ -8,7 +8,7 @@ public enum BigO {
     Ne2,
     Ne3;
 
-    public static String getTableCreate(){
+    public static String getTableCreate() {
         return """
                 ENUM('n1', 'logn', 'n', 'nlogn', 'ne2', 'ne3') NOT NULL
                 """;

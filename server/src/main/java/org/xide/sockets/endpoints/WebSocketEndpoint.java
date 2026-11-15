@@ -32,10 +32,11 @@ public final class WebSocketEndpoint {
     public void onMessage(Session session, String json) {
         WebSocketRouter activeRouter = router;
         if (activeRouter == null) {
-            send(session, SocketMessage.response(
-                "/error",
-                SocketMessageCodec.toJsonNode("WebSocket router is not ready")
-            ));
+            send(
+                    session,
+                    SocketMessage.response(
+                            "/error",
+                            SocketMessageCodec.toJsonNode("WebSocket router is not ready")));
             return;
         }
 
@@ -48,11 +49,11 @@ public final class WebSocketEndpoint {
             Optional<SocketMessage> response = activeRouter.dispatch(message);
             response.ifPresent(result -> send(session, result));
         } catch (Exception e) {
-            send(session, SocketMessage.response(
-                "/error",
-                SocketMessageCodec.toJsonNode(e.getMessage())
-            ));
-        } 
+            send(
+                    session,
+                    SocketMessage.response(
+                            "/error", SocketMessageCodec.toJsonNode(e.getMessage())));
+        }
     }
 
     @OnClose
