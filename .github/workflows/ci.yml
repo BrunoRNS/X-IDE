@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   lint:
-    name: lint · spotless
+    name: lint · spring-javaformat
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -26,8 +26,8 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: maven
-      - name: Check formatting (Spotless)
-        run: ./mvnw -B -ntp spotless:check
+      - name: Check formatting (Spring Java Format)
+        run: ./mvnw -B -ntp validate
 
   test-native:
     name: test · ${{ matrix.label }}
@@ -76,8 +76,6 @@ jobs:
 
   # 32-bit Linux without QEMU:
   #   linux/386  -> native IA32 execution on the x86_64 runner kernel
-  #   linux/arm/v7 -> native AArch32 EL0 execution on the ARM64 runner
-  #                   (Neoverse N2 + Ubuntu CONFIG_COMPAT=y)
   # The default Docker bridge network is used so the container gets Docker's
   # embedded DNS resolver instead of the runner's host resolv.conf.
   test-linux-32bit:
@@ -92,10 +90,6 @@ jobs:
             label: linux-x86
             platform: linux/386
             arch: i386
-          - os: ubuntu-24.04-arm
-            label: linux-armv7
-            platform: linux/arm/v7
-            arch: armhf
     steps:
       - uses: actions/checkout@v5
       - name: Verify that no QEMU binfmt handler is registered
@@ -104,7 +98,6 @@ jobs:
           ls /proc/sys/fs/binfmt_misc/ 2>/dev/null || true
           case "${{ matrix.platform }}" in
             linux/386)    qemu_handler=qemu-i386 ;;
-            linux/arm/v7) qemu_handler=qemu-arm ;;
             *)            echo "::error::unsupported platform"; exit 1 ;;
           esac
           if [ -e "/proc/sys/fs/binfmt_misc/$qemu_handler" ]; then

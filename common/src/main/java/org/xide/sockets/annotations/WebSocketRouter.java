@@ -15,135 +15,123 @@ import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
 
 public class WebSocketRouter {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private final Map<String, RouteHandler> routes = new ConcurrentHashMap<>();
+	private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    public void register(Object controller) {
-        Objects.requireNonNull(controller, "controller");
-        if (!controller.getClass().isAnnotationPresent(WebSocketController.class)) {
-            throw new IllegalArgumentException(
-                    "WebSocket controller must be annotated with @WebSocketController");
-        }
-        for (Method method : controller.getClass().getDeclaredMethods()) {
-            WebSocketRoute route = method.getAnnotation(WebSocketRoute.class);
-            if (route == null) {
-                continue;
-            }
-            validateRoute(controller, method, route.value());
-            RouteHandler previous =
-                    routes.putIfAbsent(
-                            route.value(),
-                            new RouteHandler(controller, method, argumentResolvers(method)));
-            if (previous != null) {
-                throw new IllegalStateException("Duplicate WebSocket route: " + route.value());
-            }
-        }
-    }
+	private final Map<String, RouteHandler> routes = new ConcurrentHashMap<>();
 
-    /**
-     * Dispatches a request and wraps a non-null handler result in its response payload. Void and
-     * null results produce no response.
-     */
-    public Optional<SocketMessage> dispatch(SocketMessage request) {
-        Objects.requireNonNull(request, "request");
-        RouteHandler handler = routes.get(request.route());
-        if (handler == null) {
-            throw new IllegalArgumentException("Unknown WebSocket route: " + request.route());
-        }
+	public void register(Object controller) {
+		Objects.requireNonNull(controller, "controller");
+		if (!controller.getClass().isAnnotationPresent(WebSocketController.class)) {
+			throw new IllegalArgumentException("WebSocket controller must be annotated with @WebSocketController");
+		}
+		for (Method method : controller.getClass().getDeclaredMethods()) {
+			WebSocketRoute route = method.getAnnotation(WebSocketRoute.class);
+			if (route == null) {
+				continue;
+			}
+			validateRoute(controller, method, route.value());
+			RouteHandler previous = routes.putIfAbsent(route.value(),
+					new RouteHandler(controller, method, argumentResolvers(method)));
+			if (previous != null) {
+				throw new IllegalStateException("Duplicate WebSocket route: " + route.value());
+			}
+		}
+	}
 
-        try {
-            ArgumentResolver[] resolvers = handler.resolvers();
-            Object[] arguments = new Object[resolvers.length];
-            for (int i = 0; i < arguments.length; i++) {
-                arguments[i] = resolvers[i].resolve(request);
-            }
-            Object result = handler.method().invoke(handler.controller(), arguments);
-            if (result == null) {
-                return Optional.empty();
-            }
-            return Optional.of(
-                    SocketMessage.response(request.route(), SocketMessageCodec.toJsonNode(result)));
-        } catch (InvocationTargetException e) {
-            throw new IllegalStateException(
-                    "WebSocket route failed: " + request.route(), e.getCause());
-        } catch (IllegalAccessException e) {
-            throw new IllegalStateException("Cannot invoke WebSocket route: " + request.route(), e);
-        }
-    }
+	/**
+	 * Dispatches a request and wraps a non-null handler result in its response payload.
+	 * Void and null results produce no response.
+	 */
+	public Optional<SocketMessage> dispatch(SocketMessage request) {
+		Objects.requireNonNull(request, "request");
+		RouteHandler handler = routes.get(request.route());
+		if (handler == null) {
+			throw new IllegalArgumentException("Unknown WebSocket route: " + request.route());
+		}
 
-    public boolean hasRoute(String route) {
-        return routes.containsKey(route);
-    }
+		try {
+			ArgumentResolver[] resolvers = handler.resolvers();
+			Object[] arguments = new Object[resolvers.length];
+			for (int i = 0; i < arguments.length; i++) {
+				arguments[i] = resolvers[i].resolve(request);
+			}
+			Object result = handler.method().invoke(handler.controller(), arguments);
+			if (result == null) {
+				return Optional.empty();
+			}
+			return Optional.of(SocketMessage.response(request.route(), SocketMessageCodec.toJsonNode(result)));
+		}
+		catch (InvocationTargetException e) {
+			throw new IllegalStateException("WebSocket route failed: " + request.route(), e.getCause());
+		}
+		catch (IllegalAccessException e) {
+			throw new IllegalStateException("Cannot invoke WebSocket route: " + request.route(), e);
+		}
+	}
 
-    private static void validateRoute(Object controller, Method method, String path) {
-        if (path == null || !path.startsWith("/") || path.startsWith("//")) {
-            throw new IllegalArgumentException("WebSocket route must be an absolute path: " + path);
-        }
-        if (!Modifier.isPublic(method.getModifiers())) {
-            throw new IllegalArgumentException(
-                    "Route " + path + " on " + controller.getClass().getName() + " must be public");
-        }
-        for (Parameter parameter : method.getParameters()) {
-            if (parameter.getType() == SocketMessage.class
-                    || parameter.isAnnotationPresent(SocketParam.class)) {
-                continue;
-            }
-            throw new IllegalArgumentException(
-                    "Route "
-                            + path
-                            + " on "
-                            + controller.getClass().getName()
-                            + " parameter '"
-                            + parameter.getName()
-                            + "' must be SocketMessage"
-                            + " or annotated with @SocketParam");
-        }
-    }
+	public boolean hasRoute(String route) {
+		return routes.containsKey(route);
+	}
 
-    private static ArgumentResolver[] argumentResolvers(Method method) {
-        Parameter[] parameters = method.getParameters();
-        ArgumentResolver[] resolvers = new ArgumentResolver[parameters.length];
-        for (int i = 0; i < parameters.length; i++) {
-            Parameter parameter = parameters[i];
-            if (parameter.getType() == SocketMessage.class) {
-                resolvers[i] = request -> request;
-                continue;
-            }
-            resolvers[i] =
-                    new PayloadResolver(
-                            parameter.getAnnotation(SocketParam.class).value(),
-                            MAPPER.getTypeFactory()
-                                    .constructType(parameter.getParameterizedType()));
-        }
-        return resolvers;
-    }
+	private static void validateRoute(Object controller, Method method, String path) {
+		if (path == null || !path.startsWith("/") || path.startsWith("//")) {
+			throw new IllegalArgumentException("WebSocket route must be an absolute path: " + path);
+		}
+		if (!Modifier.isPublic(method.getModifiers())) {
+			throw new IllegalArgumentException(
+					"Route " + path + " on " + controller.getClass().getName() + " must be public");
+		}
+		for (Parameter parameter : method.getParameters()) {
+			if (parameter.getType() == SocketMessage.class || parameter.isAnnotationPresent(SocketParam.class)) {
+				continue;
+			}
+			throw new IllegalArgumentException(
+					"Route " + path + " on " + controller.getClass().getName() + " parameter '" + parameter.getName()
+							+ "' must be SocketMessage" + " or annotated with @SocketParam");
+		}
+	}
 
-    /** Resolves a handler argument from a named field of the request payload. */
-    private record PayloadResolver(String name, JavaType type) implements ArgumentResolver {
-        @Override
-        public Object resolve(SocketMessage request) {
-            JsonNode payload = request.payload();
-            JsonNode value = payload == null ? null : payload.get(name);
-            if (value == null || value.isMissingNode()) {
-                throw new IllegalArgumentException(
-                        "Missing parameter '" + name + "' for WebSocket route: " + request.route());
-            }
-            if (value.isNull() && type.getRawClass().isPrimitive()) {
-                throw new IllegalArgumentException(
-                        "Parameter '"
-                                + name
-                                + "' for WebSocket route: "
-                                + request.route()
-                                + " is primitive and cannot be null");
-            }
-            return MAPPER.convertValue(value, type);
-        }
-    }
+	private static ArgumentResolver[] argumentResolvers(Method method) {
+		Parameter[] parameters = method.getParameters();
+		ArgumentResolver[] resolvers = new ArgumentResolver[parameters.length];
+		for (int i = 0; i < parameters.length; i++) {
+			Parameter parameter = parameters[i];
+			if (parameter.getType() == SocketMessage.class) {
+				resolvers[i] = request -> request;
+				continue;
+			}
+			resolvers[i] = new PayloadResolver(parameter.getAnnotation(SocketParam.class).value(),
+					MAPPER.getTypeFactory().constructType(parameter.getParameterizedType()));
+		}
+		return resolvers;
+	}
 
-    private interface ArgumentResolver {
-        Object resolve(SocketMessage request);
-    }
+	/** Resolves a handler argument from a named field of the request payload. */
+	private record PayloadResolver(String name, JavaType type) implements ArgumentResolver {
+		@Override
+		public Object resolve(SocketMessage request) {
+			JsonNode payload = request.payload();
+			JsonNode value = payload == null ? null : payload.get(name);
+			if (value == null || value.isMissingNode()) {
+				throw new IllegalArgumentException(
+						"Missing parameter '" + name + "' for WebSocket route: " + request.route());
+			}
+			if (value.isNull() && type.getRawClass().isPrimitive()) {
+				throw new IllegalArgumentException("Parameter '" + name + "' for WebSocket route: " + request.route()
+						+ " is primitive and cannot be null");
+			}
+			return MAPPER.convertValue(value, type);
+		}
+	}
 
-    private record RouteHandler(Object controller, Method method, ArgumentResolver[] resolvers) {}
+	private interface ArgumentResolver {
+
+		Object resolve(SocketMessage request);
+
+	}
+
+	private record RouteHandler(Object controller, Method method, ArgumentResolver[] resolvers) {
+	}
+
 }

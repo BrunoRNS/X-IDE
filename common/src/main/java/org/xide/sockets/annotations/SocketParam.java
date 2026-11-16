@@ -6,12 +6,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Binds a route method parameter to a named field of the request payload. The field value is
- * converted to the declared parameter type; a missing field makes the request fail with an error
- * response.
+ * Binds a route method parameter to a named field of the request payload. The field value
+ * is converted to the declared parameter type; a missing field makes the request fail
+ * with an error response.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
 public @interface SocketParam {
-    String value();
+
+	String value();
+
 }

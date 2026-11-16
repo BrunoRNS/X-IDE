@@ -11,35 +11,35 @@ import org.xide.protocol.SocketMessageCodec;
 import org.xide.sockets.annotations.WebSocketRouter;
 
 public class AuthControllerTest {
-    @Test
-    public void sucessStatusRunsTheSucessFlow() {
-        AuthController controller = new AuthController();
-        List<String> handled = new ArrayList<>();
-        controller.onSucess = handled::add;
-        controller.onRejected = status -> handled.add("rejected:" + status);
-        WebSocketRouter router = new WebSocketRouter();
-        router.register(controller);
 
-        router.dispatch(
-                SocketMessage.response(
-                        "/auth/login", SocketMessageCodec.toJsonNode(Map.of("status", "sucess"))));
+	@Test
+	public void sucessStatusRunsTheSucessFlow() {
+		AuthController controller = new AuthController();
+		List<String> handled = new ArrayList<>();
+		controller.onSucess = handled::add;
+		controller.onRejected = status -> handled.add("rejected:" + status);
+		WebSocketRouter router = new WebSocketRouter();
+		router.register(controller);
 
-        assertEquals(List.of("sucess"), handled);
-    }
+		router
+			.dispatch(SocketMessage.response("/auth/login", SocketMessageCodec.toJsonNode(Map.of("status", "sucess"))));
 
-    @Test
-    public void anyOtherStatusRunsTheRejectedFlow() {
-        AuthController controller = new AuthController();
-        List<String> handled = new ArrayList<>();
-        controller.onSucess = handled::add;
-        controller.onRejected = handled::add;
-        WebSocketRouter router = new WebSocketRouter();
-        router.register(controller);
+		assertEquals(List.of("sucess"), handled);
+	}
 
-        router.dispatch(
-                SocketMessage.response(
-                        "/auth/login", SocketMessageCodec.toJsonNode(Map.of("status", "invalid"))));
+	@Test
+	public void anyOtherStatusRunsTheRejectedFlow() {
+		AuthController controller = new AuthController();
+		List<String> handled = new ArrayList<>();
+		controller.onSucess = handled::add;
+		controller.onRejected = handled::add;
+		WebSocketRouter router = new WebSocketRouter();
+		router.register(controller);
 
-        assertEquals(List.of("invalid"), handled);
-    }
+		router.dispatch(
+				SocketMessage.response("/auth/login", SocketMessageCodec.toJsonNode(Map.of("status", "invalid"))));
+
+		assertEquals(List.of("invalid"), handled);
+	}
+
 }

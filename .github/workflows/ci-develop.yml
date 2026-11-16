@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   lint:
-    name: lint · spotless
+    name: lint · spring-javaformat
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -28,8 +28,8 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: maven
-      - name: Check formatting (Spotless)
-        run: ./mvnw -B -ntp spotless:check
+      - name: Check formatting (Spring Java Format)
+        run: ./mvnw -B -ntp validate
 
   test:
     name: test · ${{ matrix.module }} · ${{ matrix.os }}

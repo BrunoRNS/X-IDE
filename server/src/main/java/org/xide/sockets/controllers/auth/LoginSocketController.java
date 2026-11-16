@@ -10,34 +10,40 @@ import org.xide.sockets.annotations.WebSocketRoute;
 
 @WebSocketController
 public class LoginSocketController {
-    private static final Logger LOGGER = Logger.getLogger(LoginSocketController.class.getName());
 
-    public static record Dto(String status) {}
+	private static final Logger LOGGER = Logger.getLogger(LoginSocketController.class.getName());
 
-    /** Finds users for the login check; tests swap it out to skip the database. */
-    UserLookup userLookup = UserRepo::getUser;
+	public static record Dto(String status) {
+	}
 
-    interface UserLookup {
-        User find(String email, String password) throws Exception;
-    }
+	/** Finds users for the login check; tests swap it out to skip the database. */
+	UserLookup userLookup = UserRepo::getUser;
 
-    /**
-     * The router wraps the returned record into the response payload, so the client receives
-     * {"status": "sucess"} on this same route.
-     */
-    @WebSocketRoute("/auth/login")
-    public Dto login(@SocketParam("email") String email, @SocketParam("password") String password) {
-        try {
-            User user = userLookup.find(email, password);
-            if (user == null) {
-                LOGGER.info("Not found user, or email is invalid or password");
-                return new Dto("invalid");
-            }
-            LOGGER.info("Login sucess");
-            return new Dto("sucess");
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "No possible execute query for select user", e);
-            throw new IllegalStateException("Login failed: could not check the user", e);
-        }
-    }
+	interface UserLookup {
+
+		User find(String email, String password) throws Exception;
+
+	}
+
+	/**
+	 * The router wraps the returned record into the response payload, so the client
+	 * receives {"status": "sucess"} on this same route.
+	 */
+	@WebSocketRoute("/auth/login")
+	public Dto login(@SocketParam("email") String email, @SocketParam("password") String password) {
+		try {
+			User user = userLookup.find(email, password);
+			if (user == null) {
+				LOGGER.info("Not found user, or email is invalid or password");
+				return new Dto("invalid");
+			}
+			LOGGER.info("Login sucess");
+			return new Dto("sucess");
+		}
+		catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "No possible execute query for select user", e);
+			throw new IllegalStateException("Login failed: could not check the user", e);
+		}
+	}
+
 }

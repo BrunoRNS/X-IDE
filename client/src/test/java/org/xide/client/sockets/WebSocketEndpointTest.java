@@ -14,45 +14,46 @@ import org.xide.sockets.annotations.WebSocketRoute;
 import org.xide.sockets.annotations.WebSocketRouter;
 
 public class WebSocketEndpointTest {
-    @Test
-    public void serverResponsesReachClientControllers() throws Exception {
-        WebSocketRouter router = new WebSocketRouter();
-        List<String> handled = new ArrayList<>();
-        router.register(new RecordingController(handled));
-        WebSocketEndpoint endpoint = new WebSocketEndpoint(router);
 
-        endpoint.onMessage(
-                SocketMessageCodec.encode(
-                        SocketMessage.response(
-                                "/auth/login",
-                                SocketMessageCodec.toJsonNode(Map.of("status", "sucess")))));
+	@Test
+	public void serverResponsesReachClientControllers() throws Exception {
+		WebSocketRouter router = new WebSocketRouter();
+		List<String> handled = new ArrayList<>();
+		router.register(new RecordingController(handled));
+		WebSocketEndpoint endpoint = new WebSocketEndpoint(router);
 
-        assertEquals(List.of("sucess"), handled);
-    }
+		endpoint.onMessage(SocketMessageCodec
+			.encode(SocketMessage.response("/auth/login", SocketMessageCodec.toJsonNode(Map.of("status", "sucess")))));
 
-    @Test
-    public void unknownRoutesAreIgnoredWithoutFailing() throws Exception {
-        WebSocketRouter router = new WebSocketRouter();
-        List<String> handled = new ArrayList<>();
-        router.register(new RecordingController(handled));
-        WebSocketEndpoint endpoint = new WebSocketEndpoint(router);
+		assertEquals(List.of("sucess"), handled);
+	}
 
-        endpoint.onMessage(SocketMessageCodec.encode(SocketMessage.textResponse("/error", "boom")));
+	@Test
+	public void unknownRoutesAreIgnoredWithoutFailing() throws Exception {
+		WebSocketRouter router = new WebSocketRouter();
+		List<String> handled = new ArrayList<>();
+		router.register(new RecordingController(handled));
+		WebSocketEndpoint endpoint = new WebSocketEndpoint(router);
 
-        assertEquals(List.of(), handled);
-    }
+		endpoint.onMessage(SocketMessageCodec.encode(SocketMessage.textResponse("/error", "boom")));
 
-    @WebSocketController
-    public static final class RecordingController {
-        private final List<String> handled;
+		assertEquals(List.of(), handled);
+	}
 
-        RecordingController(List<String> handled) {
-            this.handled = handled;
-        }
+	@WebSocketController
+	public static final class RecordingController {
 
-        @WebSocketRoute("/auth/login")
-        public void login(@SocketParam("status") String status) {
-            handled.add(status);
-        }
-    }
+		private final List<String> handled;
+
+		RecordingController(List<String> handled) {
+			this.handled = handled;
+		}
+
+		@WebSocketRoute("/auth/login")
+		public void login(@SocketParam("status") String status) {
+			handled.add(status);
+		}
+
+	}
+
 }

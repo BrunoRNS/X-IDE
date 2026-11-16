@@ -76,7 +76,7 @@ help:
 		"JUnit scopes:" \
 		"  test-common | test-client | test-server | test-integration | test-all" \
 		"" \
-		"Code style (Spotless, configured in pom.xml):" \
+		"Code style (Spring Java Format, configured in pom.xml and .springjavaformatconfig):" \
 		"  format                              Rewrite all Java sources in the style." \
 		"  lint                                Fail when a source is not formatted." \
 		"" \
@@ -161,10 +161,10 @@ test-all:
 	./mvnw $(MVN_ARGS) test
 
 format:
-	./mvnw $(MVN_ARGS) spotless:apply
+	./mvnw $(MVN_ARGS) spring-javaformat:apply
 
 lint:
-	./mvnw $(MVN_ARGS) spotless:check
+	./mvnw $(MVN_ARGS) spring-javaformat:validate
 
 configure:
 	@if [ -e .env ]; then \

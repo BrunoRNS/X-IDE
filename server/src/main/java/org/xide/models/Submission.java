@@ -3,78 +3,84 @@ package org.xide.models;
 import org.xide.models.enums.SubmissionState;
 
 public class Submission {
-    private Long id;
-    private User user;
-    private Code code;
-    private Problem problem;
-    private SubmissionState state;
 
-    public Submission(User user, Code code, Problem problem, SubmissionState state, Long id) {
-        this.user = user;
-        this.code = code;
-        this.problem = problem;
-        this.state = state;
-        this.id = id;
-    }
+	private Long id;
 
-    public Submission() {}
+	private User user;
 
-    public static String getTableCreate() {
-        return """
-                CREATE TABLE IF NOT EXISTS submissions(
-                    id INT NOT NULL AUTO_INCREMENT,
-                    state %s ,
-                    code_id INT NOT NULL,
-                    id_problem INT NOT NULL,
-                    CONSTRAINT uq_submission_code UNIQUE (code_id),
-                    CONSTRAINT fk_submission_code FOREIGN KEY(code_id)
-                    REFERENCES code(id)
-                    ON DELETE CASCADE
-                    ON UPDATE CASCADE,
-                    CONSTRAINT fk_submission_problem FOREIGN KEY(id_problem) REFERENCES problem(id),
-                    PRIMARY KEY (id)
-                );
-                """
-                .formatted(SubmissionState.getTableCreate());
-    }
+	private Code code;
 
-    public User getUser() {
-        return user;
-    }
+	private Problem problem;
 
-    public void setUser(User user) {
-        this.user = user;
-    }
+	private SubmissionState state;
 
-    public Code getCode() {
-        return code;
-    }
+	public Submission(User user, Code code, Problem problem, SubmissionState state, Long id) {
+		this.user = user;
+		this.code = code;
+		this.problem = problem;
+		this.state = state;
+		this.id = id;
+	}
 
-    public void setCode(Code code) {
-        this.code = code;
-    }
+	public Submission() {
+	}
 
-    public Problem getProblem() {
-        return problem;
-    }
+	public static String getTableCreate() {
+		return """
+				CREATE TABLE IF NOT EXISTS submissions(
+				    id INT NOT NULL AUTO_INCREMENT,
+				    state %s ,
+				    code_id INT NOT NULL,
+				    id_problem INT NOT NULL,
+				    CONSTRAINT uq_submission_code UNIQUE (code_id),
+				    CONSTRAINT fk_submission_code FOREIGN KEY(code_id)
+				    REFERENCES code(id)
+				    ON DELETE CASCADE
+				    ON UPDATE CASCADE,
+				    CONSTRAINT fk_submission_problem FOREIGN KEY(id_problem) REFERENCES problem(id),
+				    PRIMARY KEY (id)
+				);
+				""".formatted(SubmissionState.getTableCreate());
+	}
 
-    public void setProblem(Problem problem) {
-        this.problem = problem;
-    }
+	public User getUser() {
+		return user;
+	}
 
-    public SubmissionState getState() {
-        return state;
-    }
+	public void setUser(User user) {
+		this.user = user;
+	}
 
-    public void setState(SubmissionState state) {
-        this.state = state;
-    }
+	public Code getCode() {
+		return code;
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public void setCode(Code code) {
+		this.code = code;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public Problem getProblem() {
+		return problem;
+	}
+
+	public void setProblem(Problem problem) {
+		this.problem = problem;
+	}
+
+	public SubmissionState getState() {
+		return state;
+	}
+
+	public void setState(SubmissionState state) {
+		this.state = state;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
 }

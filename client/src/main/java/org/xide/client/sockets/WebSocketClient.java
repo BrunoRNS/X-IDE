@@ -25,97 +25,90 @@ import org.xide.sockets.annotations.WebSocketRouter;
 import org.xide.sockets.annotations.WebSocketScanner;
 
 public class WebSocketClient {
-    private static WebSocketClient instance;
-    private final WebSocketRouter router = new WebSocketRouter();
-    private final ClientManager clientManager;
-    private final Session session;
-    private final Map<String, LinkedBlockingQueue<SocketMessage>> responses =
-            new ConcurrentHashMap<>();
 
-    private WebSocketClient(URI uri)
-            throws IOException, DeploymentException, GeneralSecurityException {
-        List<Object> controllers = WebSocketScanner.scan(Main.class.getPackageName());
-        controllers.forEach(router::register);
-        clientManager = ClientManager.createClient();
-        if ("wss".equalsIgnoreCase(uri.getScheme())) {
-            int port = uri.getPort() < 0 ? 443 : uri.getPort();
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(
-                    null,
-                    new TrustManager[] {new ServerCertificateTrustManager(uri.getHost(), port)},
-                    null);
-            SslEngineConfigurator sslConfigurator = new SslEngineConfigurator(sslContext);
-            sslConfigurator.setHostVerificationEnabled(true);
-            clientManager
-                    .getProperties()
-                    .put(ClientProperties.SSL_ENGINE_CONFIGURATOR, sslConfigurator);
-        }
-        session =
-                clientManager.connectToServer(
-                        new WebSocketEndpoint(router, this::recordResponse), uri);
-    }
+	private static WebSocketClient instance;
 
-    private void recordResponse(SocketMessage message) {
-        responses
-                .computeIfAbsent(message.route(), route -> new LinkedBlockingQueue<>())
-                .add(message);
-    }
+	private final WebSocketRouter router = new WebSocketRouter();
 
-    /** Returns the connected client, or throws when it has not connected yet. */
-    public static synchronized WebSocketClient getInstance() {
-        WebSocketClient existing = instance;
-        if (existing == null) {
-            throw new IllegalStateException("WebSocket client is not connected yet");
-        }
-        return existing;
-    }
+	private final ClientManager clientManager;
 
-    public static synchronized WebSocketClient getInstance(URI uri)
-            throws IOException, DeploymentException, GeneralSecurityException {
-        if (instance == null) {
-            instance = new WebSocketClient(uri);
-        }
-        return instance;
-    }
+	private final Session session;
 
-    public synchronized WebSocketRouter getRouter() {
-        return router;
-    }
+	private final Map<String, LinkedBlockingQueue<SocketMessage>> responses = new ConcurrentHashMap<>();
 
-    public Future<Void> sendRequest(String path, String params) throws Exception {
-        return sendRequest(SocketMessage.text(path, params));
-    }
+	private WebSocketClient(URI uri) throws IOException, DeploymentException, GeneralSecurityException {
+		List<Object> controllers = WebSocketScanner.scan(Main.class.getPackageName());
+		controllers.forEach(router::register);
+		clientManager = ClientManager.createClient();
+		if ("wss".equalsIgnoreCase(uri.getScheme())) {
+			int port = uri.getPort() < 0 ? 443 : uri.getPort();
+			SSLContext sslContext = SSLContext.getInstance("TLS");
+			sslContext.init(null, new TrustManager[] { new ServerCertificateTrustManager(uri.getHost(), port) }, null);
+			SslEngineConfigurator sslConfigurator = new SslEngineConfigurator(sslContext);
+			sslConfigurator.setHostVerificationEnabled(true);
+			clientManager.getProperties().put(ClientProperties.SSL_ENGINE_CONFIGURATOR, sslConfigurator);
+		}
+		session = clientManager.connectToServer(new WebSocketEndpoint(router, this::recordResponse), uri);
+	}
 
-    /** Sends a request whose params object is converted to the JSON payload. */
-    public Future<Void> sendRequest(String path, Object params) throws Exception {
-        return sendRequest(SocketMessage.text(path, params));
-    }
+	private void recordResponse(SocketMessage message) {
+		responses.computeIfAbsent(message.route(), route -> new LinkedBlockingQueue<>()).add(message);
+	}
 
-    public Future<Void> sendRequest(String path, JsonNode params) throws Exception {
-        return sendRequest(new SocketMessage(path, params));
-    }
+	/** Returns the connected client, or throws when it has not connected yet. */
+	public static synchronized WebSocketClient getInstance() {
+		WebSocketClient existing = instance;
+		if (existing == null) {
+			throw new IllegalStateException("WebSocket client is not connected yet");
+		}
+		return existing;
+	}
 
-    /**
-     * Waits for the next response the server sent on the given route and returns it, or {@code
-     * null} when nothing arrives within the timeout.
-     */
-    public SocketMessage receive(String route, long timeout, TimeUnit unit)
-            throws InterruptedException {
-        return responses
-                .computeIfAbsent(route, key -> new LinkedBlockingQueue<>())
-                .poll(timeout, unit);
-    }
+	public static synchronized WebSocketClient getInstance(URI uri)
+			throws IOException, DeploymentException, GeneralSecurityException {
+		if (instance == null) {
+			instance = new WebSocketClient(uri);
+		}
+		return instance;
+	}
 
-    public void close() throws IOException {
-        if (session.isOpen()) {
-            session.close();
-        }
-    }
+	public synchronized WebSocketRouter getRouter() {
+		return router;
+	}
 
-    private Future<Void> sendRequest(SocketMessage message) throws Exception {
-        if (!session.isOpen()) {
-            throw new IllegalStateException("WebSocket connection is not open");
-        }
-        return session.getAsyncRemote().sendText(SocketMessageCodec.encode(message));
-    }
+	public Future<Void> sendRequest(String path, String params) throws Exception {
+		return sendRequest(SocketMessage.text(path, params));
+	}
+
+	/** Sends a request whose params object is converted to the JSON payload. */
+	public Future<Void> sendRequest(String path, Object params) throws Exception {
+		return sendRequest(SocketMessage.text(path, params));
+	}
+
+	public Future<Void> sendRequest(String path, JsonNode params) throws Exception {
+		return sendRequest(new SocketMessage(path, params));
+	}
+
+	/**
+	 * Waits for the next response the server sent on the given route and returns it, or
+	 * {@code
+	 * null} when nothing arrives within the timeout.
+	 */
+	public SocketMessage receive(String route, long timeout, TimeUnit unit) throws InterruptedException {
+		return responses.computeIfAbsent(route, key -> new LinkedBlockingQueue<>()).poll(timeout, unit);
+	}
+
+	public void close() throws IOException {
+		if (session.isOpen()) {
+			session.close();
+		}
+	}
+
+	private Future<Void> sendRequest(SocketMessage message) throws Exception {
+		if (!session.isOpen()) {
+			throw new IllegalStateException("WebSocket connection is not open");
+		}
+		return session.getAsyncRemote().sendText(SocketMessageCodec.encode(message));
+	}
+
 }

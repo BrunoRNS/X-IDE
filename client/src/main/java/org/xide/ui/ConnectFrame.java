@@ -27,155 +27,159 @@ import org.xide.actions.ConnectServer;
 
 public class ConnectFrame extends JFrame {
 
-    private static ConnectFrame instance;
-    private static JLabel message;
-    private static JTextField jTextField;
-    private final CompletableFuture<String> endpointSelection = new CompletableFuture<>();
-    private static final Color TEXT_COLOR = new Color(34, 41, 52);
-    private static final Color MUTED_COLOR = new Color(103, 113, 128);
-    private static final Color ACCENT_COLOR = new Color(210, 28, 43);
+	private static ConnectFrame instance;
 
-    public ConnectFrame() {
-        instance = this;
-        setTitle("X-IDE - Connect");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setResizable(false);
-        setLocationRelativeTo(null);
-        setContentPane(createFrame());
-        pack();
-        setLocationRelativeTo(null);
-        setVisible(true);
-    }
+	private static JLabel message;
 
-    private JPanel createFrame() {
-        JPanel background = new JPanel(new BorderLayout());
-        background.setBackground(new Color(241, 244, 249));
-        background.setBorder(BorderFactory.createEmptyBorder(24, 24, 24, 24));
+	private static JTextField jTextField;
 
-        JPanel card = new JPanel();
-        card.setBackground(Color.WHITE);
-        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-        card.setBorder(
-                new CompoundBorder(
-                        new LineBorder(new Color(222, 227, 235), 1, true),
-                        BorderFactory.createEmptyBorder(24, 32, 28, 32)));
+	private final CompletableFuture<String> endpointSelection = new CompletableFuture<>();
 
-        ImageIcon source = new ImageIcon(getClass().getResource("logo.png"));
-        Image logo = source.getImage().getScaledInstance(190, 107, Image.SCALE_SMOOTH);
-        JLabel logoLabel = new JLabel(new ImageIcon(logo));
-        logoLabel.setAlignmentX(CENTER_ALIGNMENT);
+	private static final Color TEXT_COLOR = new Color(34, 41, 52);
 
-        JLabel title = new JLabel("Connect to your server");
-        title.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 22));
-        title.setForeground(TEXT_COLOR);
-        title.setAlignmentX(CENTER_ALIGNMENT);
+	private static final Color MUTED_COLOR = new Color(103, 113, 128);
 
-        JLabel subtitle = new JLabel("Enter your X-IDE server address to get started.");
-        subtitle.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
-        subtitle.setForeground(MUTED_COLOR);
-        subtitle.setAlignmentX(CENTER_ALIGNMENT);
+	private static final Color ACCENT_COLOR = new Color(210, 28, 43);
 
-        JLabel addressLabel = new JLabel("Server IP address");
-        addressLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 13));
-        addressLabel.setForeground(TEXT_COLOR);
-        addressLabel.setAlignmentX(LEFT_ALIGNMENT);
+	public ConnectFrame() {
+		instance = this;
+		setTitle("X-IDE - Connect");
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setResizable(false);
+		setLocationRelativeTo(null);
+		setContentPane(createFrame());
+		pack();
+		setLocationRelativeTo(null);
+		setVisible(true);
+	}
 
-        jTextField = new PlaceholderTextField("Example: 192.168.1.50");
-        jTextField.setColumns(24);
-        jTextField.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 15));
-        jTextField.setForeground(TEXT_COLOR);
-        jTextField.setToolTipText("Enter the server's IPv4 address");
-        jTextField.setBorder(
-                new CompoundBorder(
-                        new LineBorder(new Color(202, 210, 222), 1, true),
-                        BorderFactory.createEmptyBorder(10, 12, 10, 12)));
-        jTextField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
-        jTextField.setAlignmentX(LEFT_ALIGNMENT);
+	private JPanel createFrame() {
+		JPanel background = new JPanel(new BorderLayout());
+		background.setBackground(new Color(241, 244, 249));
+		background.setBorder(BorderFactory.createEmptyBorder(24, 24, 24, 24));
 
-        message = new JLabel();
-        message.setVisible(false);
-        message.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
-        message.setForeground(new Color(190, 40, 50));
-        message.setAlignmentX(LEFT_ALIGNMENT);
+		JPanel card = new JPanel();
+		card.setBackground(Color.WHITE);
+		card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+		card.setBorder(new CompoundBorder(new LineBorder(new Color(222, 227, 235), 1, true),
+				BorderFactory.createEmptyBorder(24, 32, 28, 32)));
 
-        JButton button = new JButton("Connect");
-        button.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 14));
-        button.setForeground(Color.WHITE);
-        button.setBackground(ACCENT_COLOR);
-        button.setOpaque(true);
-        button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createEmptyBorder(12, 16, 12, 16));
-        button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
-        button.setAlignmentX(LEFT_ALIGNMENT);
-        button.addActionListener(new ConnectServer());
+		ImageIcon source = new ImageIcon(getClass().getResource("logo.png"));
+		Image logo = source.getImage().getScaledInstance(190, 107, Image.SCALE_SMOOTH);
+		JLabel logoLabel = new JLabel(new ImageIcon(logo));
+		logoLabel.setAlignmentX(CENTER_ALIGNMENT);
 
-        card.add(logoLabel);
-        card.add(Box.createVerticalStrut(12));
-        card.add(title);
-        card.add(Box.createVerticalStrut(6));
-        card.add(subtitle);
-        card.add(Box.createVerticalStrut(28));
-        card.add(addressLabel);
-        card.add(Box.createVerticalStrut(8));
-        card.add(jTextField);
-        card.add(Box.createVerticalStrut(10));
-        card.add(message);
-        card.add(Box.createVerticalStrut(12));
-        card.add(button);
+		JLabel title = new JLabel("Connect to your server");
+		title.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 22));
+		title.setForeground(TEXT_COLOR);
+		title.setAlignmentX(CENTER_ALIGNMENT);
 
-        background.add(card, BorderLayout.CENTER);
-        return background;
-    }
+		JLabel subtitle = new JLabel("Enter your X-IDE server address to get started.");
+		subtitle.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
+		subtitle.setForeground(MUTED_COLOR);
+		subtitle.setAlignmentX(CENTER_ALIGNMENT);
 
-    public static void setMessage(String message2) {
-        SwingUtilities.invokeLater(
-                () -> {
-                    message.setText(message2);
-                    message.setVisible(true);
-                    message.revalidate();
-                    message.repaint();
-                });
-    }
+		JLabel addressLabel = new JLabel("Server IP address");
+		addressLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 13));
+		addressLabel.setForeground(TEXT_COLOR);
+		addressLabel.setAlignmentX(LEFT_ALIGNMENT);
 
-    public static void showMessage() {
-        message.setVisible(true);
-    }
+		jTextField = new PlaceholderTextField("Example: 192.168.1.50");
+		jTextField.setColumns(24);
+		jTextField.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 15));
+		jTextField.setForeground(TEXT_COLOR);
+		jTextField.setToolTipText("Enter the server's IPv4 address");
+		jTextField.setBorder(new CompoundBorder(new LineBorder(new Color(202, 210, 222), 1, true),
+				BorderFactory.createEmptyBorder(10, 12, 10, 12)));
+		jTextField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+		jTextField.setAlignmentX(LEFT_ALIGNMENT);
 
-    public static String getTextField() {
-        return jTextField.getText();
-    }
+		message = new JLabel();
+		message.setVisible(false);
+		message.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+		message.setForeground(new Color(190, 40, 50));
+		message.setAlignmentX(LEFT_ALIGNMENT);
 
-    public String awaitEndpoint() throws InterruptedException, ExecutionException {
-        return endpointSelection.get();
-    }
+		JButton button = new JButton("Connect");
+		button.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 14));
+		button.setForeground(Color.WHITE);
+		button.setBackground(ACCENT_COLOR);
+		button.setOpaque(true);
+		button.setFocusPainted(false);
+		button.setBorder(BorderFactory.createEmptyBorder(12, 16, 12, 16));
+		button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
+		button.setAlignmentX(LEFT_ALIGNMENT);
+		button.addActionListener(new ConnectServer());
 
-    public static void setEndpoint(String endpoint2) {
-        instance.endpointSelection.complete(endpoint2);
-    }
+		card.add(logoLabel);
+		card.add(Box.createVerticalStrut(12));
+		card.add(title);
+		card.add(Box.createVerticalStrut(6));
+		card.add(subtitle);
+		card.add(Box.createVerticalStrut(28));
+		card.add(addressLabel);
+		card.add(Box.createVerticalStrut(8));
+		card.add(jTextField);
+		card.add(Box.createVerticalStrut(10));
+		card.add(message);
+		card.add(Box.createVerticalStrut(12));
+		card.add(button);
 
-    public static void disposeFrame() {
-        instance.dispose();
-    }
+		background.add(card, BorderLayout.CENTER);
+		return background;
+	}
 
-    public static class PlaceholderTextField extends JTextField {
-        private final String placeholder;
+	public static void setMessage(String message2) {
+		SwingUtilities.invokeLater(() -> {
+			message.setText(message2);
+			message.setVisible(true);
+			message.revalidate();
+			message.repaint();
+		});
+	}
 
-        public PlaceholderTextField(String placeholder) {
-            this.placeholder = placeholder;
-        }
+	public static void showMessage() {
+		message.setVisible(true);
+	}
 
-        @Override
-        protected void paintComponent(Graphics graphics) {
-            super.paintComponent(graphics);
-            if (getText().isEmpty()) {
-                Graphics2D copy = (Graphics2D) graphics.create();
-                copy.setColor(new Color(145, 153, 165));
-                FontMetrics metrics = copy.getFontMetrics();
-                Insets insets = getInsets();
-                int y = (getHeight() - metrics.getHeight()) / 2 + metrics.getAscent();
-                copy.drawString(placeholder, insets.left, y);
-                copy.dispose();
-            }
-        }
-    }
+	public static String getTextField() {
+		return jTextField.getText();
+	}
+
+	public String awaitEndpoint() throws InterruptedException, ExecutionException {
+		return endpointSelection.get();
+	}
+
+	public static void setEndpoint(String endpoint2) {
+		instance.endpointSelection.complete(endpoint2);
+	}
+
+	public static void disposeFrame() {
+		instance.dispose();
+	}
+
+	public static class PlaceholderTextField extends JTextField {
+
+		private final String placeholder;
+
+		public PlaceholderTextField(String placeholder) {
+			this.placeholder = placeholder;
+		}
+
+		@Override
+		protected void paintComponent(Graphics graphics) {
+			super.paintComponent(graphics);
+			if (getText().isEmpty()) {
+				Graphics2D copy = (Graphics2D) graphics.create();
+				copy.setColor(new Color(145, 153, 165));
+				FontMetrics metrics = copy.getFontMetrics();
+				Insets insets = getInsets();
+				int y = (getHeight() - metrics.getHeight()) / 2 + metrics.getAscent();
+				copy.drawString(placeholder, insets.left, y);
+				copy.dispose();
+			}
+		}
+
+	}
+
 }

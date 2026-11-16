@@ -8,123 +8,124 @@ import org.xide.models.enums.Lang;
 
 public class Problem {
 
-    private String titile;
-    private Path pdf;
-    private List<Soluction> soluctions;
-    private List<Submission> submissions;
-    private List<String> restrictions;
-    private BigO bigO;
-    private Map<Lang, Double> times;
+	private String titile;
 
-    public Problem(
-            String titile,
-            Path pdf,
-            List<String> restrictions,
-            BigO bigO,
-            Map<Lang, Double> times) {
-        this.titile = titile;
-        this.pdf = pdf;
-        this.soluctions = List.of();
-        this.submissions = List.of();
-        this.restrictions = restrictions;
-        this.bigO = bigO;
-        this.times = times;
-    }
+	private Path pdf;
 
-    public Problem() {}
+	private List<Soluction> soluctions;
 
-    public static String getRestrictionTableCreate() {
-        return """
-                CREATE TABLE IF NOT EXISTS restriction(
-                    id INT NOT NULL AUTO_INCREMENT,
-                    message VARCHAR(100) NOT NULL,
-                    id_problem INT NOT NULL,
-                    CONSTRAINT fk_problem_restriction FOREIGN KEY (id_problem) REFERENCES problem(id),
-                    PRIMARY KEY(id)
-                );
-                """;
-    }
+	private List<Submission> submissions;
 
-    public static String getProblemTableCreate() {
-        return """
-                CREATE TABLE IF NOT EXISTS problem(
-                    id INT NOT NULL AUTO_INCREMENT,
-                    titile TEXT NOT NULL,
-                    big_o %s ,
-                    pdf TEXT NOT NULL,
-                    PRIMARY KEY(id)
-                );
-                """
-                .formatted(BigO.getTableCreate());
-    }
+	private List<String> restrictions;
 
-    public static String getProblemTimesTableCreate() {
-        return """
-                CREATE TABLE IF NOT EXISTS problem_times(
-                    id_problem INT NOT NULL,
-                    lang %s ,
-                    time_ms DOUBLE NOT NULL,
-                    PRIMARY KEY(id_problem, lang),
-                    CONSTRAINT fk_pt_problem FOREIGN KEY(id_problem)
-                        REFERENCES problem(id) ON DELETE CASCADE
-                );
-                """
-                .formatted(Lang.getTableCreate());
-    }
+	private BigO bigO;
 
-    public String getTitile() {
-        return titile;
-    }
+	private Map<Lang, Double> times;
 
-    public void setTitile(String titile) {
-        this.titile = titile;
-    }
+	public Problem(String titile, Path pdf, List<String> restrictions, BigO bigO, Map<Lang, Double> times) {
+		this.titile = titile;
+		this.pdf = pdf;
+		this.soluctions = List.of();
+		this.submissions = List.of();
+		this.restrictions = restrictions;
+		this.bigO = bigO;
+		this.times = times;
+	}
 
-    public Path getPdf() {
-        return pdf;
-    }
+	public Problem() {
+	}
 
-    public void setPdf(Path pdf) {
-        this.pdf = pdf;
-    }
+	public static String getRestrictionTableCreate() {
+		return """
+				CREATE TABLE IF NOT EXISTS restriction(
+				    id INT NOT NULL AUTO_INCREMENT,
+				    message VARCHAR(100) NOT NULL,
+				    id_problem INT NOT NULL,
+				    CONSTRAINT fk_problem_restriction FOREIGN KEY (id_problem) REFERENCES problem(id),
+				    PRIMARY KEY(id)
+				);
+				""";
+	}
 
-    public List<Soluction> getSoluctions() {
-        return soluctions;
-    }
+	public static String getProblemTableCreate() {
+		return """
+				CREATE TABLE IF NOT EXISTS problem(
+				    id INT NOT NULL AUTO_INCREMENT,
+				    titile TEXT NOT NULL,
+				    big_o %s ,
+				    pdf TEXT NOT NULL,
+				    PRIMARY KEY(id)
+				);
+				""".formatted(BigO.getTableCreate());
+	}
 
-    public void setSoluctions(List<Soluction> soluctions) {
-        this.soluctions = soluctions;
-    }
+	public static String getProblemTimesTableCreate() {
+		return """
+				CREATE TABLE IF NOT EXISTS problem_times(
+				    id_problem INT NOT NULL,
+				    lang %s ,
+				    time_ms DOUBLE NOT NULL,
+				    PRIMARY KEY(id_problem, lang),
+				    CONSTRAINT fk_pt_problem FOREIGN KEY(id_problem)
+				        REFERENCES problem(id) ON DELETE CASCADE
+				);
+				""".formatted(Lang.getTableCreate());
+	}
 
-    public List<String> getRestrictions() {
-        return restrictions;
-    }
+	public String getTitile() {
+		return titile;
+	}
 
-    public void setRestrictions(List<String> restrictions) {
-        this.restrictions = restrictions;
-    }
+	public void setTitile(String titile) {
+		this.titile = titile;
+	}
 
-    public BigO getBigO() {
-        return bigO;
-    }
+	public Path getPdf() {
+		return pdf;
+	}
 
-    public void setBigO(BigO bigO) {
-        this.bigO = bigO;
-    }
+	public void setPdf(Path pdf) {
+		this.pdf = pdf;
+	}
 
-    public Map<Lang, Double> getTimes() {
-        return times;
-    }
+	public List<Soluction> getSoluctions() {
+		return soluctions;
+	}
 
-    public void setTimes(Map<Lang, Double> times) {
-        this.times = times;
-    }
+	public void setSoluctions(List<Soluction> soluctions) {
+		this.soluctions = soluctions;
+	}
 
-    public List<Submission> getSubmissions() {
-        return submissions;
-    }
+	public List<String> getRestrictions() {
+		return restrictions;
+	}
 
-    public void setSubmissions(List<Submission> submissions) {
-        this.submissions = submissions;
-    }
+	public void setRestrictions(List<String> restrictions) {
+		this.restrictions = restrictions;
+	}
+
+	public BigO getBigO() {
+		return bigO;
+	}
+
+	public void setBigO(BigO bigO) {
+		this.bigO = bigO;
+	}
+
+	public Map<Lang, Double> getTimes() {
+		return times;
+	}
+
+	public void setTimes(Map<Lang, Double> times) {
+		this.times = times;
+	}
+
+	public List<Submission> getSubmissions() {
+		return submissions;
+	}
+
+	public void setSubmissions(List<Submission> submissions) {
+		this.submissions = submissions;
+	}
+
 }

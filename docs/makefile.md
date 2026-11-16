@@ -3,6 +3,21 @@
 Run commands from the project root using `make <command>`. Running `make` without
 a command displays the help (`help`).
 
+## Web interface
+
+After `make run-server`, open the site over HTTPS:
+
+- From the server machine: `https://localhost:8443/`
+- From another device on the LAN: `https://<LAN-IP>:8443/` (the LAN IP is printed by
+  `make run-server`; `hostname -I` also shows it)
+- Pages: `/` (home) and `/students` (registered students)
+- WebSocket: `wss://<LAN-IP>:8443/ws/socket`
+
+The certificate is self-signed. Confirm the SHA-256 fingerprint printed by
+`make server-logs`, then accept the browser warning (Advanced → Proceed) or import the
+certificate into the device trust store. Keep `BIND_ADDRESS=0.0.0.0` for LAN access and
+allow port 8443 in the host/router firewall; do not forward it from the internet.
+
 ## Build and package
 
 | Command | Description |
@@ -30,7 +45,8 @@ a command displays the help (`help`).
 | Command | Description |
 |---|---|
 | `make configure` | Creates `.env` from `.env.example` if `.env` does not exist; it does not overwrite an existing file. |
-| `make run-server` | Configures the environment, builds the `app` image without cache, and starts the `app` service in the background with Docker Compose. |
+| `make run-server` | Configures the environment, builds the `app` image without cache, and starts the Compose stack in the foreground (Ctrl+C stops it). The web UI is available at `https://<server-ip>:8443/`. |
+| `make run-dev-server` | Same stack, but bind-mounts `server/src/main/resources` with the Thymeleaf cache disabled, so template and static-file edits appear on browser refresh. |
 | `make run-model` | Starts Ollama in CPU mode and downloads `qwen2.5-coder:3b` (about 2 GB on first run). Its API is available at `http://localhost:11434`. |
 | `make stop-server` | Stops and removes the Compose stack services. |
 | `make server-logs` | Follows the Compose services' logs. |

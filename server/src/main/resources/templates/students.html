@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students | X-IDE</title>
+
+    <script src="/public/vendor/tailwind.browser.js"></script>
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+
+    <link rel="stylesheet" href="/public/vendor/aos.css">
+
+    <style type="text/tailwindcss">
+        @custom-variant dark (&:where(.dark, .dark *));
+
+        .brand {
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -5px;
+        }
+
+        .typing {
+            font-family: 'JetBrains Mono', monospace;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid #dc2626;
+            width: 0;
+            animation: typing 3s steps(32) 0.5s forwards,
+                       blink .8s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 32ch; }
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+        .fade-up {
+            animation: fadeUp .8s ease-out both;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .action-button {
+            transition: all .2s ease;
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+
+    <script>
+        if (
+            localStorage.theme === 'dark' ||
+            (!('theme' in localStorage) &&
+                window.matchMedia('(prefers-color-scheme: dark)').matches)
+        ) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css">
+</head>
+
+<body class="min-h-screen bg-white text-zinc-900
+             dark:bg-zinc-950 dark:text-zinc-100
+             transition-colors duration-300">
+
+
+    <div th:replace="~{templates/fragments/menu :: menu}"></div>
+
+    <main class="mx-auto w-full max-w-5xl px-6 py-10">
+
+        <div class="flex flex-wrap items-end justify-between gap-4" data-aos="fade-up">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">
+                    Students
+                </h1>
+                <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+                    Everyone registered in X-IDE.
+                </p>
+            </div>
+            <div>
+
+            <a href="/pdf-users"
+            class="action-button inline-flex items-center justify-center gap-2
+                    rounded-lg border border-zinc-200 bg-white px-5 py-3
+                    text-sm font-semibold text-zinc-700
+                    hover:border-red-600 hover:text-red-600
+                    dark:border-zinc-800 dark:bg-zinc-900
+                    dark:text-zinc-300 dark:hover:border-red-600
+                    dark:hover:text-red-500">
+
+                <i class="fa-solid fa-file-pdf text-red-600"></i>
+
+                Download PDF
+
+                <i class="fa-solid fa-download text-xs opacity-60"></i>
+            </a>
+
+                <button type="button" onclick="openStudentModal()" class="action-button inline-flex items-center justify-center gap-2
+                        rounded-lg bg-red-600 px-5 py-3
+                        text-sm font-semibold text-white
+                        shadow-lg shadow-red-600/20
+                        hover:bg-red-700">
+
+                    <i class="fa-solid fa-user-plus"></i>
+                    Register Student
+                </button>
+                <span class="rounded-full border border-zinc-200 px-4 py-1.5
+                         text-xs font-medium text-zinc-500
+                         dark:border-zinc-800 dark:text-zinc-400"
+                    th:text="|${#lists.size(students)} ${#lists.size(students) == 1 ? 'student' : 'students'}|">
+                    0 students
+                </span>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(students)}" class="mt-10 flex flex-col items-center justify-center rounded-xl
+                    border border-dashed border-zinc-200 px-6 py-16 text-center
+                    dark:border-zinc-800" data-aos="fade-up" data-aos-delay="150">
+
+            <span class="flex h-12 w-12 items-center justify-center rounded-full
+                         bg-red-600/10 text-xl text-red-600">
+                <i class="fa-solid fa-user-graduate"></i>
+            </span>
+
+            <h2 class="mt-5 text-lg font-semibold">
+                No students yet
+            </h2>
+
+            <p class="mt-2 max-w-sm text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+                Students will show up here as soon as they create an account.
+            </p>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(students)}" class="mt-8 overflow-hidden rounded-xl border border-zinc-200
+                    dark:border-zinc-800" data-aos="fade-up" data-aos-delay="150">
+
+            <table class="w-full text-left text-sm">
+                <thead class="bg-zinc-50 text-xs uppercase tracking-wide
+                              text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
+                    <tr>
+                        <th scope="col" class="px-5 py-3 font-medium">Student</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Email</th>
+                        <th scope="col" class="px-5 py-3 font-medium text-right">ID</th>
+                        <th scope="col" class="px-5 py-3 font-medium">Password</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr th:each="student : ${students}" class="border-t border-zinc-200 transition-colors
+                               hover:bg-zinc-50
+                               dark:border-zinc-800 dark:hover:bg-zinc-900">
+
+                        <td class="px-5 py-4">
+                            <div class="flex items-center gap-3">
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center
+                                             rounded-full bg-red-600/10 text-sm font-semibold
+                                             uppercase text-red-600"
+                                    th:text="${#strings.isEmpty(student.name) ? '?' : #strings.substring(student.name, 0, 1)}">
+                                    S
+                                </span>
+                                <span class="font-medium" th:text="${student.name}">
+                                    Student
+                                </span>
+                            </div>
+                        </td>
+
+                        <td class="px-5 py-4 text-zinc-500 dark:text-zinc-400" th:text="${student.email}">
+                            student@example.com
+                        </td>
+
+                        <td class="px-5 py-4 text-right text-zinc-400 dark:text-zinc-500" th:text="${student.id}">
+                            0
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Register Student Modal -->
+        <div id="studentModal" class="fixed inset-0 z-50 hidden items-center justify-center
+            bg-black/60 p-4 backdrop-blur-sm">
+
+            <div id="studentModalContent" class="w-full max-w-md scale-95 rounded-2xl
+                border border-zinc-200 bg-white p-6 opacity-0
+                shadow-2xl transition-all duration-300
+                dark:border-zinc-800 dark:bg-zinc-950">
+
+                <!-- Header -->
+                <div class="flex items-center justify-between">
+
+                    <div>
+                        <h2 class="text-xl font-bold">
+                            Register Student
+                        </h2>
+
+                        <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                            Add a new student to X-IDE.
+                        </p>
+                    </div>
+
+                    <button type="button" onclick="closeStudentModal()" class="flex h-9 w-9 items-center justify-center
+                           rounded-lg text-zinc-500
+                           hover:bg-zinc-100 hover:text-red-600
+                           dark:hover:bg-zinc-900">
+
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+
+                </div>
+                <form action="/students/register" method="POST" class="space-y-4">
+
+                    <div>
+                        <label class="mb-2 block text-sm font-medium">
+                            Student Name
+                        </label>
+
+                        <input type="text" name="name" placeholder="Enter student name" required class="w-full rounded-lg border border-zinc-200
+                              bg-white px-4 py-3 text-sm outline-none
+                              transition focus:border-red-600
+                              dark:border-zinc-800 dark:bg-zinc-900
+                              dark:text-white">
+                    </div>
+
+                    <div>
+                        <label class="mb-2 block text-sm font-medium">
+                            Email Address
+                        </label>
+
+                        <input type="email" name="email" placeholder="student@example.com" required class="w-full rounded-lg border border-zinc-200
+                              bg-white px-4 py-3 text-sm outline-none
+                              transition focus:border-red-600
+                              dark:border-zinc-800 dark:bg-zinc-900
+                              dark:text-white">
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-3 pt-3">
+
+                        <button type="button" onclick="closeStudentModal()" class="flex-1 rounded-lg border
+                               border-zinc-200 px-4 py-3
+                               text-sm font-medium
+                               hover:bg-zinc-100
+                               dark:border-zinc-800
+                               dark:hover:bg-zinc-900">
+                            Cancel
+                        </button>
+
+                        <button type="submit" class="action-button flex-1 rounded-lg
+                               bg-red-600 px-4 py-3
+                               text-sm font-semibold text-white
+                               hover:bg-red-700">
+                            <i class="fa-solid fa-plus mr-1"></i>
+                            Register
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+    </main>
+
+    <script src="/public/vendor/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 700,
+            easing: 'ease-out-cubic',
+            once: true,
+            offset: 40
+        });
+        const studentModal = document.getElementById('studentModal');
+        const studentModalContent = document.getElementById('studentModalContent');
+
+        function openStudentModal() {
+            studentModal.classList.remove('hidden');
+            studentModal.classList.add('flex');
+
+            requestAnimationFrame(() => {
+                studentModalContent.classList.remove('scale-95', 'opacity-0');
+                studentModalContent.classList.add('scale-100', 'opacity-100');
+            });
+        }
+
+        function closeStudentModal() {
+            studentModalContent.classList.remove('scale-100', 'opacity-100');
+            studentModalContent.classList.add('scale-95', 'opacity-0');
+
+            setTimeout(() => {
+                studentModal.classList.add('hidden');
+                studentModal.classList.remove('flex');
+            }, 300);
+        }
+
+        studentModal.addEventListener('click', (event) => {
+            if (event.target === studentModal) {
+                closeStudentModal();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' &&
+                !studentModal.classList.contains('hidden')) {
+                closeStudentModal();
+            }
+        });
+    </script>
+
+</body>
+
+</html>

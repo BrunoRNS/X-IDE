@@ -15,101 +15,108 @@ import org.xide.sockets.annotations.WebSocketRouter;
 import org.xide.sockets.controllers.develop.DevelopSocketController;
 
 public class WebSocketRouterTest {
-    @Test
-    public void dispatchesRequestToControllerAndReturnsItsResponse() {
-        WebSocketRouter router = new WebSocketRouter();
-        router.register(new DevelopSocketController());
 
-        Optional<SocketMessage> response =
-                router.dispatch(SocketMessage.text("/develop/ping", "ping"));
+	@Test
+	public void dispatchesRequestToControllerAndReturnsItsResponse() {
+		WebSocketRouter router = new WebSocketRouter();
+		router.register(new DevelopSocketController());
 
-        assertEquals(Optional.of(SocketMessage.textResponse("/develop/ping", "pong")), response);
-    }
+		Optional<SocketMessage> response = router.dispatch(SocketMessage.text("/develop/ping", "ping"));
 
-    @Test
-    public void wrapsDtoResultsInTheMessagePayload() {
-        WebSocketRouter router = new WebSocketRouter();
-        router.register(new ResultController());
+		assertEquals(Optional.of(SocketMessage.textResponse("/develop/ping", "pong")), response);
+	}
 
-        Optional<SocketMessage> response =
-                router.dispatch(SocketMessage.text("/result", "request"));
+	@Test
+	public void wrapsDtoResultsInTheMessagePayload() {
+		WebSocketRouter router = new WebSocketRouter();
+		router.register(new ResultController());
 
-        JsonNode payload = SocketMessageCodec.toJsonNode(new ResultDto("ready"));
-        assertEquals(Optional.of(SocketMessage.response("/result", payload)), response);
-    }
+		Optional<SocketMessage> response = router.dispatch(SocketMessage.text("/result", "request"));
 
-    @Test
-    public void allowsRoutesWithoutAResponse() {
-        WebSocketRouter router = new WebSocketRouter();
-        router.register(new ResultController());
+		JsonNode payload = SocketMessageCodec.toJsonNode(new ResultDto("ready"));
+		assertEquals(Optional.of(SocketMessage.response("/result", payload)), response);
+	}
 
-        Optional<SocketMessage> response =
-                router.dispatch(SocketMessage.text("/no-response", "request"));
+	@Test
+	public void allowsRoutesWithoutAResponse() {
+		WebSocketRouter router = new WebSocketRouter();
+		router.register(new ResultController());
 
-        assertEquals(Optional.empty(), response);
-    }
+		Optional<SocketMessage> response = router.dispatch(SocketMessage.text("/no-response", "request"));
 
-    @Test(expected = IllegalStateException.class)
-    public void rejectsDuplicateRoutes() {
-        WebSocketRouter router = new WebSocketRouter();
-        router.register(new DevelopSocketController());
-        router.register(new DevelopSocketController());
-    }
+		assertEquals(Optional.empty(), response);
+	}
 
-    @Test
-    public void injectsPayloadParametersIntoRouteMethod() {
-        WebSocketRouter router = new WebSocketRouter();
-        router.register(new ParamsController());
+	@Test(expected = IllegalStateException.class)
+	public void rejectsDuplicateRoutes() {
+		WebSocketRouter router = new WebSocketRouter();
+		router.register(new DevelopSocketController());
+		router.register(new DevelopSocketController());
+	}
 
-        JsonNode payload = SocketMessageCodec.toJsonNode(new ParamsDto("ada", 3));
-        Optional<SocketMessage> response = router.dispatch(new SocketMessage("/params", payload));
+	@Test
+	public void injectsPayloadParametersIntoRouteMethod() {
+		WebSocketRouter router = new WebSocketRouter();
+		router.register(new ParamsController());
 
-        assertEquals(Optional.of(SocketMessage.textResponse("/params", "ada:3")), response);
-    }
+		JsonNode payload = SocketMessageCodec.toJsonNode(new ParamsDto("ada", 3));
+		Optional<SocketMessage> response = router.dispatch(new SocketMessage("/params", payload));
 
-    @Test(expected = IllegalArgumentException.class)
-    public void rejectsRequestMissingAnAnnotatedParameter() {
-        WebSocketRouter router = new WebSocketRouter();
-        router.register(new ParamsController());
+		assertEquals(Optional.of(SocketMessage.textResponse("/params", "ada:3")), response);
+	}
 
-        router.dispatch(new SocketMessage("/params", SocketMessageCodec.toJsonNode(Map.of())));
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void rejectsRequestMissingAnAnnotatedParameter() {
+		WebSocketRouter router = new WebSocketRouter();
+		router.register(new ParamsController());
 
-    @Test(expected = IllegalArgumentException.class)
-    public void rejectsRoutesWithUnresolvableParameters() {
-        WebSocketRouter router = new WebSocketRouter();
-        router.register(new UnresolvableController());
-    }
+		router.dispatch(new SocketMessage("/params", SocketMessageCodec.toJsonNode(Map.of())));
+	}
 
-    @WebSocketController
-    public static final class ResultController {
-        @WebSocketRoute("/result")
-        public ResultDto result(SocketMessage request) {
-            return new ResultDto("ready");
-        }
+	@Test(expected = IllegalArgumentException.class)
+	public void rejectsRoutesWithUnresolvableParameters() {
+		WebSocketRouter router = new WebSocketRouter();
+		router.register(new UnresolvableController());
+	}
 
-        @WebSocketRoute("/no-response")
-        public void noResponse(SocketMessage request) {}
-    }
+	@WebSocketController
+	public static final class ResultController {
 
-    @WebSocketController
-    public static final class ParamsController {
-        @WebSocketRoute("/params")
-        public String params(
-                @SocketParam("name") String name, @SocketParam("attempts") int attempts) {
-            return name + ":" + attempts;
-        }
-    }
+		@WebSocketRoute("/result")
+		public ResultDto result(SocketMessage request) {
+			return new ResultDto("ready");
+		}
 
-    @WebSocketController
-    public static final class UnresolvableController {
-        @WebSocketRoute("/unresolvable")
-        public String unresolvable(String name) {
-            return name;
-        }
-    }
+		@WebSocketRoute("/no-response")
+		public void noResponse(SocketMessage request) {
+		}
 
-    public record ResultDto(String status) {}
+	}
 
-    public record ParamsDto(String name, int attempts) {}
+	@WebSocketController
+	public static final class ParamsController {
+
+		@WebSocketRoute("/params")
+		public String params(@SocketParam("name") String name, @SocketParam("attempts") int attempts) {
+			return name + ":" + attempts;
+		}
+
+	}
+
+	@WebSocketController
+	public static final class UnresolvableController {
+
+		@WebSocketRoute("/unresolvable")
+		public String unresolvable(String name) {
+			return name;
+		}
+
+	}
+
+	public record ResultDto(String status) {
+	}
+
+	public record ParamsDto(String name, int attempts) {
+	}
+
 }
