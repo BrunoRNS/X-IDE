@@ -30,20 +30,23 @@ certificate in a persistent Compose volume. The first server start creates the d
 in MySQL. Later starts verify the supplied password against the existing account and do not
 overwrite it. `communication-test` generates a random temporary password for its test user.
 
-The WebSocket edge uses WSS with TLS 1.3 at `wss://localhost:8443/ws/socket`. The server
+The WebSocket edge uses WSS with TLS 1.3 at `wss://<server-ip>:8443/ws/socket`. The server
 creates a self-signed certificate on first start and keeps it in a persistent Compose
-volume. Its certificate covers `localhost`, `127.0.0.1`, and the configured `TLS_HOST`.
-The Compose stack binds WSS to `127.0.0.1` by default, does not publish MySQL, and
-publishes Ollama only on localhost. To allow clients on the LAN, set `TLS_HOST` in `.env`
-to the server's private IP and set `BIND_ADDRESS` to that interface's IP (or `0.0.0.0`
-to listen on all interfaces). If a certificate already exists, changing `TLS_HOST` requires
-replacing only the persistent `tls_certs` volume; do not remove the database volumes. The
-client stores a TOFU pin on first connection; no public certificate or domain is required.
-For automated clients, set `XIDE_TLS_FINGERPRINT` to the fingerprint verified by the
-instructor. Set `TLS_HOST` before the server's first start; after replacing the certificate,
-verify the new fingerprint before updating any existing pin. Do not forward WSS
-from the internet router; isolate student devices on a guest VLAN and restrict access with
-router/host firewall rules. WSS does not replace application authentication and authorization.
+volume. Its certificate covers `localhost`, `127.0.0.1`, and `TLS_HOST`. To serve students
+on the LAN, leave `TLS_HOST` unset in `.env`: `make run-server` auto-detects the machine's
+LAN IP (the source address of the default route) and generates the certificate for it, and
+the server prints the `wss://IP:8443/ws/socket` URL plus the certificate SHA-256
+fingerprint to share with students. Set `BIND_ADDRESS` to `0.0.0.0` (or the LAN IP) so the
+published port accepts LAN connections; the Compose stack does not publish MySQL and
+publishes Ollama only on localhost. When `TLS_HOST` is auto-detected, a changed LAN IP
+regenerates the persistent certificate automatically and existing student pins must be
+re-pinned after verifying the new fingerprint. If `TLS_HOST` is set explicitly, changing it
+requires replacing only the persistent `tls_certs` volume; do not remove the database
+volumes. The client stores a TOFU pin on first connection; no public certificate or domain
+is required. For automated clients, set `XIDE_TLS_FINGERPRINT` to the fingerprint verified
+by the instructor. Do not forward WSS from the internet router; isolate student devices on
+a guest VLAN and restrict access with router/host firewall rules. WSS does not replace
+application authentication and authorization.
 
 ## CMake/Maven build scopes
 

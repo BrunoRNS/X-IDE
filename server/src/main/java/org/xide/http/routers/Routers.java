@@ -1,7 +1,9 @@
 package org.xide.http.routers;
 
-import io.javalin.config.JavalinConfig;
 import org.xide.http.controllers.HelloController;
+
+import io.javalin.config.JavalinConfig;
+
 
 public class Routers {
     public static void register(JavalinConfig config) {

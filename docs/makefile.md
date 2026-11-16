@@ -79,12 +79,16 @@ java -jar client/target/client-1.0-SNAPSHOT-all.jar \
   --endpoint wss://localhost:8443/ws/socket /develop/ping --message ping
 ```
 
-The server binds to loopback by default. To allow students on the LAN, set `TLS_HOST` in
-`.env` to the server's private IP (for example `192.168.1.50`) and set `BIND_ADDRESS` to
-that interface's IP or `0.0.0.0`. The generated certificate covers that IP as well as
-`localhost` and `127.0.0.1`, so connect to `wss://192.168.1.50:8443/ws/socket`. If you
-change `TLS_HOST` after the certificate was created, replace only the persistent
-`tls_certs` volume and verify the new fingerprint; do not remove the database volumes. The MySQL service
+`TLS_HOST` is auto-detected: when the shell and `.env` do not define it, `make run-server`
+uses the source IP of the machine's default route and generates the certificate for it.
+The server prints the student URL and the certificate fingerprint on startup. Set
+`TLS_HOST` in `.env` only to pin a fixed address, and set `BIND_ADDRESS` to that
+interface's IP or `0.0.0.0` so the published port 8443 accepts LAN connections. The
+generated certificate covers that address as well as `localhost` and `127.0.0.1`, so
+students connect to `wss://<server-ip>:8443/ws/socket`. With auto-detection, a changed LAN
+IP regenerates the persistent certificate automatically; if `TLS_HOST` is set explicitly,
+changing it requires replacing only the persistent
+`tls_certs` volume. Verify the new fingerprint either way; do not remove the database volumes. The MySQL service
 is private to the Compose network; Ollama is published only on localhost. On first
 connection, TOFU stores the server certificate pin in
 `~/.xide/trusted-certificates.properties`; for non-interactive clients, configure

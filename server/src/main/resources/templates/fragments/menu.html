@@ -1,0 +1,91 @@
+<nav th:fragment="menu" data-aos="fade-down"
+     class="flex items-center justify-between gap-4
+            border-b border-zinc-200 dark:border-zinc-800
+            px-7 py-3">
+
+    <a href="/" class="flex items-center shrink-0">
+        <img src="/public/logo.png"
+             alt="X-IDE"
+             class="h-8 w-auto">
+    </a>
+
+    <div class="flex items-center justify-center gap-2">
+
+        <a href="/"
+           class="px-3 py-2 text-sm font-medium
+                  text-red-600 border-b-2 border-red-600">
+            Home
+        </a>
+
+        <a href="/classroom"
+           class="px-3 py-2 text-sm font-medium
+                  text-zinc-500 border-b-2 border-transparent
+                  hover:text-red-600 hover:border-red-600
+                  transition-all duration-200">
+            Classroom
+        </a>
+
+        <a href="/competition"
+           class="px-3 py-2 text-sm font-medium
+                  text-zinc-500 border-b-2 border-transparent
+                  hover:text-red-600 hover:border-red-600
+                  transition-all duration-200">
+            Competition
+        </a>
+
+        <a href="/students"
+           class="px-3 py-2 text-sm font-medium
+                  text-zinc-500 border-b-2 border-transparent
+                  hover:text-red-600 hover:border-red-600
+                  transition-all duration-200">
+            Students
+        </a>
+
+    </div>
+
+
+    <button id="theme-toggle"
+            type="button"
+            title="Alternar tema"
+            aria-label="Alternar tema claro/escuro"
+            class="flex h-9 w-9 shrink-0 items-center
+                   justify-center rounded-lg
+                   border border-zinc-200 dark:border-zinc-800
+                   text-zinc-600 dark:text-zinc-300
+                   hover:bg-zinc-100 dark:hover:bg-zinc-800
+                   transition-all duration-200">
+
+        <span id="theme-icon">🌙</span>
+    </button>
+
+    <script>
+        (function () {
+            const btn = document.getElementById('theme-toggle');
+            const icon = document.getElementById('theme-icon');
+
+            if (!btn || !icon) return;
+
+            const update = () => {
+                icon.textContent =
+                    document.documentElement.classList.contains('dark')
+                        ? '☀️'
+                        : '🌙';
+            };
+
+            btn.addEventListener('click', () => {
+                const isDark =
+                    document.documentElement.classList.toggle('dark');
+
+                localStorage.setItem(
+                    'theme',
+                    isDark ? 'dark' : 'light'
+                );
+
+                update();
+            });
+
+            update();
+        })();
+    </script>
+
+</nav>

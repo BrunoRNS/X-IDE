@@ -3,6 +3,7 @@
 MVN_ARGS ?=
 COMPOSE_ARGS ?=
 COMPOSE := docker compose --env-file .env -f infra/compose.yaml
+COMPOSE_DEV := $(COMPOSE) -f infra/compose.dev.yaml
 
 CLIENT_JAR := client/target/client-1.0-SNAPSHOT-all.jar
 CLIENT_ENDPOINT ?= wss://localhost:8443/ws/socket
@@ -10,9 +11,25 @@ CLIENT_ROUTE ?= /develop/ping
 CLIENT_MESSAGE ?= ping
 MODEL_NAME ?= qwen2.5-coder:3b
 
+# Auto-detected LAN IP: source address of the default route, used as TLS_HOST when
+# neither the shell environment nor .env defines one. Fallback: hostname -I.
+LAN_IP := $(shell ip -4 route get 1.1.1.1 2>/dev/null | sed -n 's/.*src \([0-9.]*\).*/\1/p' | tr -d '\r' | head -n 1)
+ifeq ($(LAN_IP),)
+LAN_IP := $(shell hostname -I 2>/dev/null | awk '{print $$1}')
+endif
+
+# Effective TLS_HOST: shell environment first, then .env, then the auto-detected
+# LAN IP. TLS_HOST_AUTO=1 lets the container entrypoint regenerate the self-signed
+# certificate when the auto-detected IP is not covered by the persistent one.
+TLS_HOST_VALUE := $(if $(TLS_HOST),$(TLS_HOST),$(strip $(shell sed -n 's/^TLS_HOST=//p' .env 2>/dev/null | tail -n 1 | tr -d '\r')))
+ifeq ($(strip $(TLS_HOST_VALUE)),)
+TLS_HOST_VALUE := $(LAN_IP)
+TLS_HOST_AUTO := 1
+endif
+
 .PHONY: all build-client build-server build-common build-integration build-all package-all
 .PHONY: test-client test-server test-common test-integration test-all
-.PHONY: run-server stop-server server-logs stack-status
+.PHONY: run-server run-dev-server stop-server server-logs stack-status
 .PHONY: run-client run-clients communication-test communication-test-windows remote-test
 .PHONY: run-model
 .PHONY: format lint
@@ -66,11 +83,18 @@ help:
 		"Runtime:" \
 		"  run-server                          Start MySQL + Java server + Nginx." \
 		"                                      Generates a persistent self-signed TLS" \
-		"                                      certificate. Binds to 127.0.0.1 by default;" \
-		"                                      set BIND_ADDRESS and TLS_HOST to the LAN IP" \
-		"                                      to allow student clients to connect." \
+		"                                      certificate. TLS_HOST is auto-detected" \
+		"                                      from the LAN IP when unset; keep" \
+		"                                      BIND_ADDRESS=0.0.0.0 so student clients" \
+		"                                      on the LAN can connect. The server prints" \
+		"                                      the student WSS URL and fingerprint." \
 		"                                      --user/--password: not yet implemented." \
 		"  stop-server | server-logs | stack-status" \
+		"  run-dev-server                      Like run-server, but bind-mounts" \
+		"                                      server/src/main/resources into the app" \
+		"                                      container with the Thymeleaf cache off:" \
+		"                                      edit templates/*.html or public/* and" \
+		"                                      just refresh the browser (no rebuild)." \
 		"  run-model                           Start Ollama and download MODEL_NAME." \
 		"                                      Default: qwen2.5-coder:3b (CPU)." \
 		"                                      Use MODEL_NAME=qwen2.5-coder:1.5b for faster inference." \
@@ -152,8 +176,30 @@ configure:
 
 
 run-server: configure
+	@if [ -n "$(TLS_HOST_AUTO)" ]; then \
+		echo "TLS_HOST not set; auto-detected LAN IP: $(LAN_IP)"; \
+	elif [ -z "$(TLS_HOST_VALUE)" ]; then \
+		echo "No LAN IP detected and no TLS_HOST set; the stack will fall back to localhost." >&2; \
+	fi
 	$(COMPOSE) build --no-cache app
-	$(COMPOSE) up  --force-recreate $(COMPOSE_ARGS) app
+	TLS_HOST='$(TLS_HOST_VALUE)' TLS_HOST_AUTO='$(TLS_HOST_AUTO)' \
+		$(COMPOSE) up --force-recreate $(COMPOSE_ARGS) app
+
+# Dev loop: same stack as run-server, but the image is built with cache and the
+# server resources directory is bind-mounted (infra/compose.dev.yaml). HTML and
+# static asset edits are picked up on browser refresh; restart is only needed
+# for Java source changes (rebuild with: make build-server && docker compose
+# --env-file .env -f infra/compose.yaml -f infra/compose.dev.yaml build app).
+run-dev-server: configure
+	@if [ -n "$(TLS_HOST_AUTO)" ]; then \
+		echo "TLS_HOST not set; auto-detected LAN IP: $(LAN_IP)"; \
+	elif [ -z "$(TLS_HOST_VALUE)" ]; then \
+		echo "No LAN IP detected and no TLS_HOST set; the stack will fall back to localhost." >&2; \
+	fi
+	$(COMPOSE) build app
+	@echo "Dev mode: server/src/main/resources is bind-mounted; edit templates/*.html or public/* and refresh the browser."
+	TLS_HOST='$(TLS_HOST_VALUE)' TLS_HOST_AUTO='$(TLS_HOST_AUTO)' \
+		$(COMPOSE_DEV) up --force-recreate $(COMPOSE_ARGS) app
 
 run-model: configure
 	$(COMPOSE) up -d --wait $(COMPOSE_ARGS) ollama
