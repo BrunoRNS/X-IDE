@@ -3,6 +3,7 @@ package org.xide.http.controllers;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,6 +14,9 @@ import org.xide.repository.UserRepo;
 import io.javalin.http.Context;
 
 public class StudentsController {
+
+	public record UserDTO(String name, String email) {
+	}
 
 	private static final Logger LOGGER = Logger.getLogger(StudentsController.class.getName());
 
@@ -28,12 +32,26 @@ public class StudentsController {
 		ctx.render("templates/students.html", Map.of("students", students));
 	}
 
-	public static void loadPdf(Context ctx){
+	public static void loadPdf(Context ctx) {
 		byte[] bytes = LoadPdfUsers.selectUsers();
 		ctx.contentType("application/pdf");
 		ctx.header("Content-Disposition", "inline; filename=users.pdf");
 		ctx.result(new ByteArrayInputStream(bytes));
 
+	}
+
+	public static void register(Context ctx) {
+		try {
+			UserDTO dto = ctx.bodyAsClass(UserDTO.class);
+			String password = dto.name() + dto.email().substring(2);
+			User savedUser = UserRepo.save(dto.email(), password, dto.name());
+
+			ctx.status(201).json(savedUser);
+		}
+		catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "Could not register user", e);
+			ctx.status(500);
+		}
 	}
 
 }

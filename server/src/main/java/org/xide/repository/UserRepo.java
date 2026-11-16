@@ -26,7 +26,7 @@ public class UserRepo {
 	}
 
 	public static List<User> findAll() throws Exception {
-		String sql = "SELECT id, name, email FROM users ORDER BY name";
+		String sql = "SELECT id, name, email, password FROM users ORDER BY id";
 		java.sql.Connection conn = Connection.connect();
 		PreparedStatement ps = conn.prepareStatement(sql);
 		try (ResultSet rs = ps.executeQuery()) {
@@ -36,10 +36,28 @@ public class UserRepo {
 				user.setId(rs.getLong("id"));
 				user.setName(rs.getString("name"));
 				user.setEmail(rs.getString("email"));
+				user.setPassword(rs.getString("password"));
 				users.add(user);
 			}
 			return users;
 		}
+	}
+
+	public static User save(String email, String password, String name) throws Exception {
+		String sql = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
+		java.sql.Connection conn = Connection.connect();
+		PreparedStatement ps = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+		ps.setString(1, name);
+		ps.setString(2, email);
+		ps.setString(3, password);
+		ps.executeUpdate();
+		long id = -1;
+		java.sql.ResultSet rs = ps.getGeneratedKeys();
+		if (rs.next()) {
+			id = rs.getLong(1);
+		}
+		System.out.println(password);
+		return new User(name, password, email, id);
 	}
 
 }

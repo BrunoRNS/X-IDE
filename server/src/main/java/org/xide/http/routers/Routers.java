@@ -14,9 +14,12 @@ public class Routers {
 		config.routes.get("/students", (cx) -> {
 			StudentsController.index(cx);
 		});
-		config.routes.get("/pdf-users", (cx)->{
+		config.routes.get("/pdf-users", (cx) -> {
 			StudentsController.loadPdf(cx);
-		})
+		});
+		config.routes.post("/students/register", (cx) -> {
+			StudentsController.register(cx);
+		});
 	}
 
 }
