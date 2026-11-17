@@ -3,7 +3,6 @@ package org.xide.http.controllers;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -50,6 +49,40 @@ public class StudentsController {
 		}
 		catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "Could not register user", e);
+			ctx.status(500);
+		}
+	}
+
+	public static void deleteUser(Context ctx) {
+		Long id = Long.valueOf(ctx.pathParam("id"));
+		try {
+			if (UserRepo.deleteById(id)) {
+				ctx.status(200);
+			}
+			else {
+				ctx.status(404);
+			}
+		}
+		catch (Exception e) {
+			ctx.status(500);
+		}
+	}
+
+	public static void updateUser(Context ctx) {
+		Long id = Long.valueOf(ctx.pathParam("id"));
+		UserDTO dto = ctx.bodyAsClass(UserDTO.class);
+		String password = dto.name() + dto.email().substring(2);
+		User user = new User(dto.name(), password, dto.email(), id);
+		try {
+			if (UserRepo.update(user)) {
+				ctx.status(200);
+			}
+			else {
+				ctx.status(404);
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
 			ctx.status(500);
 		}
 	}

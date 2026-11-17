@@ -60,4 +60,23 @@ public class UserRepo {
 		return new User(name, password, email, id);
 	}
 
+	public static boolean deleteById(Long id) throws Exception {
+		String sql = "DELETE FROM users WHERE id = ?;";
+		java.sql.Connection conn = Connection.connect();
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setLong(1, id);
+		return ps.executeUpdate() > 0;
+	}
+
+	public static boolean update(User user) throws Exception {
+		String sql = "UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?";
+		java.sql.Connection conn = Connection.connect();
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setString(1, user.getName());
+		ps.setString(2, user.getEmail());
+		ps.setString(3, user.getPassword());
+		ps.setLong(4, user.getId());
+		return ps.executeUpdate() > 0;
+	}
+
 }

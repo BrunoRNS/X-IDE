@@ -20,6 +20,14 @@ public class Routers {
 		config.routes.post("/students/register", (cx) -> {
 			StudentsController.register(cx);
 		});
+
+		config.routes.delete("/students/delete/<id>", (ctx) -> {
+			StudentsController.deleteUser(ctx);
+		});
+
+		config.routes.put("/students/update/<id>", (ctx) -> {
+			StudentsController.updateUser(ctx);
+		});
 	}
 
 }
