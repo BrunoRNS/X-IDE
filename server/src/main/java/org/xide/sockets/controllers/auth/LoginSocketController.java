@@ -27,6 +27,15 @@ public class LoginSocketController {
 
 	}
 
+	@WebSocketRoute(value = "/auth/logout", protectedRoute = true)
+	public Dto logout(Session session) {
+		if (session != null) {
+			ClientSessions.unregisterLogin(session);
+		}
+		LOGGER.info("Logout sucess");
+		return new Dto("sucess");
+	}
+
 	@WebSocketRoute("/auth/login")
 	public Dto login(Session session, @SocketParam("email") String email, @SocketParam("password") String password) {
 		try {

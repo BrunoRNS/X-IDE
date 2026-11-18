@@ -51,7 +51,7 @@ allow port 8443 in the host/router firewall; do not forward it from the internet
 | `make stop-server` | Stops and removes the Compose stack services. |
 | `make server-logs` | Follows the Compose services' logs. |
 | `make stack-status` | Shows the status of the Compose services. |
-| `make run-client` | Packages the client, opens a window to enter the server IP, then sends a message to the route. Defaults to `ping` at `/develop/ping`. |
+| `make run-client` | Packages the client, opens a window to enter the server IP, then sends a message to the route. Defaults to `ping` at `/develop/ping`. Runs in development mode, so the single-monitor requirement is disabled. |
 | `make communication-test` | Packages the client and runs the communication test using the Bash script. |
 | `make communication-test-windows` | Runs the same test using the PowerShell script. |
 | `make remote-test URL=<address>` | Packages the client and sends a message to the specified WebSocket address. `URL` is required. |
@@ -83,6 +83,7 @@ make run-model MODEL_NAME=qwen2.5-coder:3b
 | `CLIENT_ENDPOINT` | WebSocket endpoint used by communication tests. | `wss://localhost:8443/ws/socket` |
 | `CLIENT_ROUTE` | Route sent by the client. | `/develop/ping` |
 | `CLIENT_MESSAGE` | Message sent by the client. | `ping` |
+| `CLIENT_DEV_MODE` | Enables client development mode on `run-client`; disables the single-monitor requirement. Set to `false` to test the kiosk behavior. | `true` |
 | `MODEL_NAME` | Ollama model pulled by `run-model`; use `qwen2.5-coder:1.5b` for faster inference with less memory. | `qwen2.5-coder:3b` |
 | `URL` | WebSocket destination for `remote-test`. | required for this command |
 

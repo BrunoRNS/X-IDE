@@ -3,6 +3,7 @@ package org.xide.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import org.xide.ui.LoginFrame;
+import org.xide.ui.MainFrame;
 
 public class Login implements ActionListener {
 
@@ -15,6 +16,8 @@ public class Login implements ActionListener {
 		String password = LoginFrame.getPassword();
 		try {
 			org.xide.client.sockets.WebSocketClient.getInstance().sendRequest("/auth/login", new Dto(email, password));
+			LoginFrame.disposeFrame();
+			new MainFrame();
 		}
 		catch (Exception ea) {
 			ea.printStackTrace();

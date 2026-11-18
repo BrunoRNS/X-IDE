@@ -45,7 +45,11 @@ public class WebSocketClient {
 			SSLContext sslContext = SSLContext.getInstance("TLS");
 			sslContext.init(null, new TrustManager[] { new ServerCertificateTrustManager(uri.getHost(), port) }, null);
 			SslEngineConfigurator sslConfigurator = new SslEngineConfigurator(sslContext);
-			sslConfigurator.setHostVerificationEnabled(true);
+			// The trust manager authenticates the server by its pinned SHA-256
+			// fingerprint. Hostname verification would reject the connection when
+			// the certificate SAN does not contain the typed IP (for example after
+			// a DHCP address change), even if the pinned certificate is unchanged.
+			sslConfigurator.setHostVerificationEnabled(false);
 			clientManager.getProperties().put(ClientProperties.SSL_ENGINE_CONFIGURATOR, sslConfigurator);
 		}
 		session = clientManager.connectToServer(new WebSocketEndpoint(router, this::recordResponse), uri);

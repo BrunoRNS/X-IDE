@@ -9,6 +9,7 @@ CLIENT_JAR := client/target/client-1.0-SNAPSHOT-all.jar
 CLIENT_ENDPOINT ?= wss://localhost:8443/ws/socket
 CLIENT_ROUTE ?= /develop/ping
 CLIENT_MESSAGE ?= ping
+CLIENT_DEV_MODE ?= true
 MODEL_NAME ?= qwen2.5-coder:3b
 
 # Auto-detected LAN IP: source address of the default route, used as TLS_HOST when
@@ -30,7 +31,7 @@ endif
 .PHONY: all build-client build-server build-common build-integration build-all package-all
 .PHONY: test-client test-server test-common test-integration test-all
 .PHONY: run-server run-dev-server stop-server server-logs stack-status
-.PHONY: run-client run-clients communication-test communication-test-windows remote-test
+.PHONY: run-client run-clients communication-test communication-test-windows remote-test run-dev-client
 .PHONY: run-model
 .PHONY: format lint
 .PHONY: configure help exit quit
@@ -219,6 +220,10 @@ run-client:
 	java -jar $(CLIENT_JAR) "$(CLIENT_ROUTE)" \
 		--message "$(CLIENT_MESSAGE)"
 
+run-dev-client:
+	./mvnw $(MVN_ARGS) -pl client -am package
+	java -Dxide.dev.mode=$(CLIENT_DEV_MODE) -jar $(CLIENT_JAR) "$(CLIENT_ROUTE)" \
+		--message "$(CLIENT_MESSAGE)"
 communication-test:
 	./mvnw $(MVN_ARGS) -pl client -am package
 	CLIENT_ENDPOINT="$(CLIENT_ENDPOINT)" \

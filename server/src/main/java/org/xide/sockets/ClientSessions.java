@@ -30,9 +30,13 @@ public final class ClientSessions {
 		SESSIONSLOGIN.add(session);
 	}
 
+	public static void unregisterLogin(Session session) {
+		SESSIONSLOGIN.remove(session);
+	}
+
 	public static void unregister(Session session) {
 		SESSIONS.remove(session);
-		SESSIONSLOGIN.remove(session);
+		unregisterLogin(session);
 	}
 
 	public static List<Session> all() {

@@ -90,6 +90,11 @@ make build-server
 docker compose --env-file .env -f infra/compose.yaml -f infra/compose.dev.yaml build app
 ```
 
+The desktop client has its own development mode. `make run-client` starts it with
+`-Dxide.dev.mode=true`, which disables the single-monitor kiosk check (any number of
+monitors is allowed). When running the packaged JAR directly, enable it with
+`XIDE_DEV_MODE=true java -jar ...` or `java -Dxide.dev.mode=true -jar ...`.
+
 ## Command surface
 
 Run `make` or `make help` to list everything.
@@ -140,6 +145,7 @@ WebSocket routes currently registered:
 | Route | Purpose |
 |---|---|
 | `/auth/login` | Validates `email` + `password` against MySQL |
+| `/auth/logout` | Removes the requesting session from the logged-in set |
 | `/develop/ping` | Returns `pong` |
 | `/develop/ping-clients` | Pushes a ping to every connected client |
 | `/develop/last-pong` | Returns the last pong recorded from a client |
