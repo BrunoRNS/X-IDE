@@ -79,6 +79,15 @@ public class WebSocketRouterTest {
 		router.register(new UnresolvableController());
 	}
 
+	@Test
+	public void flagsRoutesMarkedAsProtected() {
+		WebSocketRouter router = new WebSocketRouter();
+		router.register(new SecureController());
+
+		assertEquals(true, router.isProtected("/secret"));
+		assertEquals(false, router.isProtected("/open"));
+	}
+
 	@WebSocketController
 	public static final class ResultController {
 
@@ -109,6 +118,21 @@ public class WebSocketRouterTest {
 		@WebSocketRoute("/unresolvable")
 		public String unresolvable(String name) {
 			return name;
+		}
+
+	}
+
+	@WebSocketController
+	public static final class SecureController {
+
+		@WebSocketRoute("/open")
+		public String open(SocketMessage request) {
+			return "ok";
+		}
+
+		@WebSocketRoute(value = "/secret", protectedRoute = true)
+		public String secret(SocketMessage request) {
+			return "ok";
 		}
 
 	}

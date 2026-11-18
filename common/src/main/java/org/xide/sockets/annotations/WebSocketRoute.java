@@ -11,4 +11,6 @@ public @interface WebSocketRoute {
 
 	String value();
 
+	boolean protectedRoute() default false;
+
 }

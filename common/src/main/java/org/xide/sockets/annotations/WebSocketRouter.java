@@ -3,6 +3,7 @@ package org.xide.sockets.annotations;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.websocket.Session;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -32,7 +33,7 @@ public class WebSocketRouter {
 			}
 			validateRoute(controller, method, route.value());
 			RouteHandler previous = routes.putIfAbsent(route.value(),
-					new RouteHandler(controller, method, argumentResolvers(method)));
+					new RouteHandler(controller, method, argumentResolvers(method), route.protectedRoute()));
 			if (previous != null) {
 				throw new IllegalStateException("Duplicate WebSocket route: " + route.value());
 			}
@@ -44,17 +45,20 @@ public class WebSocketRouter {
 	 * Void and null results produce no response.
 	 */
 	public Optional<SocketMessage> dispatch(SocketMessage request) {
+		return dispatch(request, null);
+	}
+
+	public Optional<SocketMessage> dispatch(SocketMessage request, Session session) {
 		Objects.requireNonNull(request, "request");
 		RouteHandler handler = routes.get(request.route());
 		if (handler == null) {
 			throw new IllegalArgumentException("Unknown WebSocket route: " + request.route());
 		}
-
 		try {
 			ArgumentResolver[] resolvers = handler.resolvers();
 			Object[] arguments = new Object[resolvers.length];
 			for (int i = 0; i < arguments.length; i++) {
-				arguments[i] = resolvers[i].resolve(request);
+				arguments[i] = resolvers[i].resolve(request, session);
 			}
 			Object result = handler.method().invoke(handler.controller(), arguments);
 			if (result == null) {
@@ -74,6 +78,12 @@ public class WebSocketRouter {
 		return routes.containsKey(route);
 	}
 
+	/** Reports whether the route only accepts logged in sessions. */
+	public boolean isProtected(String route) {
+		RouteHandler handler = routes.get(route);
+		return handler != null && handler.protectedRoute();
+	}
+
 	private static void validateRoute(Object controller, Method method, String path) {
 		if (path == null || !path.startsWith("/") || path.startsWith("//")) {
 			throw new IllegalArgumentException("WebSocket route must be an absolute path: " + path);
@@ -83,7 +93,8 @@ public class WebSocketRouter {
 					"Route " + path + " on " + controller.getClass().getName() + " must be public");
 		}
 		for (Parameter parameter : method.getParameters()) {
-			if (parameter.getType() == SocketMessage.class || parameter.isAnnotationPresent(SocketParam.class)) {
+			if (parameter.getType() == SocketMessage.class || parameter.getType() == Session.class
+					|| parameter.isAnnotationPresent(SocketParam.class)) {
 				continue;
 			}
 			throw new IllegalArgumentException(
@@ -98,7 +109,11 @@ public class WebSocketRouter {
 		for (int i = 0; i < parameters.length; i++) {
 			Parameter parameter = parameters[i];
 			if (parameter.getType() == SocketMessage.class) {
-				resolvers[i] = request -> request;
+				resolvers[i] = (request, session) -> request;
+				continue;
+			}
+			if (parameter.getType() == Session.class) {
+				resolvers[i] = (request, session) -> session;
 				continue;
 			}
 			resolvers[i] = new PayloadResolver(parameter.getAnnotation(SocketParam.class).value(),
@@ -110,7 +125,7 @@ public class WebSocketRouter {
 	/** Resolves a handler argument from a named field of the request payload. */
 	private record PayloadResolver(String name, JavaType type) implements ArgumentResolver {
 		@Override
-		public Object resolve(SocketMessage request) {
+		public Object resolve(SocketMessage request, Session session) {
 			JsonNode payload = request.payload();
 			JsonNode value = payload == null ? null : payload.get(name);
 			if (value == null || value.isMissingNode()) {
@@ -127,11 +142,12 @@ public class WebSocketRouter {
 
 	private interface ArgumentResolver {
 
-		Object resolve(SocketMessage request);
+		Object resolve(SocketMessage request, Session session);
 
 	}
 
-	private record RouteHandler(Object controller, Method method, ArgumentResolver[] resolvers) {
+	private record RouteHandler(Object controller, Method method, ArgumentResolver[] resolvers,
+			boolean protectedRoute) {
 	}
 
 }

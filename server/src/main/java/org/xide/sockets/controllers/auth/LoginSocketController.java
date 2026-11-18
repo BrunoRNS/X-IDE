@@ -1,5 +1,6 @@
 package org.xide.sockets.controllers.auth;
 
+import jakarta.websocket.Session;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.xide.models.User;
@@ -7,6 +8,7 @@ import org.xide.repository.UserRepo;
 import org.xide.sockets.annotations.SocketParam;
 import org.xide.sockets.annotations.WebSocketController;
 import org.xide.sockets.annotations.WebSocketRoute;
+import org.xide.sockets.ClientSessions;
 
 @WebSocketController
 public class LoginSocketController {
@@ -17,7 +19,7 @@ public class LoginSocketController {
 	}
 
 	/** Finds users for the login check; tests swap it out to skip the database. */
-	UserLookup userLookup = UserRepo::getUser;
+	UserLookup userLookup = UserRepo::getUserByEmailAndPassword;
 
 	interface UserLookup {
 
@@ -25,17 +27,16 @@ public class LoginSocketController {
 
 	}
 
-	/**
-	 * The router wraps the returned record into the response payload, so the client
-	 * receives {"status": "sucess"} on this same route.
-	 */
 	@WebSocketRoute("/auth/login")
-	public Dto login(@SocketParam("email") String email, @SocketParam("password") String password) {
+	public Dto login(Session session, @SocketParam("email") String email, @SocketParam("password") String password) {
 		try {
 			User user = userLookup.find(email, password);
 			if (user == null) {
 				LOGGER.info("Not found user, or email is invalid or password");
 				return new Dto("invalid");
+			}
+			if (session != null) {
+				ClientSessions.registerLogin(session);
 			}
 			LOGGER.info("Login sucess");
 			return new Dto("sucess");

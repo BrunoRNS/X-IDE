@@ -79,4 +79,23 @@ public class UserRepo {
 		return ps.executeUpdate() > 0;
 	}
 
+	public static User getUserByEmailAndPassword(String email, String password) throws Exception {
+		String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
+		java.sql.Connection conn = Connection.connect();
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setString(1, email);
+		ps.setString(2, password);
+		try (ResultSet rs = ps.executeQuery()) {
+			while (rs.next()) {
+				User user = new User();
+				user.setId(rs.getLong("id"));
+				user.setName(rs.getString("name"));
+				user.setEmail(rs.getString("email"));
+				user.setPassword(rs.getString("password"));
+				return user;
+			}
+		}
+		return null;
+	}
+
 }

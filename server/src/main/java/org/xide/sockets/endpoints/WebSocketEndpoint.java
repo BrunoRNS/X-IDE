@@ -45,7 +45,12 @@ public final class WebSocketEndpoint {
 				ClientSessions.recordPong(message);
 				return;
 			}
-			Optional<SocketMessage> response = activeRouter.dispatch(message);
+			if (activeRouter.isProtected(message.route()) && !ClientSessions.isLogged(session)) {
+				send(session,
+						SocketMessage.textResponse("/error", "Protected route requires login: " + message.route()));
+				return;
+			}
+			Optional<SocketMessage> response = activeRouter.dispatch(message, session);
 			response.ifPresent(result -> send(session, result));
 		}
 		catch (Exception e) {

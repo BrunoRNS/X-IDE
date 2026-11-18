@@ -15,6 +15,8 @@ public final class ClientSessions {
 
 	private static final Set<Session> SESSIONS = ConcurrentHashMap.newKeySet();
 
+	private static final Set<Session> SESSIONSLOGIN = ConcurrentHashMap.newKeySet();
+
 	private static volatile SocketMessage lastPong;
 
 	private ClientSessions() {
@@ -24,8 +26,13 @@ public final class ClientSessions {
 		SESSIONS.add(session);
 	}
 
+	public static void registerLogin(Session session) {
+		SESSIONSLOGIN.add(session);
+	}
+
 	public static void unregister(Session session) {
 		SESSIONS.remove(session);
+		SESSIONSLOGIN.remove(session);
 	}
 
 	public static List<Session> all() {
@@ -38,6 +45,10 @@ public final class ClientSessions {
 
 	public static SocketMessage lastPong() {
 		return lastPong;
+	}
+
+	public static boolean isLogged(Session session) {
+		return SESSIONSLOGIN.contains(session);
 	}
 
 }
