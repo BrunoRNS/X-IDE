@@ -1,5 +1,6 @@
 services:
   app:
+    image: xide-server:local
     build:
       context: ..
       dockerfile: infra/Dockerfile

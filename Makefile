@@ -11,6 +11,7 @@ CLIENT_ROUTE ?= /develop/ping
 CLIENT_MESSAGE ?= ping
 CLIENT_DEV_MODE ?= true
 MODEL_NAME ?= qwen2.5-coder:3b
+RUN_SERVER_BUILD ?= 1
 
 # Auto-detected LAN IP: source address of the default route, used as TLS_HOST when
 # neither the shell environment nor .env defines one. Fallback: hostname -I.
@@ -28,7 +29,7 @@ TLS_HOST_VALUE := $(LAN_IP)
 TLS_HOST_AUTO := 1
 endif
 
-.PHONY: all build-client build-server build-common build-integration build-all package-all
+.PHONY: all build-client build-server build-server-image build-common build-integration build-all package-all
 .PHONY: test-client test-server test-common test-integration test-all
 .PHONY: run-server run-dev-server stop-server server-logs stack-status
 .PHONY: run-client run-clients communication-test communication-test-windows remote-test run-dev-client
@@ -82,6 +83,7 @@ help:
 		"  lint                                Fail when a source is not formatted." \
 		"" \
 		"Runtime:" \
+		"  build-server-image                  Build the Docker image used by run-server." \
 		"  run-server                          Start MySQL + Java server + Nginx." \
 		"                                      Generates a persistent self-signed TLS" \
 		"                                      certificate. TLS_HOST is auto-detected" \
@@ -90,6 +92,7 @@ help:
 		"                                      on the LAN can connect. The server prints" \
 		"                                      the student WSS URL and fingerprint." \
 		"                                      --user/--password: not yet implemented." \
+		"                                      RUN_SERVER_BUILD=0 uses a preloaded image." \
 		"  stop-server | server-logs | stack-status" \
 		"  run-dev-server                      Like run-server, but bind-mounts" \
 		"                                      server/src/main/resources into the app" \
@@ -176,15 +179,18 @@ configure:
 	fi
 
 
+build-server-image: configure
+	$(COMPOSE) build --no-cache app
+
 run-server: configure
 	@if [ -n "$(TLS_HOST_AUTO)" ]; then \
 		echo "TLS_HOST not set; auto-detected LAN IP: $(LAN_IP)"; \
 	elif [ -z "$(TLS_HOST_VALUE)" ]; then \
 		echo "No LAN IP detected and no TLS_HOST set; the stack will fall back to localhost." >&2; \
 	fi
-	$(COMPOSE) build --no-cache app
+	@if [ "$(RUN_SERVER_BUILD)" = "1" ]; then $(COMPOSE) build --no-cache app; fi
 	TLS_HOST='$(TLS_HOST_VALUE)' TLS_HOST_AUTO='$(TLS_HOST_AUTO)' \
-		$(COMPOSE) up --force-recreate $(COMPOSE_ARGS) app
+		$(COMPOSE) up --force-recreate $(if $(filter 0,$(RUN_SERVER_BUILD)),--no-build,) $(COMPOSE_ARGS) app
 
 # Dev loop: same stack as run-server, but the image is built with cache and the
 # server resources directory is bind-mounted (infra/compose.dev.yaml). HTML and
