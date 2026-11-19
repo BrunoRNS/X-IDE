@@ -20,6 +20,8 @@ services:
         condition: service_healthy
     ports:
       - "${BIND_ADDRESS:-127.0.0.1}:${HTTPS_PORT:-8443}:8443"
+      # Plain HTTP ports used by the Class page to host folders for students.
+      - "${BIND_ADDRESS:-127.0.0.1}:${CLASSROOM_PORT_RANGE:-8083-8102}:${CLASSROOM_PORT_RANGE:-8083-8102}"
     volumes:
       - tls_certs:/etc/nginx/certs
 

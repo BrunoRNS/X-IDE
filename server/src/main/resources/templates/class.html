@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classroom | X-IDE</title>
+
+    <script src="/public/vendor/tailwind.browser.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+
+    <link rel="stylesheet" href="/public/vendor/aos.css">
+
+    <style type="text/tailwindcss">
+        @custom-variant dark (&:where(.dark, .dark *));
+
+        .action-button {
+            transition: all .2s ease;
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .dropzone {
+            transition: border-color .2s ease, background-color .2s ease, transform .2s ease;
+        }
+
+        .dropzone:hover,
+        .dropzone.is-dragging {
+            border-color: #dc2626;
+            background-color: rgba(220, 38, 38, .05);
+        }
+
+        .dropzone.is-dragging {
+            transform: scale(1.01);
+        }
+
+        .room-card {
+            animation: cardIn .3s ease-out both;
+        }
+
+        @keyframes cardIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+
+    <script>
+        if (
+            localStorage.theme === 'dark' ||
+            (!('theme' in localStorage) &&
+                window.matchMedia('(prefers-color-scheme: dark)').matches)
+        ) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css">
+</head>
+
+<body class="min-h-screen bg-white text-zinc-900
+             dark:bg-zinc-950 dark:text-zinc-100
+             transition-colors duration-300">
+
+    <div th:replace="~{templates/fragments/menu :: menu}"></div>
+
+    <main class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
+
+        <div class="flex flex-wrap items-end justify-between gap-4" data-aos="fade-up">
+            <div>
+                    <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">
+                    Classroom
+                </h1>
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+                    Host a folder with HTML pages, PDFs and assets. Students open the
+                    address shown on the room card from any device on the classroom network.
+                </p>
+            </div>
+
+            <span id="roomCount" class="rounded-full border border-zinc-200 px-4 py-1.5
+                         text-xs font-medium text-zinc-500
+                         dark:border-zinc-800 dark:text-zinc-400">
+                0 rooms
+            </span>
+        </div>
+
+        <section class="mt-8 rounded-2xl border border-zinc-200 bg-white p-6
+                        dark:border-zinc-800 dark:bg-zinc-950" data-aos="fade-up" data-aos-delay="100">
+
+            <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div class="w-full max-w-xs">
+                    <label for="roomId" class="mb-2 block text-sm font-medium">
+                        Classroom ID
+                    </label>
+                    <input id="roomId" type="number" min="1" step="1" value="1" inputmode="numeric"
+                        class="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3
+                               text-sm outline-none transition focus:border-red-600
+                               dark:border-zinc-800 dark:bg-zinc-900 dark:text-white">
+                    <p class="mt-2 text-xs leading-5 text-zinc-500 dark:text-zinc-400">
+                        Use the same ID to update a room and its hosted files.
+                    </p>
+                </div>
+
+                <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+                    <input id="folderInput" type="file" webkitdirectory directory multiple
+                        class="hidden" aria-label="Select the folder to host">
+
+                    <button id="chooseFolderBtn" type="button" class="action-button inline-flex items-center justify-center gap-2
+                            w-full rounded-lg bg-red-600 px-5 py-3 sm:w-auto
+                            text-sm font-semibold text-white
+                            hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60">
+                        <i class="fa-solid fa-folder-open" aria-hidden="true"></i>
+                        Choose folder
+                    </button>
+
+                    <button id="refreshBtn" type="button" class="action-button inline-flex items-center justify-center gap-2
+                            w-full rounded-lg border border-zinc-200 bg-white px-5 py-3 sm:w-auto
+                            text-sm font-semibold text-zinc-700
+                            hover:border-red-600 hover:text-red-600
+                            dark:border-zinc-800 dark:bg-zinc-900
+                            dark:text-zinc-300 dark:hover:border-red-600
+                            dark:hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-60">
+                        <i id="refreshIcon" class="fa-solid fa-rotate" aria-hidden="true"></i>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+
+            <div id="dropZone" role="button" tabindex="0" class="dropzone mt-6 flex w-full cursor-pointer
+                        flex-col items-center justify-center rounded-xl
+                        border border-dashed border-zinc-300 px-6 py-10 text-center
+                        dark:border-zinc-700" aria-label="Drop a folder here or click to browse">
+
+                <span class="flex h-12 w-12 items-center justify-center rounded-full
+                             bg-red-600/10 text-xl text-red-600">
+                    <i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
+                </span>
+
+                <p class="mt-4 text-sm font-semibold">
+                    Drop a folder here or click to browse
+                </p>
+
+                <p class="mt-1 max-w-md text-xs leading-5 text-zinc-500 dark:text-zinc-400">
+                    An <code class="rounded bg-zinc-100 px-1 py-0.5 font-mono text-[11px]
+                                 dark:bg-zinc-900">index.html</code>
+                    is opened automatically. PDFs and other assets are served in the same room.
+                </p>
+            </div>
+
+            <div id="uploadStatus" role="status" aria-live="polite" class="mt-4 hidden items-start gap-3
+                        rounded-lg border border-zinc-200 px-4 py-3 text-sm
+                        dark:border-zinc-800">
+                <i id="uploadStatusIcon" class="fa-solid fa-circle-info mt-0.5 text-red-600" aria-hidden="true"></i>
+                <span id="uploadStatusText" class="leading-6 text-zinc-600 dark:text-zinc-300"></span>
+            </div>
+        </section>
+
+        <section class="mt-10" data-aos="fade-up" data-aos-delay="200">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <h2 class="text-lg font-semibold">
+                    Open rooms
+                </h2>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                    Served over HTTP on the classroom network
+                </p>
+            </div>
+
+            <div id="emptyState" class="mt-5 flex flex-col items-center justify-center rounded-xl
+                        border border-dashed border-zinc-200 px-6 py-14 text-center
+                        dark:border-zinc-800">
+                <span class="flex h-12 w-12 items-center justify-center rounded-full
+                             bg-red-600/10 text-xl text-red-600">
+                    <i class="fa-solid fa-chalkboard" aria-hidden="true"></i>
+                </span>
+
+                <h3 class="mt-5 text-lg font-semibold">
+                    No rooms hosted yet
+                </h3>
+
+                <p class="mt-2 max-w-sm text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+                    Choose a folder above to start hosting it for your students.
+                </p>
+            </div>
+
+            <div id="roomsGrid" class="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3"></div>
+        </section>
+
+    </main>
+
+    <dialog id="ipDialog" aria-label="Classroom IP address"
+        class="m-auto w-[calc(100%-2rem)] max-w-5xl rounded-2xl border border-zinc-200
+               bg-white p-6 text-center text-zinc-900 shadow-2xl backdrop:bg-zinc-950/80
+               dark:border-zinc-800 dark:bg-zinc-900 dark:text-white sm:p-10">
+        <p id="expandedIp" class="break-all font-mono text-5xl font-bold leading-tight text-red-600
+                                  sm:text-7xl lg:text-8xl"></p>
+    </dialog>
+
+    <script src="/public/vendor/aos.js"></script>
+    <script src="/public/classroom.js"></script>
+</body>
+
+</html>
