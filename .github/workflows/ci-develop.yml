@@ -54,6 +54,9 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: maven
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
       - name: Build standalone client
         run: ./mvnw -B -ntp -pl client -am -DskipTests package
       - name: Create native application bundle
@@ -68,11 +71,80 @@ jobs:
           if [[ "${{ matrix.target }}" == macos-* ]]; then
             app_image=XIDE-Client.app
           fi
-          tar -czf "dist/xide-client-${{ matrix.target }}.tar.gz" -C dist "$app_image"
+          python - "$app_image" "dist/xide-client-${{ matrix.target }}.zip" <<'PY'
+          import os
+          import sys
+          import zipfile
+
+          root, archive = sys.argv[1:]
+          with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as bundle:
+              for current, _, files in os.walk(os.path.join("dist", root)):
+                  for filename in files:
+                      path = os.path.join(current, filename)
+                      bundle.write(path, os.path.relpath(path, "dist"))
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: xide-client-${{ matrix.target }}
-          path: dist/xide-client-${{ matrix.target }}.tar.gz
+          path: dist/xide-client-${{ matrix.target }}.zip
+          if-no-files-found: error
+
+  build-server-native:
+    name: server bundle · ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            target: linux-x64
+          - os: windows-latest
+            target: windows-x64
+          - os: macos-latest
+            target: macos-arm64
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Build standalone server
+        run: ./mvnw -B -ntp -pl server -am -DskipTests package
+      - name: Create native application bundle
+        run: |
+          mkdir -p dist
+          jpackage --type app-image --name XIDE-Server \
+            --input server/target \
+            --main-jar server-1.0-SNAPSHOT.jar \
+            --main-class org.xide.Main \
+            --dest dist
+          app_image=XIDE-Server
+          if [[ "${{ matrix.target }}" == macos-* ]]; then
+            app_image=XIDE-Server.app
+          fi
+          python - "$app_image" "dist/xide-server-${{ matrix.target }}.zip" <<'PY'
+          import os
+          import sys
+          import zipfile
+
+          root, archive = sys.argv[1:]
+          with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as bundle:
+              for current, _, files in os.walk(os.path.join("dist", root)):
+                  for filename in files:
+                      path = os.path.join(current, filename)
+                      bundle.write(path, os.path.relpath(path, "dist"))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: xide-server-${{ matrix.target }}
+          path: dist/xide-server-${{ matrix.target }}.zip
           if-no-files-found: error
 
   test:
