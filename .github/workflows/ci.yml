@@ -62,7 +62,11 @@ jobs:
             --main-jar client-1.0-SNAPSHOT-all.jar \
             --main-class org.xide.Main \
             --dest dist
-          tar -czf "dist/xide-client-${{ matrix.target }}.tar.gz" -C dist XIDE-Client
+          app_image=XIDE-Client
+          if [[ "${{ matrix.target }}" == macos-* ]]; then
+            app_image=XIDE-Client.app
+          fi
+          tar -czf "dist/xide-client-${{ matrix.target }}.tar.gz" -C dist "$app_image"
       - uses: actions/upload-artifact@v4
         with:
           name: xide-client-${{ matrix.target }}
