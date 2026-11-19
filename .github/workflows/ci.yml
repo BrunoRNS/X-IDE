@@ -29,6 +29,46 @@ jobs:
       - name: Check formatting (Spring Java Format)
         run: ./mvnw -B -ntp validate
 
+  build-client-native:
+    name: client bundle · ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            target: linux-x64
+          - os: windows-latest
+            target: windows-x64
+          - os: macos-latest
+            target: macos-arm64
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Build standalone client
+        run: ./mvnw -B -ntp -pl client -am -DskipTests package
+      - name: Create native application bundle
+        run: |
+          mkdir -p dist
+          jpackage --type app-image --name XIDE-Client \
+            --input client/target \
+            --main-jar client-1.0-SNAPSHOT-all.jar \
+            --main-class org.xide.Main \
+            --dest dist
+          tar -czf "dist/xide-client-${{ matrix.target }}.tar.gz" -C dist XIDE-Client
+      - uses: actions/upload-artifact@v4
+        with:
+          name: xide-client-${{ matrix.target }}
+          path: dist/xide-client-${{ matrix.target }}.tar.gz
+          if-no-files-found: error
+
   test-native:
     name: test · ${{ matrix.label }}
     runs-on: ${{ matrix.os }}

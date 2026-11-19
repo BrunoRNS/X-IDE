@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import javax.swing.JOptionPane;
 import org.xide.client.sockets.WebSocketClient;
 import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
 import org.xide.ui.ConnectFrame;
+import org.xide.ui.LoadingFrame;
 import org.xide.ui.LoginFrame;
 
 public final class Main {
@@ -17,6 +19,11 @@ public final class Main {
 	private static final String DEFAULT_MESSAGE = "";
 
 	public static void main(String[] args) throws Exception {
+		if (VirtualMachineDetector.isVirtualMachine()) {
+			System.err.println("This client is not permitted to run in a virtual machine.");
+			System.exit(1);
+		}
+
 		String endpoint = null;
 		String route = null;
 		String message = null;
@@ -63,7 +70,19 @@ public final class Main {
 		String effectiveRoute = route != null ? route : DEFAULT_ROUTE;
 		String payload = message != null ? message : DEFAULT_MESSAGE;
 
-		WebSocketClient client = WebSocketClient.getInstance(uri);
+		LoadingFrame loadingFrame = new LoadingFrame();
+		WebSocketClient client;
+		try {
+			client = WebSocketClient.getInstance(uri);
+		}
+		catch (Exception e) {
+			loadingFrame.dispose();
+			JOptionPane.showMessageDialog(null, "Could not connect to the server: " + e.getMessage(),
+					"Connection failed", JOptionPane.ERROR_MESSAGE);
+			System.exit(1);
+			return;
+		}
+		loadingFrame.dispose();
 
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			try {
