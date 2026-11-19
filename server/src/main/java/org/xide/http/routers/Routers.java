@@ -2,6 +2,7 @@ package org.xide.http.routers;
 
 import org.xide.http.controllers.HelloController;
 import org.xide.http.controllers.StudentsController;
+import org.xide.http.controllers.ClassController;
 
 import io.javalin.config.JavalinConfig;
 
@@ -14,6 +15,9 @@ public class Routers {
 		config.routes.get("/students", (cx) -> {
 			StudentsController.index(cx);
 		});
+		config.routes.get("/share", ClassController::index);
+		config.routes.post("/share/upload", ClassController::upload);
+		config.routes.post("/share/stop/<port>", ClassController::stop);
 		config.routes.get("/pdf-users", (cx) -> {
 			StudentsController.loadPdf(cx);
 		});

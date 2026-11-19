@@ -22,6 +22,8 @@ public class Main {
 		WebSocketServer server = WebSocketServer.getInstance();
 		Javalin.create(config -> {
 			Path devResources = devResourcesRoot();
+			config.http.maxRequestSize = 1024L * 1024 * 1024; // allow sharing large
+																// folders
 			config.fileRenderer(new JavalinThymeleaf(templateEngine(devResources)));
 			if (devResources == null) {
 				config.staticFiles.add(staticFiles -> {
