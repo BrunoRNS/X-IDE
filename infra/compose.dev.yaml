@@ -1,0 +1,10 @@
+# Dev overrides for `make run-dev-server`: bind-mounts server/src/main/resources
+# into the app container and points the JVM at it via XIDE_DEV_RESOURCES, so the
+# server reads templates/static files from the working tree (Thymeleaf cache is
+# disabled there) and HTML/CSS edits show up on browser refresh without a rebuild.
+services:
+  app:
+    environment:
+      XIDE_DEV_RESOURCES: /opt/xide/resources
+    volumes:
+      - ../server/src/main/resources:/opt/xide/resources:ro

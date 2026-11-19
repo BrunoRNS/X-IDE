@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>X-IDE</title>
+
+
+    <script src="/public/vendor/tailwind.browser.js"></script>
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+
+    <link rel="stylesheet" href="/public/vendor/aos.css">
+
+    <style type="text/tailwindcss">
+        @custom-variant dark (&:where(.dark, .dark *));
+
+        .brand {
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -5px;
+        }
+
+        .typing {
+            font-family: 'JetBrains Mono', monospace;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid #dc2626;
+            width: 0;
+            animation: typing 3s steps(32) 0.5s forwards,
+                       blink .8s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 32ch; }
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+        .fade-up {
+            animation: fadeUp .8s ease-out both;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .action-button {
+            transition: all .2s ease;
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+
+    <script>
+        if (
+            localStorage.theme === 'dark' ||
+            (!('theme' in localStorage) &&
+                window.matchMedia('(prefers-color-scheme: dark)').matches)
+        ) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css">
+</head>
+
+<body class="min-h-screen bg-white text-zinc-900
+             dark:bg-zinc-950 dark:text-zinc-100
+             transition-colors duration-300">
+
+
+    <div th:replace="~{templates/fragments/menu :: menu}"></div>
+
+
+    <main class="flex min-h-[80vh] flex-col items-center
+                 justify-center px-6 text-center">
+
+
+        <div class="mb-5" data-aos="fade-up">
+            <h1 class="brand text-7xl sm:text-9xl font-bold">
+                <span class="text-red-600">X</span><span class="text-zinc-900 dark:text-white">-IDE</span>
+            </h1>
+        </div>
+
+
+        <div class="h-7 max-w-full overflow-hidden">
+            <p class="typing text-xs sm:text-sm
+                      text-zinc-500 dark:text-zinc-400">
+                created by students for students
+            </p>
+        </div>
+
+
+        <p class="mt-8 max-w-md text-sm leading-7
+                  text-zinc-500 dark:text-zinc-400" data-aos="fade-up" data-aos-delay="250">
+            Your space to connect, organize classrooms
+            and create competitions.
+            Everything you need in one place.
+        </p>
+
+
+        <div class="mt-9 flex flex-wrap items-center
+                    justify-center gap-3" data-aos="fade-up" data-aos-delay="450">
+
+
+            <a href="/classroom/create" class="gap-2 rounded-lg border
+                      border-zinc-200 px-5 py-3
+                      text-sm font-medium
+                      text-zinc-700
+                      hover:border-red-600
+                      hover:text-red-600
+                      dark:border-zinc-800
+                      dark:text-zinc-300
+                      dark:hover:border-red-600
+                      dark:hover:text-red-500">
+
+                <span class="text-lg leading-none">+</span>
+                Create Class
+            </a>
+
+            <a href="/competition/create" class="action-button inline-flex items-center
+                      gap-2 rounded-lg border
+                      border-zinc-200 px-5 py-3
+                      text-sm font-medium
+                      text-zinc-700
+                      hover:border-red-600
+                      hover:text-red-600
+                      dark:border-zinc-800
+                      dark:text-zinc-300
+                      dark:hover:border-red-600
+                      dark:hover:text-red-500">
+
+                <span class="text-lg leading-none">+</span>
+                Create Competition
+            </a>
+
+        </div>
+
+        <a href="https://github.com/SEU-USUARIO/SEU-REPOSITORIO" target="_blank" rel="noopener noreferrer" class="action-button mt-8 inline-flex items-center gap-3
+          rounded-lg px-6 py-3
+          bg-zinc-900 text-white
+          hover:bg-zinc-700
+          dark:bg-white dark:text-zinc-900
+          dark:hover:bg-zinc-200
+          text-sm font-semibold
+          shadow-lg shadow-zinc-900/10
+          dark:shadow-white/5">
+
+            <i class="fa-brands fa-github text-xl"></i>
+
+            <span>Open Repository</span>
+
+            <i class="fa-solid fa-arrow-up-right-from-square text-xs opacity-60"></i>
+
+        </a>
+
+
+    </main>
+
+    <script src="/public/vendor/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 700,
+            easing: 'ease-out-cubic',
+            once: true,
+            offset: 40
+        });
+    </script>
+
+</body>
+
+</html>

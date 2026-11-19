@@ -1,5 +1,6 @@
 services:
   app:
+    image: xide-server:local
     build:
       context: ..
       dockerfile: infra/Dockerfile
@@ -7,6 +8,8 @@ services:
     environment:
       SERVER_PORT: "8081"
       TLS_HOST: ${TLS_HOST:-localhost}
+      TLS_HOST_AUTO: ${TLS_HOST_AUTO:-}
+      HTTPS_PORT: ${HTTPS_PORT:-8443}
       DB_HOST: mysql
       DB_PORT: "3306"
       DB_NAME: ${DB_NAME:?Set DB_NAME in the root .env file}

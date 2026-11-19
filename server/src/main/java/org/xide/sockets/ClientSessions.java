@@ -1,41 +1,58 @@
 package org.xide.sockets;
 
+import jakarta.websocket.Session;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import jakarta.websocket.Session;
 import org.xide.protocol.SocketMessage;
 
 /**
- * Tracks the client sessions currently connected to the WebSocket server and
- * the last pong one of them answered with, so server-side routes can push
- * messages to clients and introspect their answers.
+ * Tracks the client sessions currently connected to the WebSocket server and the last
+ * pong one of them answered with, so server-side routes can push messages to clients and
+ * introspect their answers.
  */
 public final class ClientSessions {
-    private static final Set<Session> SESSIONS = ConcurrentHashMap.newKeySet();
-    private static volatile SocketMessage lastPong;
 
-    private ClientSessions() {
-    }
+	private static final Set<Session> SESSIONS = ConcurrentHashMap.newKeySet();
 
-    public static void register(Session session) {
-        SESSIONS.add(session);
-    }
+	private static final Set<Session> SESSIONSLOGIN = ConcurrentHashMap.newKeySet();
 
-    public static void unregister(Session session) {
-        SESSIONS.remove(session);
-    }
+	private static volatile SocketMessage lastPong;
 
-    public static List<Session> all() {
-        return List.copyOf(SESSIONS);
-    }
+	private ClientSessions() {
+	}
 
-    public static void recordPong(SocketMessage message) {
-        lastPong = message;
-    }
+	public static void register(Session session) {
+		SESSIONS.add(session);
+	}
 
-    public static SocketMessage lastPong() {
-        return lastPong;
-    }
+	public static void registerLogin(Session session) {
+		SESSIONSLOGIN.add(session);
+	}
+
+	public static void unregisterLogin(Session session) {
+		SESSIONSLOGIN.remove(session);
+	}
+
+	public static void unregister(Session session) {
+		SESSIONS.remove(session);
+		unregisterLogin(session);
+	}
+
+	public static List<Session> all() {
+		return List.copyOf(SESSIONS);
+	}
+
+	public static void recordPong(SocketMessage message) {
+		lastPong = message;
+	}
+
+	public static SocketMessage lastPong() {
+		return lastPong;
+	}
+
+	public static boolean isLogged(Session session) {
+		return SESSIONSLOGIN.contains(session);
+	}
+
 }
