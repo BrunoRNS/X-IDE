@@ -33,7 +33,9 @@ TLS_HOST not set; auto-detected LAN IP: 192.168.0.42
 ## Open the website (https://\<ip\>:\<port\>)
 
 The web interface is published over **HTTPS on port 8443** by default
-(`HTTPS_PORT` in `.env`). There is no plain HTTP port exposed.
+(`HTTPS_PORT` in `.env`). Classroom file servers opened from `/classroom` are the
+exception: they use plain HTTP on the ports in `CLASSROOM_PORT_RANGE`
+(`8083-8102` by default).
 
 1. Start the stack with `make run-server` and wait for MySQL to become healthy and for
    the server to finish creating the database tables.
@@ -60,8 +62,10 @@ The web interface is published over **HTTPS on port 8443** by default
 5. Available pages:
    - `/` — home page.
    - `/students` — students registered in the database.
-   - `/classroom`, `/competition` and the "create" links are placeholders and are not
-     implemented yet (they return 404).
+   - `/classroom` — host a folder of HTML pages, PDFs and assets and see the open
+     room cards.
+   - `/competition` and the "create" links are placeholders and are not implemented
+     yet (they return 404).
 
 Useful URLs:
 
@@ -171,6 +175,7 @@ existing file. Required values:
 | `DB_PASSWORD`, `DB_ROOT_PASSWORD` | Replace the example values before starting. |
 | `BIND_ADDRESS` | Host interface for the HTTPS port. Use `0.0.0.0` for LAN access. |
 | `HTTPS_PORT` | Published HTTPS/WSS port (default `8443`). |
+| `CLASSROOM_PORT_RANGE` | Plain HTTP ports used by hosted classroom folders (default `8083-8102`). |
 | `TLS_HOST` | Optional fixed certificate address. Leave unset to auto-detect the LAN IP. |
 
 If `TLS_HOST` is set explicitly, changing it requires replacing only the persistent
@@ -207,6 +212,8 @@ java -jar client/target/client-1.0-SNAPSHOT-all.jar \
   internet router; isolate student devices on a guest VLAN and restrict access with
   router/host firewall rules. Docker-published ports can bypass UFW, so verify filtering
   at the router or Docker firewall layer.
+- Classroom folders are served over plain HTTP on the `CLASSROOM_PORT_RANGE` ports.
+  Host only material that is safe to expose on the classroom network.
 - WSS only encrypts transport; it does not replace application authentication and
   authorization.
 - This is not a sandbox for running untrusted submissions. Execute submissions only in

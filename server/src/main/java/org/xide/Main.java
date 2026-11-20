@@ -6,6 +6,8 @@ import io.javalin.http.staticfiles.Location;
 import io.javalin.rendering.template.JavalinThymeleaf;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
@@ -22,7 +24,12 @@ public class Main {
 		WebSocketServer server = WebSocketServer.getInstance();
 		Javalin.create(config -> {
 			Path devResources = devResourcesRoot();
-			config.fileRenderer(new JavalinThymeleaf(templateEngine(devResources)));
+			JavalinThymeleaf thymeleaf = new JavalinThymeleaf(templateEngine(devResources));
+			config.fileRenderer((filePath, model, ctx) -> {
+				Map<String, Object> vars = new HashMap<>(model);
+				vars.put("requestPath", ctx.path());
+				return thymeleaf.render(filePath, vars, ctx);
+			});
 			if (devResources == null) {
 				config.staticFiles.add(staticFiles -> {
 					staticFiles.hostedPath = "/public";

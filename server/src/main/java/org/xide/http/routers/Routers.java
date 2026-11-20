@@ -1,5 +1,6 @@
 package org.xide.http.routers;
 
+import org.xide.http.controllers.ClassController;
 import org.xide.http.controllers.HelloController;
 import org.xide.http.controllers.StudentsController;
 
@@ -27,6 +28,22 @@ public class Routers {
 
 		config.routes.put("/students/update/<id>", (ctx) -> {
 			StudentsController.updateUser(ctx);
+		});
+
+		config.routes.get("/classroom", (ctx) -> {
+			ClassController.page(ctx);
+		});
+
+		config.routes.get("/class", (ctx) -> {
+			ClassController.list(ctx);
+		});
+
+		config.routes.get("/class/{id}", (ctx) -> {
+			ClassController.show(ctx);
+		});
+
+		config.routes.post("/class/{id}", (ctx) -> {
+			ClassController.index(ctx);
 		});
 	}
 
