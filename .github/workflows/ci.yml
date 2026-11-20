@@ -92,6 +92,11 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
       - name: Build server image used by make run-server
         run: make build-server-image
       - name: Package server image as ZIP

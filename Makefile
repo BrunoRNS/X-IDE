@@ -29,7 +29,7 @@ TLS_HOST_VALUE := $(LAN_IP)
 TLS_HOST_AUTO := 1
 endif
 
-.PHONY: all build-client build-server build-server-image build-common build-integration build-all package-all
+.PHONY: all build-client build-server build-server-image build-common build-integration build-all package-all package-server
 .PHONY: test-client test-server test-common test-integration test-all
 .PHONY: run-server run-dev-server stop-server server-logs stack-status
 .PHONY: run-client run-clients communication-test communication-test-windows remote-test run-dev-client
@@ -149,6 +149,9 @@ build-all:
 package-all:
 	./mvnw $(MVN_ARGS) package
 
+package-server:
+	./mvnw $(MVN_ARGS) -B -ntp -U -pl server -am -DskipTests package
+
 test-client:
 	./mvnw $(MVN_ARGS) -pl client -am test
 
@@ -179,10 +182,14 @@ configure:
 	fi
 
 
-build-server-image: configure
+build-server-image: configure package-server
 	$(COMPOSE) build --no-cache app
 
 run-server: configure
+
+ifeq ($(RUN_SERVER_BUILD),1)
+run-server: package-server
+endif
 	@if [ -n "$(TLS_HOST_AUTO)" ]; then \
 		echo "TLS_HOST not set; auto-detected LAN IP: $(LAN_IP)"; \
 	elif [ -z "$(TLS_HOST_VALUE)" ]; then \
@@ -197,7 +204,7 @@ run-server: configure
 # static asset edits are picked up on browser refresh; restart is only needed
 # for Java source changes (rebuild with: make build-server && docker compose
 # --env-file .env -f infra/compose.yaml -f infra/compose.dev.yaml build app).
-run-dev-server: configure
+run-dev-server: configure package-server
 	@if [ -n "$(TLS_HOST_AUTO)" ]; then \
 		echo "TLS_HOST not set; auto-detected LAN IP: $(LAN_IP)"; \
 	elif [ -z "$(TLS_HOST_VALUE)" ]; then \

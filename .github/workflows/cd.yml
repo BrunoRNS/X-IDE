@@ -69,6 +69,13 @@ jobs:
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Package server JAR
+        run: ./mvnw -B -ntp -U -pl server -am -DskipTests package
       - uses: docker/setup-qemu-action@v3
         with:
           platforms: all
