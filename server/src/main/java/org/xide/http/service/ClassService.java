@@ -24,11 +24,14 @@ public class ClassService {
 	public static Javalin createServer(List<UploadedFile> files, List<String> paths, long id) throws IOException {
 		Path directory = uploadDirectory(id);
 		createFolder(files, paths, directory);
+		String staticDirectory = directory.toRealPath().toString();
 
 		Javalin server = Javalin.create(config -> {
 			config.staticFiles.add(staticFiles -> {
 				staticFiles.hostedPath = "/";
-				staticFiles.directory = directory.toString();
+				// Resolve filesystem aliases before Jetty's static-resource checks,
+				// such as /var -> /private/var on macOS or short names on Windows.
+				staticFiles.directory = staticDirectory;
 				staticFiles.location = Location.EXTERNAL;
 			});
 		});
