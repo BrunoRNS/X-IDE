@@ -73,7 +73,7 @@ help:
 		"" \
 		"Build scopes (see each module's src/main/java and src/test/java package-info.java):" \
 		"  build-common | build-client | build-server | build-integration | build-all" \
-		"  package-all" \
+		"  package-server | package-all" \
 		"" \
 		"JUnit scopes:" \
 		"  test-common | test-client | test-server | test-integration | test-all" \
@@ -202,7 +202,7 @@ endif
 # Dev loop: same stack as run-server, but the image is built with cache and the
 # server resources directory is bind-mounted (infra/compose.dev.yaml). HTML and
 # static asset edits are picked up on browser refresh; restart is only needed
-# for Java source changes (rebuild with: make build-server && docker compose
+# for Java source changes (rebuild with: make package-server && docker compose
 # --env-file .env -f infra/compose.yaml -f infra/compose.dev.yaml build app).
 run-dev-server: configure package-server
 	@if [ -n "$(TLS_HOST_AUTO)" ]; then \

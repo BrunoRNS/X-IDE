@@ -28,6 +28,7 @@ allow port 8443 in the host/router firewall; do not forward it from the internet
 | `make build-server` | Compiles `server` and its required modules. |
 | `make build-integration` | Compiles the client tests and dependencies without running them. |
 | `make build-all` | Compiles all project modules. |
+| `make package-server` | Packages the server and required modules into the JAR used by the Docker image. |
 | `make package-all` | Runs the Maven `package` phase for all modules. |
 
 ## Tests

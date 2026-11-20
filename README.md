@@ -90,7 +90,7 @@ Thymeleaf cache, so edits to `templates/*.html` and `public/*` show up on a brow
 refresh. Java source changes still require rebuilding:
 
 ```sh
-make build-server
+make package-server
 docker compose --env-file .env -f infra/compose.yaml -f infra/compose.dev.yaml build app
 ```
 
@@ -105,7 +105,7 @@ Run `make` or `make help` to list everything.
 
 | Area | Commands |
 |---|---|
-| Build | `build-common`, `build-client`, `build-server`, `build-integration`, `build-all`, `package-all` |
+| Build | `build-common`, `build-client`, `build-server`, `build-integration`, `build-all`, `package-server`, `package-all` |
 | Tests | `test-common`, `test-client`, `test-server`, `test-integration`, `test-all` |
 | Stack | `configure`, `run-server`, `run-dev-server`, `stop-server`, `server-logs`, `stack-status` |
 | Model | `run-model` (Ollama, default `qwen2.5-coder:3b`) |
