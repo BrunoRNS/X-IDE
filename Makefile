@@ -3,18 +3,38 @@
 MVN_ARGS ?=
 COMPOSE_ARGS ?=
 COMPOSE := docker compose --env-file .env -f infra/compose.yaml
+COMPOSE_DEV := $(COMPOSE) -f infra/compose.dev.yaml
 
 CLIENT_JAR := client/target/client-1.0-SNAPSHOT-all.jar
 CLIENT_ENDPOINT ?= wss://localhost:8443/ws/socket
 CLIENT_ROUTE ?= /develop/ping
 CLIENT_MESSAGE ?= ping
+CLIENT_DEV_MODE ?= true
 MODEL_NAME ?= qwen2.5-coder:3b
+RUN_SERVER_BUILD ?= 1
 
-.PHONY: all build-client build-server build-common build-integration build-all package-all
+# Auto-detected LAN IP: source address of the default route, used as TLS_HOST when
+# neither the shell environment nor .env defines one. Fallback: hostname -I.
+LAN_IP := $(shell ip -4 route get 1.1.1.1 2>/dev/null | sed -n 's/.*src \([0-9.]*\).*/\1/p' | tr -d '\r' | head -n 1)
+ifeq ($(LAN_IP),)
+LAN_IP := $(shell hostname -I 2>/dev/null | awk '{print $$1}')
+endif
+
+# Effective TLS_HOST: shell environment first, then .env, then the auto-detected
+# LAN IP. TLS_HOST_AUTO=1 lets the container entrypoint regenerate the self-signed
+# certificate when the auto-detected IP is not covered by the persistent one.
+TLS_HOST_VALUE := $(if $(TLS_HOST),$(TLS_HOST),$(strip $(shell sed -n 's/^TLS_HOST=//p' .env 2>/dev/null | tail -n 1 | tr -d '\r')))
+ifeq ($(strip $(TLS_HOST_VALUE)),)
+TLS_HOST_VALUE := $(LAN_IP)
+TLS_HOST_AUTO := 1
+endif
+
+.PHONY: all build-client build-server build-server-image build-common build-integration build-all package-all
 .PHONY: test-client test-server test-common test-integration test-all
-.PHONY: run-server stop-server server-logs stack-status
-.PHONY: run-client run-clients communication-test communication-test-windows remote-test
+.PHONY: run-server run-dev-server stop-server server-logs stack-status
+.PHONY: run-client run-clients communication-test communication-test-windows remote-test run-dev-client
 .PHONY: run-model
+.PHONY: format lint
 .PHONY: configure help exit quit
 
 help:
@@ -58,19 +78,32 @@ help:
 		"JUnit scopes:" \
 		"  test-common | test-client | test-server | test-integration | test-all" \
 		"" \
+		"Code style (Spring Java Format, configured in pom.xml and .springjavaformatconfig):" \
+		"  format                              Rewrite all Java sources in the style." \
+		"  lint                                Fail when a source is not formatted." \
+		"" \
 		"Runtime:" \
+		"  build-server-image                  Build the Docker image used by run-server." \
 		"  run-server                          Start MySQL + Java server + Nginx." \
 		"                                      Generates a persistent self-signed TLS" \
-		"                                      certificate. Binds to 127.0.0.1 by default;" \
-		"                                      set BIND_ADDRESS and TLS_HOST to the LAN IP" \
-		"                                      to allow student clients to connect." \
+		"                                      certificate. TLS_HOST is auto-detected" \
+		"                                      from the LAN IP when unset; keep" \
+		"                                      BIND_ADDRESS=0.0.0.0 so student clients" \
+		"                                      on the LAN can connect. The server prints" \
+		"                                      the student WSS URL and fingerprint." \
 		"                                      --user/--password: not yet implemented." \
+		"                                      RUN_SERVER_BUILD=0 uses a preloaded image." \
 		"  stop-server | server-logs | stack-status" \
+		"  run-dev-server                      Like run-server, but bind-mounts" \
+		"                                      server/src/main/resources into the app" \
+		"                                      container with the Thymeleaf cache off:" \
+		"                                      edit templates/*.html or public/* and" \
+		"                                      just refresh the browser (no rebuild)." \
 		"  run-model                           Start Ollama and download MODEL_NAME." \
 		"                                      Default: qwen2.5-coder:3b (CPU)." \
 		"                                      Use MODEL_NAME=qwen2.5-coder:1.5b for faster inference." \
-		"  run-client                          Send CLIENT_MESSAGE to CLIENT_ROUTE at" \
-		"                                      CLIENT_ENDPOINT and print the response." \
+		"  run-client                          Open the client window to enter the server IP," \
+		"                                      then send CLIENT_MESSAGE to CLIENT_ROUTE." \
 		"                                      First WSS connection verifies a server fingerprint." \
 		"                                      XIDE_TLS_FINGERPRINT supports automation." \
 		"                                      --user/--password: not yet implemented." \
@@ -89,8 +122,8 @@ help:
 		"Example local workflow:" \
 		"  run-server                          # starts the stack " \
 		"  communication-test                  # ping/pong both ways through the stack" \
-		"  run-client                          # CLIENT_MESSAGE defaults to ping -> prints pong" \
-		"  run-client CLIENT_ENDPOINT=wss://localhost:8443/ws/socket" \
+		"  run-client                          # opens the server connection window" \
+		"  run-client CLIENT_ROUTE=/develop/ping" \
 		"  stop-server" \
 		"" \
 		"Optional Maven options: MVN_ARGS='-DskipTests'" \
@@ -131,6 +164,12 @@ test-integration:
 test-all:
 	./mvnw $(MVN_ARGS) test
 
+format:
+	./mvnw $(MVN_ARGS) spring-javaformat:apply
+
+lint:
+	./mvnw $(MVN_ARGS) spring-javaformat:validate
+
 configure:
 	@if [ -e .env ]; then \
 		echo ".env already exists; leaving it unchanged."; \
@@ -140,9 +179,34 @@ configure:
 	fi
 
 
-run-server: configure
+build-server-image: configure
 	$(COMPOSE) build --no-cache app
-	$(COMPOSE) up  --force-recreate $(COMPOSE_ARGS) app
+
+run-server: configure
+	@if [ -n "$(TLS_HOST_AUTO)" ]; then \
+		echo "TLS_HOST not set; auto-detected LAN IP: $(LAN_IP)"; \
+	elif [ -z "$(TLS_HOST_VALUE)" ]; then \
+		echo "No LAN IP detected and no TLS_HOST set; the stack will fall back to localhost." >&2; \
+	fi
+	@if [ "$(RUN_SERVER_BUILD)" = "1" ]; then $(COMPOSE) build --no-cache app; fi
+	TLS_HOST='$(TLS_HOST_VALUE)' TLS_HOST_AUTO='$(TLS_HOST_AUTO)' \
+		$(COMPOSE) up --force-recreate $(if $(filter 0,$(RUN_SERVER_BUILD)),--no-build,) $(COMPOSE_ARGS) app
+
+# Dev loop: same stack as run-server, but the image is built with cache and the
+# server resources directory is bind-mounted (infra/compose.dev.yaml). HTML and
+# static asset edits are picked up on browser refresh; restart is only needed
+# for Java source changes (rebuild with: make build-server && docker compose
+# --env-file .env -f infra/compose.yaml -f infra/compose.dev.yaml build app).
+run-dev-server: configure
+	@if [ -n "$(TLS_HOST_AUTO)" ]; then \
+		echo "TLS_HOST not set; auto-detected LAN IP: $(LAN_IP)"; \
+	elif [ -z "$(TLS_HOST_VALUE)" ]; then \
+		echo "No LAN IP detected and no TLS_HOST set; the stack will fall back to localhost." >&2; \
+	fi
+	$(COMPOSE) build app
+	@echo "Dev mode: server/src/main/resources is bind-mounted; edit templates/*.html or public/* and refresh the browser."
+	TLS_HOST='$(TLS_HOST_VALUE)' TLS_HOST_AUTO='$(TLS_HOST_AUTO)' \
+		$(COMPOSE_DEV) up --force-recreate $(COMPOSE_ARGS) app
 
 run-model: configure
 	$(COMPOSE) up -d --wait $(COMPOSE_ARGS) ollama
@@ -159,9 +223,13 @@ stack-status:
 
 run-client:
 	./mvnw $(MVN_ARGS) -pl client -am package
-	java -jar $(CLIENT_JAR) "$(CLIENT_ENDPOINT)" "$(CLIENT_ROUTE)" \
+	java -jar $(CLIENT_JAR) "$(CLIENT_ROUTE)" \
 		--message "$(CLIENT_MESSAGE)"
 
+run-dev-client:
+	./mvnw $(MVN_ARGS) -pl client -am package
+	java -Dxide.dev.mode=$(CLIENT_DEV_MODE) -jar $(CLIENT_JAR) "$(CLIENT_ROUTE)" \
+		--message "$(CLIENT_MESSAGE)"
 communication-test:
 	./mvnw $(MVN_ARGS) -pl client -am package
 	CLIENT_ENDPOINT="$(CLIENT_ENDPOINT)" \
@@ -180,7 +248,7 @@ remote-test:
 	@test -n "$(URL)" || { \
 		echo "remote-test: URL is required, e.g. make remote-test URL=wss://host:8443/ws/socket"; exit 1; }
 	./mvnw $(MVN_ARGS) -pl client -am package
-	java -jar $(CLIENT_JAR) "$(URL)" "$(CLIENT_ROUTE)" \
+	java -jar $(CLIENT_JAR) --endpoint "$(URL)" "$(CLIENT_ROUTE)" \
 		--message "$(CLIENT_MESSAGE)"
 
 exit quit:

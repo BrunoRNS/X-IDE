@@ -193,10 +193,26 @@ esac
 
 if [ -z "${MVNW_USERNAME-}" ] && command -v wget >/dev/null; then
   verbose "Found wget ... using wget"
-  wget ${__MVNW_QUIET_WGET:+"$__MVNW_QUIET_WGET"} "$distributionUrl" -O "$TMP_DOWNLOAD_DIR/$distributionUrlName" || die "wget: Failed to fetch $distributionUrl"
+  download_attempt=1
+  until wget ${__MVNW_QUIET_WGET:+"$__MVNW_QUIET_WGET"} "$distributionUrl" -O "$TMP_DOWNLOAD_DIR/$distributionUrlName"; do
+    if [ "$download_attempt" -ge 3 ]; then
+      die "wget: Failed to fetch $distributionUrl after 3 attempts"
+    fi
+    verbose "Download failed; retrying in ${download_attempt}s (attempt $((download_attempt + 1))/3)"
+    sleep "$download_attempt"
+    download_attempt=$((download_attempt + 1))
+  done
 elif [ -z "${MVNW_USERNAME-}" ] && command -v curl >/dev/null; then
   verbose "Found curl ... using curl"
-  curl ${__MVNW_QUIET_CURL:+"$__MVNW_QUIET_CURL"} -f -L -o "$TMP_DOWNLOAD_DIR/$distributionUrlName" "$distributionUrl" || die "curl: Failed to fetch $distributionUrl"
+  download_attempt=1
+  until curl ${__MVNW_QUIET_CURL:+"$__MVNW_QUIET_CURL"} --retry 0 -f -L -o "$TMP_DOWNLOAD_DIR/$distributionUrlName" "$distributionUrl"; do
+    if [ "$download_attempt" -ge 3 ]; then
+      die "curl: Failed to fetch $distributionUrl after 3 attempts"
+    fi
+    verbose "Download failed; retrying in ${download_attempt}s (attempt $((download_attempt + 1))/3)"
+    sleep "$download_attempt"
+    download_attempt=$((download_attempt + 1))
+  done
 elif set_java_home; then
   verbose "Falling back to use Java to download"
   javaSource="$TMP_DOWNLOAD_DIR/Downloader.java"
