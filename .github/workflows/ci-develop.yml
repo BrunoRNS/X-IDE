@@ -18,6 +18,108 @@ permissions:
   contents: read
 
 jobs:
+  lint:
+    name: lint · spring-javaformat
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Check formatting (Spring Java Format)
+        run: ./mvnw -B -ntp -U validate
+
+  build-client-native:
+    name: client bundle · ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            target: linux-x64
+          - os: windows-latest
+            target: windows-x64
+          - os: macos-latest
+            target: macos-arm64
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Build standalone client
+        run: ./mvnw -B -ntp -U -pl client -am -DskipTests package
+      - name: Create native application bundle
+        run: |
+          mkdir -p dist
+          jpackage --type app-image --name XIDE-Client \
+            --input client/target \
+            --main-jar client-1.0-SNAPSHOT-all.jar \
+            --main-class org.xide.Main \
+            --dest dist
+          app_image=XIDE-Client
+          if [[ "${{ matrix.target }}" == macos-* ]]; then
+            app_image=XIDE-Client.app
+          fi
+          python - "$app_image" "dist/xide-client-${{ matrix.target }}.zip" <<'PY'
+          import os
+          import sys
+          import zipfile
+
+          root, archive = sys.argv[1:]
+          with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as bundle:
+              for current, _, files in os.walk(os.path.join("dist", root)):
+                  for filename in files:
+                      path = os.path.join(current, filename)
+                      bundle.write(path, os.path.relpath(path, "dist"))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: xide-client-${{ matrix.target }}
+          path: dist/xide-client-${{ matrix.target }}.zip
+          if-no-files-found: error
+
+  build-server-container:
+    name: server image · Docker
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build server image used by make run-server
+        run: make build-server-image
+      - name: Package server image as ZIP
+        run: |
+          mkdir -p dist
+          docker save xide-server:local --output dist/xide-server-image.tar
+          python3 - <<'PY'
+          import zipfile
+
+          with open("dist/README.txt", "w", encoding="utf-8") as readme:
+              readme.write(
+                  "X-IDE server Docker image\n\n"
+                  "Load the image with: docker load -i xide-server-image.tar\n"
+                  "From the X-IDE repository, start the stack with: make run-server RUN_SERVER_BUILD=0\n"
+                  "This starts the server, MySQL, and Nginx through Docker Compose.\n"
+              )
+          with zipfile.ZipFile("dist/xide-server-docker.zip", "w", zipfile.ZIP_DEFLATED) as bundle:
+              bundle.write("dist/xide-server-image.tar", "xide-server-image.tar")
+              bundle.write("dist/README.txt", "README.txt")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: xide-server-docker
+          path: dist/xide-server-docker.zip
+          if-no-files-found: error
+
   test:
     name: test · ${{ matrix.module }} · ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -37,4 +139,4 @@ jobs:
           java-version: '17'
           cache: maven
       - name: Run ${{ matrix.module }} tests
-        run: ./mvnw -B -ntp -pl ${{ matrix.module }} -am test
+        run: ./mvnw -B -ntp -U -pl ${{ matrix.module }} -am test

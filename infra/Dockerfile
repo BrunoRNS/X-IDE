@@ -12,7 +12,7 @@ COPY common/src common/src
 COPY server/pom.xml server/pom.xml
 COPY server/src server/src
 
-RUN mvn -B -f pom.xml -pl server -am -DskipTests package
+RUN mvn -B -U -f pom.xml -pl server -am -DskipTests package
 
 
 
