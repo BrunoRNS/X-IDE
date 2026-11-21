@@ -18,6 +18,34 @@ import org.xide.models.enums.SubmissionState;
 
 public class SubmissionRepository {
 
+	public static List<Problem> getProblems() throws Exception {
+		String sql = "SELECT id, titile, balao FROM problem ORDER BY id";
+		java.sql.Connection conn = Connection.connect();
+		try (PreparedStatement statement = conn.prepareStatement(sql); ResultSet result = statement.executeQuery()) {
+			List<Problem> problems = new ArrayList<>();
+			while (result.next()) {
+				Problem problem = new Problem();
+				problem.setId(result.getLong("id"));
+				problem.setTitile(result.getString("titile"));
+				problem.setBalao(result.getString("balao"));
+				problems.add(problem);
+			}
+			return problems;
+		}
+	}
+
+	public static List<User> getParticipants() throws Exception {
+		String sql = "SELECT id, name, email FROM users ORDER BY id";
+		java.sql.Connection conn = Connection.connect();
+		try (PreparedStatement statement = conn.prepareStatement(sql); ResultSet result = statement.executeQuery()) {
+			List<User> users = new ArrayList<>();
+			while (result.next()) {
+				users.add(new User(result.getString("name"), null, result.getString("email"), result.getLong("id")));
+			}
+			return users;
+		}
+	}
+
 	public static List<Submission> getSubmissionOrdemByDate() throws Exception {
 		String sql = """
 				SELECT
