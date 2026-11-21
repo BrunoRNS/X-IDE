@@ -1,7 +1,8 @@
 package org.xide.actions;
 
 import java.awt.event.*;
-import org.xide.ui.ConnectFrame;
+
+import org.xide.frame.ConnectFrame;
 
 public class ConnectServer implements ActionListener {
 

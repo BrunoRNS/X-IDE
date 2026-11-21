@@ -1,4 +1,4 @@
-package org.xide.ui;
+package org.xide.frame;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

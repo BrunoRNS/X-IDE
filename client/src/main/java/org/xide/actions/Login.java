@@ -2,7 +2,8 @@ package org.xide.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import org.xide.ui.LoginFrame;
+
+import org.xide.frame.LoginFrame;
 
 public class Login implements ActionListener {
 

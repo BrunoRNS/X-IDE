@@ -35,10 +35,14 @@ public final class ExamIntegrityMonitor {
 
 	private static final AtomicReference<ScheduledFuture<?>> PENDING_VIOLATION = new AtomicReference<>();
 
+	private static final AtomicReference<AWTEventListener> FOCUS_LISTENER = new AtomicReference<>();
+
+	private static final AtomicReference<ScheduledFuture<?>> TTY_MONITOR = new AtomicReference<>();
+
 	private ExamIntegrityMonitor() {
 	}
 
-	public static void start() {
+	public static synchronized void start() {
 		if (!STARTED.compareAndSet(false, true)) {
 			return;
 		}
@@ -46,6 +50,26 @@ public final class ExamIntegrityMonitor {
 		if (System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("linux")) {
 			monitorLinuxTty();
 		}
+	}
+
+	/** Stops monitoring so the client can return to the login screen safely. */
+	public static synchronized void stop() {
+		if (!STARTED.compareAndSet(true, false)) {
+			return;
+		}
+
+		AWTEventListener focusListener = FOCUS_LISTENER.getAndSet(null);
+		if (focusListener != null) {
+			Toolkit.getDefaultToolkit().removeAWTEventListener(focusListener);
+		}
+
+		ScheduledFuture<?> ttyMonitor = TTY_MONITOR.getAndSet(null);
+		if (ttyMonitor != null) {
+			ttyMonitor.cancel(false);
+		}
+
+		cancelPendingViolation();
+		ARMED.set(false);
 	}
 
 	private static void monitorWindowFocus() {
@@ -77,6 +101,7 @@ public final class ExamIntegrityMonitor {
 			}
 		};
 
+		FOCUS_LISTENER.set(windowFocusListener);
 		Toolkit.getDefaultToolkit()
 			.addAWTEventListener(windowFocusListener, AWTEvent.WINDOW_FOCUS_EVENT_MASK | AWTEvent.WINDOW_EVENT_MASK);
 	}
@@ -110,12 +135,12 @@ public final class ExamIntegrityMonitor {
 			System.err.println("TTY monitoring is unavailable; window focus monitoring remains active.");
 			return;
 		}
-		SCHEDULER.scheduleAtFixedRate(() -> {
+		TTY_MONITOR.set(SCHEDULER.scheduleAtFixedRate(() -> {
 			String activeTty = readActiveTty();
 			if (activeTty != null && !initialTty.equals(activeTty)) {
 				endExam("The active Linux TTY changed during the exam.");
 			}
-		}, 100, 100, TimeUnit.MILLISECONDS);
+		}, 100, 100, TimeUnit.MILLISECONDS));
 	}
 
 	private static String readActiveTty() {
