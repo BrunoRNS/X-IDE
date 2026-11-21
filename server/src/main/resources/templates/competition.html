@@ -175,7 +175,14 @@
                     <h2 id="submissionHistoryTitle" class="text-lg font-semibold">Submission history</h2>
                     <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Recent submissions received during the competition.</p>
                 </div>
-                <span id="submissionConnection" role="status" class="text-xs text-zinc-500 dark:text-zinc-400">Connecting…</span>
+                <div class="flex items-center gap-3">
+                    <button id="soundToggleButton" type="button" aria-pressed="false"
+                        class="inline-flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 hover:border-red-500 hover:text-red-600 dark:border-zinc-800 dark:text-zinc-300">
+                        <i class="fa-solid fa-volume-high" aria-hidden="true"></i>
+                        Enable sound
+                    </button>
+                    <span id="submissionConnection" role="status" class="text-xs text-zinc-500 dark:text-zinc-400">Connecting…</span>
+                </div>
             </div>
             <p id="submissionHistoryMessage" class="py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">Loading submissions…</p>
             <div id="submissionHistoryWrap" class="mt-4 hidden overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
@@ -215,7 +222,7 @@
 
 
     <script src="/public/vendor/aos.js"></script>
-    <script src="/public/competition.js" defer></script>
+    <script src="/public/competition.js?v=alerts-2" defer></script>
     <script>
         AOS.init({
             duration: 700,

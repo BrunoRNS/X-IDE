@@ -5,6 +5,7 @@
     const connection = document.getElementById('submissionConnection');
     const message = document.getElementById('submissionHistoryMessage');
     const historyWrap = document.getElementById('submissionHistoryWrap');
+    const soundToggleButton = document.getElementById('soundToggleButton');
     const historyView = document.getElementById('submissionHistoryView');
     const rankingView = document.getElementById('rankingView');
     const rankingHead = document.getElementById('rankingHead');
@@ -29,6 +30,10 @@
     let refreshTimer;
     let requestPending = false;
     let showingRanking = false;
+    let soundContext = null;
+    let soundLimiter = null;
+    let soundEnabled = false;
+    let seenSubmissionIds = null;
 
     function setConnection(text, online) {
         connection.textContent = text;
@@ -70,6 +75,7 @@
         historyWrap.classList.remove('hidden');
         history.replaceChildren(...items.map((submission, index) => {
             const row = document.createElement('tr');
+            row.dataset.submissionId = String(submission.id ?? '');
             row.className = 'bg-white text-zinc-700 dark:bg-zinc-950 dark:text-zinc-300';
             const balloonCell = document.createElement('td');
             balloonCell.className = 'whitespace-nowrap px-4 py-3';
@@ -91,9 +97,79 @@
         }));
     }
 
+    function playPlim() {
+        if (!soundEnabled || !soundContext || soundContext.state !== 'running') return;
+
+        const now = soundContext.currentTime;
+        const notes = [
+            { frequency: 880, start: 0, duration: 0.62 },
+            { frequency: 1174.66, start: 0.13, duration: 0.72 },
+            { frequency: 1760, start: 0.3, duration: 0.55 }
+        ];
+
+        for (const note of notes) {
+            const oscillator = soundContext.createOscillator();
+            const gain = soundContext.createGain();
+            const start = now + note.start;
+            const end = start + note.duration;
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(note.frequency, start);
+            gain.gain.setValueAtTime(0.0001, start);
+            gain.gain.exponentialRampToValueAtTime(0.72, start + 0.025);
+            gain.gain.setValueAtTime(0.72, start + 0.12);
+            gain.gain.exponentialRampToValueAtTime(0.0001, end);
+
+            oscillator.connect(gain);
+            gain.connect(soundLimiter || soundContext.destination);
+            oscillator.start(start);
+            oscillator.stop(end + 0.02);
+        }
+    }
+
+    async function toggleSound() {
+        if (soundEnabled) {
+            soundEnabled = false;
+            soundToggleButton.setAttribute('aria-pressed', 'false');
+            soundToggleButton.innerHTML = '<i class="fa-solid fa-volume-high" aria-hidden="true"></i> Enable sound';
+            return;
+        }
+
+        const AudioContextType = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextType) {
+            soundToggleButton.textContent = 'Sound unavailable';
+            soundToggleButton.disabled = true;
+            return;
+        }
+
+        try {
+            if (!soundContext) {
+                soundContext = new AudioContextType();
+                soundLimiter = soundContext.createDynamicsCompressor();
+                soundLimiter.threshold.setValueAtTime(-8, soundContext.currentTime);
+                soundLimiter.knee.setValueAtTime(8, soundContext.currentTime);
+                soundLimiter.ratio.setValueAtTime(12, soundContext.currentTime);
+                soundLimiter.attack.setValueAtTime(0.003, soundContext.currentTime);
+                soundLimiter.release.setValueAtTime(0.2, soundContext.currentTime);
+                soundLimiter.connect(soundContext.destination);
+            }
+            await soundContext.resume();
+            if (soundContext.state !== 'running') throw new Error('Audio is not running');
+            soundEnabled = true;
+            soundToggleButton.setAttribute('aria-pressed', 'true');
+            soundToggleButton.innerHTML = '<i class="fa-solid fa-volume-xmark" aria-hidden="true"></i> Mute alerts';
+            playPlim();
+        } catch (error) {
+            console.warn('Could not enable submission sounds:', error);
+            soundToggleButton.textContent = 'Could not enable sound';
+        }
+    }
+
+    soundToggleButton.addEventListener('click', toggleSound);
+
     function renderRanking(board) {
         if (!board || !Array.isArray(board.problems) || !Array.isArray(board.participants)
-                || !Array.isArray(board.submissions) || board.participants.length === 0) {
+            || !Array.isArray(board.submissions) || board.participants.length === 0) {
             rankingBody.replaceChildren();
             rankingHead.replaceChildren();
             rankingWrap.classList.add('hidden');
@@ -215,7 +291,14 @@
             }
             if (response.route === '/submission/all') {
                 requestPending = false;
+                const currentIds = new Set(Array.isArray(response.payload)
+                    ? response.payload.map(item => String(item.id))
+                    : []);
+                const newSubmission = seenSubmissionIds !== null
+                    && Array.from(currentIds).some(id => !seenSubmissionIds.has(id));
+                seenSubmissionIds = currentIds;
                 renderHistory(response.payload);
+                if (newSubmission) playPlim();
             } else if (response.route === '/submission/ranking') {
                 requestPending = false;
                 renderRanking(response.payload);
@@ -226,7 +309,7 @@
                 activeMessage.classList.remove('hidden');
             }
             if ((response.route === '/submission/all' || response.route === '/submission/ranking')
-                    && response.route !== (showingRanking ? '/submission/ranking' : '/submission/all')) {
+                && response.route !== (showingRanking ? '/submission/ranking' : '/submission/all')) {
                 requestCurrentView();
             }
         });
