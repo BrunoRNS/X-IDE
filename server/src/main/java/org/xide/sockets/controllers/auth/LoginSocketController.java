@@ -30,9 +30,12 @@ public class LoginSocketController {
 	@WebSocketRoute(value = "/auth/logout", protectedRoute = true)
 	public Dto logout(Session session) {
 		if (session != null) {
+			User user = ClientSessions.getUser(session);
 			ClientSessions.unregisterLogin(session);
+			LOGGER.info("Logout sucess " + user.getName());
+			return new Dto("sucess");
 		}
-		LOGGER.info("Logout sucess");
+		LOGGER.info("Logout sucess " + "not found user");
 		return new Dto("sucess");
 	}
 
@@ -45,7 +48,7 @@ public class LoginSocketController {
 				return new Dto("invalid");
 			}
 			if (session != null) {
-				ClientSessions.registerLogin(session);
+				ClientSessions.registerLogin(user, session);
 			}
 			LOGGER.info("Login sucess");
 			return new Dto("sucess");
