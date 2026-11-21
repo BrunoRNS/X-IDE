@@ -22,6 +22,7 @@ public class InitDatabase {
 		smt.execute(Soluction.getTableCreate());
 		smt.execute(Code.getTableCreate());
 		smt.execute(Submission.getTableCreate());
+		smt.execute(Submission.getTriggerInsert());
 
 		System.out.println("Tables create!");
 	}

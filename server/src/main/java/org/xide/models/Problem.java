@@ -8,6 +8,8 @@ import org.xide.models.enums.Lang;
 
 public class Problem {
 
+	private Long id;
+
 	private String titile;
 
 	private Path pdf;
@@ -15,6 +17,8 @@ public class Problem {
 	private List<Soluction> soluctions;
 
 	private List<Submission> submissions;
+
+	private String balao;
 
 	private List<String> restrictions;
 
@@ -29,6 +33,18 @@ public class Problem {
 		this.submissions = List.of();
 		this.restrictions = restrictions;
 		this.bigO = bigO;
+		this.times = times;
+	}
+
+	public Problem(String titile, Path pdf, List<String> restrictions, BigO bigO, Map<Lang, Double> times,
+			String balao) {
+		this.titile = titile;
+		this.pdf = pdf;
+		this.soluctions = List.of();
+		this.submissions = List.of();
+		this.restrictions = restrictions;
+		this.bigO = bigO;
+		this.balao = balao;
 		this.times = times;
 	}
 
@@ -52,6 +68,7 @@ public class Problem {
 				CREATE TABLE IF NOT EXISTS problem(
 				    id INT NOT NULL AUTO_INCREMENT,
 				    titile TEXT NOT NULL,
+					balao TEXT,
 				    big_o %s ,
 				    pdf TEXT NOT NULL,
 				    PRIMARY KEY(id)
@@ -74,6 +91,14 @@ public class Problem {
 
 	public String getTitile() {
 		return titile;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public void setTitile(String titile) {
@@ -126,6 +151,14 @@ public class Problem {
 
 	public void setSubmissions(List<Submission> submissions) {
 		this.submissions = submissions;
+	}
+
+	public String getBalao() {
+		return balao;
+	}
+
+	public void setBalao(String balao) {
+		this.balao = balao;
 	}
 
 }

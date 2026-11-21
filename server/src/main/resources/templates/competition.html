@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Competition | X-IDE</title>
+    <script src="/public/vendor/tailwind.browser.js"></script>
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+
+    <link rel="stylesheet" href="/public/vendor/aos.css">
+
+    <style type="text/tailwindcss">
+        @custom-variant dark (&:where(.dark, .dark *));
+
+        .brand {
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -5px;
+        }
+
+        .typing {
+            font-family: 'JetBrains Mono', monospace;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid #dc2626;
+            width: 0;
+            animation: typing 3s steps(32) 0.5s forwards,
+                       blink .8s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 32ch; }
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+        .fade-up {
+            animation: fadeUp .8s ease-out both;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .action-button {
+            transition: all .2s ease;
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+
+    <script>
+        if (
+            localStorage.theme === 'dark' ||
+            (!('theme' in localStorage) &&
+                window.matchMedia('(prefers-color-scheme: dark)').matches)
+        ) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css">
+</head>
+
+<body class="min-h-screen bg-white text-zinc-900
+             dark:bg-zinc-950 dark:text-zinc-100
+             transition-colors duration-300">
+
+    <div th:replace="~{templates/fragments/menu :: menu}"></div>
+
+
+    <main class="mx-auto w-full max-w-5xl px-6 py-10">
+
+        
+        <div class="flex flex-wrap items-center justify-between gap-4
+                border-b border-zinc-200 pb-5
+                dark:border-zinc-800">
+
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight">
+                    Competition
+                </h1>
+                <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                    Manage your programming competition.
+                </p>
+            </div>
+
+            <span th:if="${status}" class="inline-flex items-center gap-2 rounded-full
+                     border border-green-200 bg-green-50
+                     px-3 py-1.5 text-xs font-semibold text-green-700
+                     dark:border-green-900 dark:bg-green-950/40
+                     dark:text-green-400">
+
+                <span class="h-2 w-2 rounded-full bg-green-500"></span>
+                On-line
+            </span>
+
+            <span th:unless="${status}" class="inline-flex items-center gap-2 rounded-full
+                     border border-red-200 bg-red-50
+                     px-3 py-1.5 text-xs font-semibold text-red-700
+                     dark:border-red-900 dark:bg-red-950/40
+                     dark:text-red-400">
+
+                <span class="h-2 w-2 rounded-full bg-red-500"></span>
+                Off-line
+            </span>
+        </div>
+
+        
+        <div class="mt-6 flex flex-wrap items-center gap-3">
+
+            <button th:if="${!status}" type="button" class="action-button inline-flex items-center gap-2
+                       rounded-lg bg-green-600 px-4 py-2.5
+                       text-sm font-semibold text-white
+                       hover:bg-green-700">
+
+                <i class="fa-solid fa-play"></i>
+                Start competition
+            </button>
+
+            <button th:if="${status}" type="button" class="action-button inline-flex items-center gap-2
+                       rounded-lg bg-red-600 px-4 py-2.5
+                       text-sm font-semibold text-white
+                       hover:bg-red-700">
+
+                <i class="fa-solid fa-stop"></i>
+                End competition
+            </button>
+
+            <button th:if="${!status}" type="button" class="action-button inline-flex items-center gap-2
+                       rounded-lg border border-zinc-200 bg-white
+                       px-4 py-2.5 text-sm font-medium text-zinc-700
+                       hover:border-red-500 hover:text-red-600
+                       dark:border-zinc-800 dark:bg-zinc-900
+                       dark:text-zinc-300">
+                
+                    <i class="fa-solid fa-list"></i>
+                    Problems
+            </button>
+
+            <button th:if="${status}" type="button" class="action-button inline-flex items-center gap-2
+                       rounded-lg border border-zinc-200 bg-white
+                       px-4 py-2.5 text-sm font-medium text-zinc-700
+                       hover:border-amber-400 hover:text-amber-600
+                       dark:border-zinc-800 dark:bg-zinc-900
+                       dark:text-zinc-300">
+
+                <i class="fa-solid fa-trophy text-amber-500"></i>
+                Ranking
+            </button>
+
+        </div>
+
+        <section th:if="${status}" class="mt-8" aria-labelledby="submissionHistoryTitle">
+            <div class="flex flex-wrap items-end justify-between gap-3 border-b border-zinc-200 pb-3 dark:border-zinc-800">
+                <div>
+                    <h2 id="submissionHistoryTitle" class="text-lg font-semibold">Submission history</h2>
+                    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Recent submissions received during the competition.</p>
+                </div>
+                <span id="submissionConnection" role="status" class="text-xs text-zinc-500 dark:text-zinc-400">Connecting…</span>
+            </div>
+            <p id="submissionHistoryMessage" class="py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">Loading submissions…</p>
+            <div id="submissionHistoryWrap" class="mt-4 hidden overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
+                <table class="w-full min-w-[480px] text-left text-sm">
+                    <thead class="bg-zinc-50 text-xs uppercase tracking-wide text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 font-medium">Balloon</th>
+                            <th scope="col" class="px-4 py-3 font-medium">Participant</th>
+                            <th scope="col" class="px-4 py-3 font-medium">Submission</th>
+                            <th scope="col" class="px-4 py-3 font-medium">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="submissionHistory" class="divide-y divide-zinc-100 dark:divide-zinc-800" aria-live="polite"></tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+
+    <script src="/public/vendor/aos.js"></script>
+    <script src="/public/competition.js" defer></script>
+    <script>
+        AOS.init({
+            duration: 700,
+            easing: 'ease-out-cubic',
+            once: true,
+            offset: 40
+        });
+
+    </script>
+</body>
+
+</html>

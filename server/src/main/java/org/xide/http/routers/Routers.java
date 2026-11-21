@@ -1,6 +1,7 @@
 package org.xide.http.routers;
 
 import org.xide.http.controllers.ClassController;
+import org.xide.http.controllers.CompetitionController;
 import org.xide.http.controllers.HelloController;
 import org.xide.http.controllers.StudentsController;
 
@@ -44,6 +45,10 @@ public class Routers {
 
 		config.routes.post("/class/{id}", (ctx) -> {
 			ClassController.index(ctx);
+		});
+
+		config.routes.get("/competition", (ctx) -> {
+			CompetitionController.index(ctx);
 		});
 	}
 
