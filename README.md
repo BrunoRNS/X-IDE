@@ -14,6 +14,10 @@ Requirements:
 - Docker Engine with Compose v2 (or Podman Compose; override with
   `make COMPOSE="podman compose"`).
 - `make`, `bash` and `git`.
+- On Windows, `make` works from `cmd.exe`/PowerShell (the Makefile uses
+  `mvnw.cmd`) or from Git Bash/MSYS2 (it uses `./mvnw`). `make
+  communication-test` still needs `bash`; use `make
+  communication-test-windows` for the native PowerShell version.
 - OpenSSL is only needed inside the container, which installs it automatically.
 
 ```sh
@@ -94,7 +98,7 @@ make package-server
 docker compose --env-file .env -f infra/compose.yaml -f infra/compose.dev.yaml build app
 ```
 
-The desktop client has its own development mode. `make run-client` starts it with
+The desktop client has a development mode. `make run-dev-client` starts it with
 `-Dxide.dev.mode=true`, which disables the single-monitor kiosk check (any number of
 monitors is allowed). When running the packaged JAR directly, enable it with
 `XIDE_DEV_MODE=true java -jar ...` or `java -Dxide.dev.mode=true -jar ...`.

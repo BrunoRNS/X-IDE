@@ -21,6 +21,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.border.MatteBorder;
@@ -120,7 +121,12 @@ public class TabbeMenu extends JPanel {
 		page.setOpaque(true);
 		page.setBorder(BorderFactory.createEmptyBorder(24, 28, 24, 28));
 
-		tabs.addTab(title, page);
+		JScrollPane scroll = new JScrollPane(page, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		scroll.setBorder(BorderFactory.createEmptyBorder());
+		scroll.getViewport().setBackground(Color.WHITE);
+
+		tabs.addTab(title, scroll);
 		int index = tabs.getTabCount() - 1;
 
 		JLabel label = new JLabel(title, SwingConstants.CENTER);
@@ -189,7 +195,7 @@ public class TabbeMenu extends JPanel {
 					Graphics2D underline = (Graphics2D) graphics.create();
 					underline.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 					underline.setColor(ACCENT_COLOR);
-					underline.fillRoundRect(bounds.x + 14, bounds.y + bounds.height - 3, bounds.width - 28, 3, 3, 3);
+					underline.fillRoundRect(bounds.x + 20, bounds.y + bounds.height - 8, bounds.width - 40, 3, 3, 3);
 					underline.dispose();
 				}
 			}
