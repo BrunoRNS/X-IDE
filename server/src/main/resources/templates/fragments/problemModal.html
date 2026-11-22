@@ -1,0 +1,194 @@
+<div th:fragment="problemModal" id="problemModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm"
+    role="dialog" aria-modal="true" aria-labelledby="problemModalTitle">
+
+    <div
+        class="my-auto w-full max-w-5xl overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-950">
+        <div class="flex items-center justify-between border-b border-zinc-200 px-5 py-4 dark:border-zinc-800 sm:px-6">
+            <div>
+                <h2 id="problemModalTitle" class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                    Create problem
+                </h2>
+                <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                    Add a new programming challenge to the competition.
+                </p>
+            </div>
+
+            <button type="button" id="closeProblemModal" aria-label="Close modal"
+                class="rounded-lg p-2 text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200">
+                <i class="fa-solid fa-xmark text-lg" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <form id="problemForm" method="post" action="/problens/new" enctype="multipart/form-data"
+            class="max-h-[75vh] overflow-y-auto">
+
+            <div class="space-y-5 p-5 sm:p-6">
+
+                <div class="flex items-end gap-3">
+                    <div>
+                        <label for="problemTitle"
+                            class="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                            Problem title
+                        </label>
+
+                        <input type="text" id="problemTitle" name="title" required maxlength="100"
+                            placeholder="e.g. Two Sum"
+                            class="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
+                    </div>
+                    <div class="relative">
+                        <label class="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                            Color ballon
+                        </label>
+                        <button type="button" id="button-dropdown" onclick="openDropdown(this)"
+                            class="flex w-full items-center justify-between gap-2 rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5 text-sm text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800">
+                            <span id="dropdown-selected" class="flex items-center gap-2">
+                                <!-- balloon selecionado aparece aqui -->
+                                <span class="text-zinc-400 dark:text-zinc-500">Select color</span>
+                            </span>
+                            <i class="fa-solid fa-chevron-down text-xs text-zinc-400 transition-transform"
+                                id="dropdown-chevron"></i>
+                        </button>
+
+                        <div id="content-dropdown"
+                            class="absolute left-0 top-full z-10 mt-1 hidden rounded-xl border border-zinc-200 bg-white p-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <label for="problemPdf" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                        Problem statement PDF
+                    </label>
+                    <input type="file" id="problemPdf" name="pdf" accept="application/pdf,.pdf"
+                        aria-describedby="problemPdfStatus"
+                        class="block w-full cursor-pointer rounded-lg border border-zinc-200 bg-white text-sm text-zinc-600 file:mr-4 file:cursor-pointer file:border-0 file:bg-zinc-100 file:px-4 file:py-2.5 file:text-sm file:font-medium file:text-zinc-700 hover:file:bg-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:file:bg-zinc-800 dark:file:text-zinc-200">
+                    <p id="problemPdfStatus" role="status" aria-live="polite"
+                        class="text-xs text-zinc-500 dark:text-zinc-400">
+                        Choose a PDF to preview it.
+                    </p>
+                    <div id="problemPdfPreview"
+                        class="hidden min-w-0 overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800">
+                        <iframe id="problemPdfViewer" src="/public/vendor/pdfjs/web/viewer.html"
+                            title="PDF.js problem statement viewer"
+                            class="h-[60vh] min-h-80 w-full bg-white dark:bg-zinc-950"></iframe>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                        Select minimum BigO
+                    </label>
+                    <div id="bigo">
+
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                        Recommentation for IA
+                    </label>
+                    <textarea name="recommentation" rows="3" placeholder="e.g. Array list is obrigatory..."
+                        class="w-full resize-y rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5 text-sm text-zinc-900 outline-none focus:border-red-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
+                                </textarea>
+                </div>
+
+                <div id="soluctionContainer" class="space-y-4">
+
+                    <span class="example-title text-sm font-semibold pb-4 text-zinc-700 dark:text-zinc-300">
+                        Code examples
+                    </span>
+
+                    <div id="soluction-group" class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+
+                    </div>
+
+                    <button type="button" onclick="addLangSoluction(false)"
+                        class="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        Add Soluction
+                    </button>
+
+                </div>
+
+                <div id="examplesContainer" class="space-y-4">
+
+                    <div class="example-group rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
+
+                        <div class="mb-3 flex items-center justify-between">
+                            <span class="example-title text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                                Example 1
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                                    Input description
+                                </label>
+
+                                <textarea name="inputDescription[]" rows="3" placeholder="Describe the input format..."
+                                    class="w-full resize-y rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5 text-sm text-zinc-900 outline-none focus:border-red-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                                    Output description
+                                </label>
+
+                                <textarea name="outputDescription[]" rows="3"
+                                    placeholder="Describe the expected output..."
+                                    class="w-full resize-y rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5 text-sm text-zinc-900 outline-none focus:border-red-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"></textarea>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="space-y-3">
+                    <button type="button"
+                        class="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700"
+                        onclick="createNewExample(false)">
+                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                        Add example
+                    </button>
+                </div>
+                <div class="space-y-3">
+                    <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                        Language limits
+                    </label>
+                    <div id="langLimitsContainer" class="space-y-3">
+
+                    </div>
+                    <button type="button" onclick="addLangLimit()"
+                        class="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        Add language
+                    </button>
+                </div>
+
+
+            </div>
+
+            <!-- Footer -->
+            <div
+                class="flex flex-col-reverse gap-3 border-t border-zinc-200 bg-zinc-50 px-5 py-4 dark:border-zinc-800 dark:bg-zinc-900/50 sm:flex-row sm:justify-end sm:px-6">
+
+                <button type="button" id="cancelProblemModal"
+                    class="rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800">
+                    Cancel
+                </button>
+
+                <button type="submit"
+                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700">
+                    <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                    Create problem
+                </button>
+
+            </div>
+
+        </form>
+    </div>
+</div>

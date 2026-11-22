@@ -1,0 +1,98 @@
+<div th:fragment="header" class="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-200 pb-5 dark:border-zinc-800">
+    <div>
+        <h1 class="text-2xl font-bold tracking-tight">Competition</h1>
+        <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Manage your programming competition.</p>
+    </div>
+
+    <span th:if="${status}" class="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-semibold text-green-700 dark:border-green-900 dark:bg-green-950/40 dark:text-green-400">
+        <span class="h-2 w-2 rounded-full bg-green-500"></span>
+        On-line
+    </span>
+
+    <span th:unless="${status}" class="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-400">
+        <span class="h-2 w-2 rounded-full bg-red-500"></span>
+        Off-line
+    </span>
+</div>
+
+<div th:fragment="actions" class="mt-6 flex flex-wrap items-center gap-3">
+    <button th:if="${!status}" 
+        type="button" 
+        class="action-button inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-700"
+        onclick="openModalStartCompetition()"
+    >
+        <i class="fa-solid fa-play" aria-hidden="true"></i>
+        Start competition
+    </button>
+
+    <button th:if="${status}" type="button" class="action-button inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700">
+        <i class="fa-solid fa-stop" aria-hidden="true"></i>
+        End competition
+    </button>
+
+    <button th:if="${status}" id="rankingToggleButton" type="button" aria-pressed="false" class="action-button inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 hover:border-amber-400 hover:text-amber-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
+        <i class="fa-solid fa-trophy text-amber-500" aria-hidden="true"></i>
+        Ranking
+    </button>
+
+    <button th:if="${!status}" type="button" class="action-button inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 hover:border-red-500 hover:text-red-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
+        <i class="fa-solid fa-list" aria-hidden="true"></i>
+        Problems
+    </button>
+</div>
+
+<section th:fragment="submissionHistory" th:if="${status}" id="submissionHistoryView" class="mt-8" aria-labelledby="submissionHistoryTitle">
+    <div class="flex flex-wrap items-end justify-between gap-3 border-b border-zinc-200 pb-3 dark:border-zinc-800">
+        <div>
+            <h2 id="submissionHistoryTitle" class="text-lg font-semibold">Submission history</h2>
+            <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Recent submissions received during the competition.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <button id="soundToggleButton" type="button" aria-pressed="false" class="inline-flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 hover:border-red-500 hover:text-red-600 dark:border-zinc-800 dark:text-zinc-300">
+                <i class="fa-solid fa-volume-high" aria-hidden="true"></i>
+                Enable sound
+            </button>
+            <span id="submissionConnection" role="status" class="text-xs text-zinc-500 dark:text-zinc-400">Connecting…</span>
+        </div>
+    </div>
+    <p id="submissionHistoryMessage" class="py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">Loading submissions…</p>
+    <div id="submissionHistoryWrap" class="mt-4 hidden overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
+        <table class="w-full min-w-[480px] text-left text-sm">
+            <thead class="bg-zinc-50 text-xs uppercase tracking-wide text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
+                <tr>
+                    <th scope="col" class="px-4 py-3 font-medium">Balloon</th>
+                    <th scope="col" class="px-4 py-3 font-medium">Participant</th>
+                    <th scope="col" class="px-4 py-3 font-medium">Submission</th>
+                    <th scope="col" class="px-4 py-3 font-medium">Status</th>
+                </tr>
+            </thead>
+            <tbody id="submissionHistory" class="divide-y divide-zinc-100 dark:divide-zinc-800" aria-live="polite"></tbody>
+        </table>
+    </div>
+</section>
+
+<section th:fragment="ranking" th:if="${status}" id="rankingView" class="mt-8 hidden" aria-labelledby="rankingTitle">
+    <div class="flex flex-wrap items-end justify-between gap-3 border-b border-zinc-200 pb-3 dark:border-zinc-800">
+        <div>
+            <h2 id="rankingTitle" class="text-lg font-semibold">Competition ranking</h2>
+            <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Ordered by solved balloons, then time.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span id="rankingConnection" role="status" class="text-xs text-zinc-500 dark:text-zinc-400">Connecting…</span>
+            <button id="rankingFullscreenButton" type="button" class="inline-flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 hover:border-amber-500 hover:text-amber-600 dark:border-zinc-800 dark:text-zinc-300">
+                <i class="fa-solid fa-expand" aria-hidden="true"></i>
+                Full screen
+            </button>
+        </div>
+    </div>
+    <p id="rankingMessage" class="py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">Loading ranking…</p>
+    <div id="rankingWrap" class="mt-4 hidden overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
+        <table class="w-full min-w-[560px] text-left text-sm">
+            <colgroup id="rankingColumns"></colgroup>
+            <thead class="bg-zinc-50 text-xs uppercase tracking-wide text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
+                <tr id="rankingHead"></tr>
+            </thead>
+            <tbody id="rankingBody" class="divide-y divide-zinc-100 dark:divide-zinc-800"></tbody>
+        </table>
+    </div>
+</section>

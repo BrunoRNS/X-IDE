@@ -9,9 +9,15 @@ public class CompetitionController {
 
 	private static final Logger LOGGER = Logger.getLogger(CompetitionController.class.getName());
 
+	private static boolean state;
+
 	public static void index(Context ctx) {
-		Map<String, Object> map = Map.of("status", true);
+		Map<String, Object> map = Map.of("status", state);
 		ctx.render("templates/competition.html", map);
+	}
+
+	public static void setState(Boolean state) {
+		CompetitionController.state = state;
 	}
 
 }

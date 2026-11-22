@@ -3,6 +3,7 @@ package org.xide.http.routers;
 import org.xide.http.controllers.ClassController;
 import org.xide.http.controllers.CompetitionController;
 import org.xide.http.controllers.HelloController;
+import org.xide.http.controllers.ProblensController;
 import org.xide.http.controllers.StudentsController;
 
 import io.javalin.config.JavalinConfig;
@@ -49,6 +50,10 @@ public class Routers {
 
 		config.routes.get("/competition", (ctx) -> {
 			CompetitionController.index(ctx);
+		});
+
+		config.routes.post("/problens/new", (ctx) -> {
+			ProblensController.registerNewProblem(ctx);
 		});
 	}
 

@@ -14,7 +14,7 @@ import jakarta.websocket.Session;
 @WebSocketController
 public class SubmissionController {
 
-	public static record ProblemDto(Long id, String title, String balloon) {
+	public static record ProblemDto(Long id, String title, String balloonColor) {
 	}
 
 	public static record ParticipantDto(Long id, String userName) {
@@ -23,7 +23,7 @@ public class SubmissionController {
 	public static record SubmissionDto(Long userId, Long problemId, String state, String date) {
 	}
 
-	public static record HistoryDto(Long id, String userName, String problemTitle, String state) {
+	public static record HistoryDto(Long id, String userName, String problemTitle, String state, String balloonColor) {
 	}
 
 	public static record Board(List<ProblemDto> problems, List<ParticipantDto> participants,
@@ -36,7 +36,7 @@ public class SubmissionController {
 			return SubmissionRepository.getSubmissionOrdemByDate()
 				.stream()
 				.map(s -> new HistoryDto(s.getId(), s.getUser().getName(), s.getProblem().getTitile(),
-						s.getState().toString().toLowerCase()))
+						s.getState().toString().toLowerCase(), s.getProblem().getBalao().cssColor()))
 				.toList();
 		}
 		catch (Exception e) {
@@ -49,7 +49,7 @@ public class SubmissionController {
 		try {
 			List<ProblemDto> problems = SubmissionRepository.getProblems()
 				.stream()
-				.map(p -> new ProblemDto(p.getId(), p.getTitile(), p.getBalao()))
+				.map(p -> new ProblemDto(p.getId(), p.getTitile(), p.getBalao().cssColor()))
 				.toList();
 			List<ParticipantDto> participants = SubmissionRepository.getParticipants()
 				.stream()

@@ -105,9 +105,7 @@ public class SubmissionRepository {
 		if (pdf != null) {
 			problem.setPdf(Paths.get(pdf));
 		}
-		if (balao != null) {
-			problem.setBalao(balao);
-		}
+		problem.setBalao(balao);
 		return problem;
 	}
 

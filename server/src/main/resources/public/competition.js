@@ -9,21 +9,17 @@
     const historyView = document.getElementById('submissionHistoryView');
     const rankingView = document.getElementById('rankingView');
     const rankingHead = document.getElementById('rankingHead');
+    const rankingColumns = document.getElementById('rankingColumns');
     const rankingBody = document.getElementById('rankingBody');
     const rankingMessage = document.getElementById('rankingMessage');
     const rankingWrap = document.getElementById('rankingWrap');
     const rankingToggleButton = document.getElementById('rankingToggleButton');
+    const rankingFullscreenButton = document.getElementById('rankingFullscreenButton');
+    const rankingConnection = document.getElementById('rankingConnection');
     const balloonColors = [
-        'text-red-600 dark:text-red-400', 'text-blue-600 dark:text-blue-400',
-        'text-emerald-600 dark:text-emerald-400', 'text-amber-600 dark:text-amber-400',
-        'text-violet-600 dark:text-violet-400', 'text-pink-600 dark:text-pink-400',
-        'text-cyan-600 dark:text-cyan-400', 'text-orange-600 dark:text-orange-400',
-        'text-lime-600 dark:text-lime-400', 'text-fuchsia-600 dark:text-fuchsia-400',
-        'text-indigo-600 dark:text-indigo-400', 'text-teal-600 dark:text-teal-400',
-        'text-rose-600 dark:text-rose-400', 'text-sky-600 dark:text-sky-400',
-        'text-green-600 dark:text-green-400', 'text-yellow-600 dark:text-yellow-400',
-        'text-purple-600 dark:text-purple-400', 'text-stone-600 dark:text-stone-400',
-        'text-red-500 dark:text-red-300', 'text-blue-500 dark:text-blue-300'
+        '#dc2626', '#2563eb', '#16a34a', '#ca8a04', '#ea580c', '#9333ea', '#db2777', '#0891b2',
+        '#65a30d', '#c026d3', '#4f46e5', '#0d9488', '#e11d48', '#0284c7', '#059669', '#d97706',
+        '#7c3aed', '#78716c', '#f43f5e', '#1d4ed8'
     ];
     let socket;
     let retryTimer;
@@ -33,20 +29,24 @@
     let soundContext = null;
     let soundLimiter = null;
     let soundEnabled = false;
-    let seenSubmissionIds = null;
+    let highestSeenSubmissionId = null;
 
     function setConnection(text, online) {
+        const className = `text-xs ${online ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-500 dark:text-zinc-400'}`;
         connection.textContent = text;
-        connection.className = `text-xs ${online ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-500 dark:text-zinc-400'}`;
+        connection.className = className;
+        rankingConnection.textContent = text;
+        rankingConnection.className = className;
     }
 
-    function createBalloon(filled, colorClass) {
+    function createBalloon(filled, color) {
         const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         icon.setAttribute('viewBox', '0 0 24 32');
         icon.setAttribute('width', '20');
         icon.setAttribute('height', '26');
         icon.setAttribute('aria-hidden', 'true');
-        icon.classList.add('inline-block', ...colorClass.split(/\s+/));
+        icon.classList.add('inline-block');
+        icon.style.color = color || '#dc2626';
         const body = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         body.setAttribute('d', 'M12 1C6.2 1 2 5.5 2 11.5c0 5.3 3.8 10.8 8.2 12.1L12 27l1.8-3.4C18.2 22.3 22 16.8 22 11.5 22 5.5 17.8 1 12 1Z');
         body.setAttribute('fill', filled ? 'currentColor' : 'none');
@@ -79,7 +79,8 @@
             row.className = 'bg-white text-zinc-700 dark:bg-zinc-950 dark:text-zinc-300';
             const balloonCell = document.createElement('td');
             balloonCell.className = 'whitespace-nowrap px-4 py-3';
-            const balloon = createBalloon(submission.state === 'accepted', balloonColors[index % balloonColors.length]);
+            const balloon = createBalloon(submission.state === 'accepted',
+                submission.balloonColor || balloonColors[index % balloonColors.length]);
             balloon.classList.add('mr-2', 'align-middle');
             balloonCell.append(balloon, document.createTextNode(submission.problemTitle || 'Unknown problem'));
 
@@ -191,12 +192,25 @@
         for (const [index, problem] of board.problems.entries()) {
             const cell = document.createElement('th');
             cell.scope = 'col';
-            cell.className = 'min-w-36 max-w-48 whitespace-normal break-words px-3 py-3 text-center align-bottom font-medium leading-tight';
+            cell.className = 'whitespace-normal break-words px-3 py-3 text-center align-bottom font-medium leading-tight';
             cell.title = problem.title || `Problem ${index + 1}`;
-            cell.textContent = cell.title;
+            cell.textContent = problem.title || '';
             headerCells.push(cell);
         }
         rankingHead.replaceChildren(...headerCells);
+        const problemCount = board.problems.length;
+        const problemWidth = problemCount ? 50 / problemCount : 0;
+        rankingColumns.replaceChildren(...[
+            7,
+            problemCount >= 12 ? 15 : 21,
+            9,
+            9,
+            ...board.problems.map(() => problemWidth)
+        ].map((width) => {
+            const column = document.createElement('col');
+            column.style.width = `${width}%`;
+            return column;
+        }));
 
         const submissionsByUser = new Map();
         for (const submission of board.submissions) {
@@ -249,11 +263,66 @@
                 cell.className = 'px-3 py-2 text-center';
                 cell.title = problem.title || `Problem ${problemIndex + 1}`;
                 const accepted = standing.solvedAt.has(String(problem.id));
-                cell.append(createBalloon(accepted, balloonColors[problemIndex % balloonColors.length]));
+                cell.append(createBalloon(accepted,
+                    problem.balloonColor || balloonColors[problemIndex % balloonColors.length]));
                 row.append(cell);
             }
             return row;
         }));
+        fitRankingTable();
+    }
+
+    function fitRankingTable() {
+        if (!document.fullscreenElement && !rankingView.classList.contains('ranking-fullscreen-fallback')) return;
+
+        const rowCount = Math.max(1, rankingBody.rows.length + 1);
+        const columnCount = Math.max(1, rankingHead.cells.length);
+        const toolbar = rankingView.firstElementChild;
+        const toolbarHeight = toolbar?.getBoundingClientRect().height || 70;
+        const availableHeight = Math.max(120, window.innerHeight - toolbarHeight - 80);
+        const fontSize = Math.max(8, Math.min(30, availableHeight / (rowCount * 1.55), window.innerWidth / (columnCount * 1.2)));
+        const horizontalPadding = Math.max(2, Math.min(12, window.innerWidth / (columnCount * 12)));
+        rankingWrap.style.setProperty('--ranking-font-size', `${fontSize}px`);
+        rankingWrap.style.setProperty('--ranking-cell-y', `${Math.max(2, Math.min(12, fontSize * 0.28))}px`);
+        rankingWrap.style.setProperty('--ranking-cell-x', `${horizontalPadding}px`);
+        rankingWrap.style.setProperty('--ranking-row-height', `${availableHeight / rowCount}px`);
+        rankingWrap.style.setProperty('--ranking-balloon-size', `${Math.max(9, Math.min(22, fontSize * 1.15))}px`);
+    }
+
+    function updateFullscreenButton(isFullscreen) {
+        rankingFullscreenButton.innerHTML = isFullscreen
+            ? '<i class="fa-solid fa-compress" aria-hidden="true"></i> Exit full screen'
+            : '<i class="fa-solid fa-expand" aria-hidden="true"></i> Full screen';
+        rankingFullscreenButton.setAttribute('aria-pressed', String(isFullscreen));
+    }
+
+    async function toggleRankingFullscreen() {
+        const fallbackActive = rankingView.classList.contains('ranking-fullscreen-fallback');
+        if (document.fullscreenElement === rankingView || fallbackActive) {
+            if (document.fullscreenElement === rankingView && document.exitFullscreen) {
+                await document.exitFullscreen();
+            }
+            rankingView.classList.remove('ranking-fullscreen-fallback');
+            document.body.classList.remove('ranking-fullscreen-active');
+            updateFullscreenButton(false);
+            return;
+        }
+
+        try {
+            if (rankingView.requestFullscreen) {
+                await rankingView.requestFullscreen();
+            } else {
+                rankingView.classList.add('ranking-fullscreen-fallback');
+                document.body.classList.add('ranking-fullscreen-active');
+            }
+            updateFullscreenButton(true);
+            requestAnimationFrame(fitRankingTable);
+        } catch (error) {
+            rankingView.classList.add('ranking-fullscreen-fallback');
+            document.body.classList.add('ranking-fullscreen-active');
+            updateFullscreenButton(true);
+            requestAnimationFrame(fitRankingTable);
+        }
     }
 
     function requestCurrentView() {
@@ -273,6 +342,25 @@
         requestCurrentView();
     });
 
+    rankingFullscreenButton.addEventListener('click', toggleRankingFullscreen);
+    document.addEventListener('fullscreenchange', () => {
+        const active = document.fullscreenElement === rankingView;
+        if (!active) {
+            rankingView.classList.remove('ranking-fullscreen-fallback');
+            document.body.classList.remove('ranking-fullscreen-active');
+        }
+        updateFullscreenButton(active);
+        requestAnimationFrame(fitRankingTable);
+    });
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && rankingView.classList.contains('ranking-fullscreen-fallback')) {
+            rankingView.classList.remove('ranking-fullscreen-fallback');
+            document.body.classList.remove('ranking-fullscreen-active');
+            updateFullscreenButton(false);
+        }
+    });
+    window.addEventListener('resize', fitRankingTable);
+
     function connect() {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         socket = new WebSocket(`${protocol}//${window.location.host}/ws/socket`);
@@ -291,12 +379,18 @@
             }
             if (response.route === '/submission/all') {
                 requestPending = false;
-                const currentIds = new Set(Array.isArray(response.payload)
-                    ? response.payload.map(item => String(item.id))
-                    : []);
-                const newSubmission = seenSubmissionIds !== null
-                    && Array.from(currentIds).some(id => !seenSubmissionIds.has(id));
-                seenSubmissionIds = currentIds;
+                const submissionIds = Array.isArray(response.payload)
+                    ? response.payload.map(item => Number(item.id)).filter(Number.isFinite)
+                    : [];
+                const latestSubmissionId = submissionIds.length ? Math.max(...submissionIds) : null;
+                const newSubmission = highestSeenSubmissionId !== null
+                    && latestSubmissionId !== null
+                    && latestSubmissionId > highestSeenSubmissionId;
+                if (latestSubmissionId !== null) {
+                    highestSeenSubmissionId = highestSeenSubmissionId === null
+                        ? latestSubmissionId
+                        : Math.max(highestSeenSubmissionId, latestSubmissionId);
+                }
                 renderHistory(response.payload);
                 if (newSubmission) playPlim();
             } else if (response.route === '/submission/ranking') {
