@@ -9,7 +9,7 @@ public class CompetitionController {
 
 	private static final Logger LOGGER = Logger.getLogger(CompetitionController.class.getName());
 
-	private static boolean state;
+	private static boolean state = true;
 
 	public static void index(Context ctx) {
 		Map<String, Object> map = Map.of("status", state);

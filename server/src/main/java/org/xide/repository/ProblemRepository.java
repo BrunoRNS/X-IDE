@@ -4,9 +4,11 @@ import java.nio.file.Path;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.xide.http.controllers.ProblensController.DtoProblem;
 import org.xide.models.Example;
 import org.xide.models.Problem;
 import org.xide.models.Soluction;
@@ -70,6 +72,23 @@ public class ProblemRepository {
 		}
 
 		throw new IllegalStateException("The database did not return the problem id.");
+	}
+
+	public static List<DtoProblem> findAllProblem() throws Exception {
+		String sql = """
+				SELECT titile, balao, big_o FROM problem;
+				""";
+		java.sql.Connection conn = Connection.connect();
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ResultSet rs = ps.executeQuery();
+		List<DtoProblem> all = new ArrayList<>();
+		while (rs.next()) {
+			String title = rs.getString("titile");
+			BalloonColor balloonColor = BalloonColor.fromDatabase(rs.getString("balao"));
+			BigO bigO = BigO.fromDatabase(rs.getString("big_o"));
+			all.add(new DtoProblem(title, balloonColor.cssColor(), bigO));
+		}
+		return all;
 	}
 
 	private static void insertTimes(java.sql.Connection conn, Map<Lang, Double> times, Long id) throws Exception {

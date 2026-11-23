@@ -38,6 +38,9 @@ public class ProblensController {
 			List<ExampleCode> exampleCodes, List<ExampleIO> examples, List<Limits> limits) {
 	}
 
+	public static record DtoProblem(String title, String hexa, BigO bigo) {
+	}
+
 	public static void registerNewProblem(Context ctx) {
 		UploadedFile pdf = ctx.uploadedFile("pdf");
 		String title = trim(ctx.formParam("title"));
@@ -60,6 +63,17 @@ public class ProblensController {
 		catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "Could not create problem", e);
 			ctx.status(500).json(Map.of("error", "Could not save the problem."));
+		}
+	}
+
+	public static void getAllProblem(Context ctx) {
+		try {
+			ctx.status(200).json(ProblemRepository.findAllProblem());
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			LOGGER.log(Level.SEVERE, "Could not list all problems", e);
+			ctx.status(500).json(Map.of("error", "Could not list all problems"));
 		}
 	}
 

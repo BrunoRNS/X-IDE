@@ -55,6 +55,10 @@ public class Routers {
 		config.routes.post("/problens/new", (ctx) -> {
 			ProblensController.registerNewProblem(ctx);
 		});
+
+		config.routes.get("/problens/all", (ctx) -> {
+			ProblensController.getAllProblem(ctx);
+		});
 	}
 
 }
