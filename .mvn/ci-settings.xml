@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+    <!--
+        GitHub-hosted runners share their egress IPs with every other GitHub
+        project, so Maven Central frequently rejects their downloads with
+        HTTP 429 (Too Many Requests). CI uses Google's mirror of Central to
+        avoid those shared limits. Repositories other than Central, such as
+        JitPack, are still contacted directly.
+
+        The mirror keeps the id "central" on purpose: Maven then still
+        recognizes artifacts restored from a local repository cache as coming
+        from the same repository instead of re-verifying every one of them.
+    -->
+    <mirrors>
+        <mirror>
+            <id>central</id>
+            <name>Google mirror of Maven Central</name>
+            <url>https://maven-central.storage-download.googleapis.com/maven2/</url>
+            <mirrorOf>central</mirrorOf>
+        </mirror>
+    </mirrors>
+</settings>

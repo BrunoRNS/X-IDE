@@ -32,10 +32,10 @@ public class LoginSocketController {
 		if (session != null) {
 			User user = ClientSessions.getUser(session);
 			ClientSessions.unregisterLogin(session);
-			LOGGER.info("Logout sucess " + user.getName());
+			LOGGER.info("Logout success " + user.getName());
 			return new Dto("sucess");
 		}
-		LOGGER.info("Logout sucess " + "not found user");
+		LOGGER.info("Logout success: user not found");
 		return new Dto("sucess");
 	}
 
@@ -50,7 +50,7 @@ public class LoginSocketController {
 			if (session != null) {
 				ClientSessions.registerLogin(user, session);
 			}
-			LOGGER.info("Login sucess");
+			LOGGER.info("Login success");
 			return new Dto("sucess");
 		}
 		catch (Exception e) {

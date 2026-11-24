@@ -32,6 +32,10 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  # Maven Central rate-limits GitHub's shared runner IPs (HTTP 429).
+  MAVEN_ARGS: "-s .mvn/ci-settings.xml"
+
 jobs:
   test:
     name: test · ${{ matrix.module }} · ${{ matrix.os }}
@@ -52,7 +56,7 @@ jobs:
           java-version: '17'
           cache: maven
       - name: Run ${{ matrix.module }} tests
-        run: ./mvnw -B -ntp -U -pl ${{ matrix.module }} -am test
+        run: ./mvnw -B -ntp -pl ${{ matrix.module }} -am test
 
   docker:
     name: docker · publish multi-arch image to Docker Hub
@@ -75,7 +79,7 @@ jobs:
           java-version: '17'
           cache: maven
       - name: Package server JAR
-        run: ./mvnw -B -ntp -U -pl server -am -DskipTests package
+        run: ./mvnw -B -ntp -pl server -am -DskipTests package
       - uses: docker/setup-qemu-action@v3
         with:
           platforms: all
@@ -120,7 +124,7 @@ jobs:
           java-version: '17'
           cache: maven
       - name: Build shaded JARs
-        run: ./mvnw -B -ntp -U -DskipTests package
+        run: ./mvnw -B -ntp -DskipTests package
       - name: Assemble per-target bundles
         run: |
           case "$GITHUB_REF_NAME" in

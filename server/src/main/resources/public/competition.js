@@ -31,6 +31,7 @@
     let soundEnabled = false;
     let highestSeenSubmissionId = null;
 
+    // Connection and shared UI helpers
     function setConnection(text, online) {
         const className = `text-xs ${online ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-500 dark:text-zinc-400'}`;
         connection.textContent = text;
@@ -62,6 +63,7 @@
         return icon;
     }
 
+    // Submission history
     function renderHistory(items) {
         if (!Array.isArray(items) || items.length === 0) {
             history.replaceChildren();
@@ -98,6 +100,7 @@
         }));
     }
 
+    // Submission sound alerts
     function playPlim() {
         if (!soundEnabled || !soundContext || soundContext.state !== 'running') return;
 
@@ -168,6 +171,7 @@
 
     soundToggleButton.addEventListener('click', toggleSound);
 
+    // Ranking data and rendering
     function renderRanking(board) {
         if (!board || !Array.isArray(board.problems) || !Array.isArray(board.participants)
             || !Array.isArray(board.submissions) || board.participants.length === 0) {
@@ -272,6 +276,7 @@
         fitRankingTable();
     }
 
+    // Ranking display and fullscreen
     function fitRankingTable() {
         if (!document.fullscreenElement && !rankingView.classList.contains('ranking-fullscreen-fallback')) return;
 
@@ -325,6 +330,7 @@
         }
     }
 
+    // Ranking controls and events
     function requestCurrentView() {
         if (!socket || socket.readyState !== WebSocket.OPEN || requestPending) return;
         requestPending = true;
@@ -361,6 +367,7 @@
     });
     window.addEventListener('resize', fitRankingTable);
 
+    // Live connection lifecycle
     function connect() {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         socket = new WebSocket(`${protocol}//${window.location.host}/ws/socket`);

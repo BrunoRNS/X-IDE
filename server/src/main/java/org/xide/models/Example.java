@@ -1,5 +1,8 @@
 package org.xide.models;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import org.xide.models.enums.Lang;
 
 public class Example {
@@ -39,6 +42,11 @@ public class Example {
 				    CONSTRAINT fk_problem_example FOREIGN KEY (id_problem) REFERENCES problem(id) ON DELETE CASCADE
 				)
 				""".formatted(Lang.getTableCreate());
+	}
+
+	public static Example createExampleBySql(String prefix, ResultSet rs) throws SQLException {
+		return new Example(rs.getLong(prefix + ".id"), rs.getString(prefix + ".code"),
+				Lang.fromDatabase(rs.getString(prefix + ".lang")));
 	}
 
 	public Long getId() {

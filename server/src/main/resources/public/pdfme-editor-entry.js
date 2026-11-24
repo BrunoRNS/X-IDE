@@ -3,6 +3,7 @@ import { generate } from '@pdfme/generator';
 import { image, signature, text, barcodes, line, rectangle, ellipse, table } from '@pdfme/schemas';
 import { Designer } from '@pdfme/ui';
 
+// PDF editor plugin configuration
 const plugins = {
     text,
     image,

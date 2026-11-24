@@ -17,6 +17,10 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  # Maven Central rate-limits GitHub's shared runner IPs (HTTP 429).
+  MAVEN_ARGS: "-s .mvn/ci-settings.xml"
+
 jobs:
   lint:
     name: lint · spring-javaformat
@@ -139,4 +143,4 @@ jobs:
           java-version: '17'
           cache: maven
       - name: Run ${{ matrix.module }} tests
-        run: ./mvnw -B -ntp -U -pl ${{ matrix.module }} -am test
+        run: ./mvnw -B -ntp -pl ${{ matrix.module }} -am test

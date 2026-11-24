@@ -2,69 +2,9 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Competition | X-IDE</title>
-    <script src="/public/vendor/tailwind.browser.js"></script>
-
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
-
-    <link rel="stylesheet" href="/public/vendor/aos.css">
+    <th:block th:replace="~{templates/fragments/head :: commonHead('Competition | X-IDE')}"></th:block>
 
     <style type="text/tailwindcss">
-        @custom-variant dark (&:where(.dark, .dark *));
-
-        .brand {
-            font-family: 'Space Grotesk', sans-serif;
-            letter-spacing: -5px;
-        }
-
-        .typing {
-            font-family: 'JetBrains Mono', monospace;
-            overflow: hidden;
-            white-space: nowrap;
-            border-right: 2px solid #dc2626;
-            width: 0;
-            animation: typing 3s steps(32) 0.5s forwards,
-                       blink .8s step-end infinite;
-        }
-
-        @keyframes typing {
-            from { width: 0; }
-            to { width: 32ch; }
-        }
-
-        @keyframes blink {
-            50% { border-color: transparent; }
-        }
-
-        .fade-up {
-            animation: fadeUp .8s ease-out both;
-        }
-
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .action-button {
-            transition: all .2s ease;
-        }
-
-        .action-button:hover {
-            transform: translateY(-2px);
-        }
-
         #rankingView:fullscreen,
         #rankingView.ranking-fullscreen-fallback {
             box-sizing: border-box;
@@ -137,18 +77,6 @@
         }
     </style>
 
-    <script>
-        if (
-            localStorage.theme === 'dark' ||
-            (!('theme' in localStorage) &&
-                window.matchMedia('(prefers-color-scheme: dark)').matches)
-        ) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css">
 </head>
 
 <body class="min-h-screen bg-white text-zinc-900
@@ -230,11 +158,13 @@
 
     </main>
     <div th:replace="~{templates/fragments/problemModal :: problemModal}"></div>
+    <div th:replace="~{templates/fragments/problemViewModal :: problemViewModal}"></div>
 
     <script src="/public/vendor/aos.js"></script>
     <script src="/public/find_all_problens.js" defer></script>
+    <script src="/public/view_problem.js?v=problem-view-2" defer></script>
     <script src="/public/competition.js?v=balloon-colors-1" defer></script>
-    <script src="/public/problens.js?v=pdfjs-viewer-1" defer></script>
+    <script type="module" src="/public/problens.js?v=problem-edit-1"></script>
     <script>
         AOS.init({
             duration: 700,

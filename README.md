@@ -82,6 +82,9 @@ Useful URLs:
 
 If you change `HTTPS_PORT` in `.env`, use the new value in the URLs. To confirm the
 stack is running, use `make stack-status` and check that `app` and `mysql` are healthy.
+Uploaded PDFs and classroom files are stored in the Compose volume `uploads_data`, so
+they survive stopping or recreating the app container. Removing the Compose volumes
+(for example, with `docker compose down -v`) also deletes these uploads.
 
 ### Dev mode (hot reload)
 

@@ -56,8 +56,20 @@ public class Routers {
 			ProblensController.registerNewProblem(ctx);
 		});
 
+		config.routes.put("/problems/{id}", (ctx) -> {
+			ProblensController.updateProblem(ctx);
+		});
+
 		config.routes.get("/problens/all", (ctx) -> {
 			ProblensController.getAllProblem(ctx);
+		});
+
+		config.routes.post("/problens/id", (ctx) -> {
+			ProblensController.getProblemById(ctx);
+		});
+
+		config.routes.get("/problems/{id}/pdf", (ctx) -> {
+			ProblensController.getProblemPdf(ctx);
 		});
 	}
 

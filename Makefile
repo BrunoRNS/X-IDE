@@ -197,7 +197,7 @@ package-all:
 	$(MVNW) $(MVN_ARGS) package
 
 package-server:
-	$(MVNW) $(MVN_ARGS) -B -ntp -U -pl server -am -DskipTests package
+	$(MVNW) $(MVN_ARGS) -B -ntp -pl server -am -DskipTests package
 
 test-client:
 	$(MVNW) $(MVN_ARGS) -pl client -am test

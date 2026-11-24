@@ -11,6 +11,7 @@ const studentForm = document.getElementById('registerStudentForm');
 
 let editingStudent = false;
 
+// Student form and modal
 function openStudentModal() {
     editingStudent = false;
     studentForm.reset();
@@ -61,6 +62,7 @@ function closeStudentModal() {
     }, 300);
 }
 
+// Modal and form events
 studentModal.addEventListener('click', (event) => {
     if (event.target === studentModal) closeStudentModal();
 });
@@ -105,6 +107,7 @@ studentForm.addEventListener('submit', async (event) => {
     }
 });
 
+// Student deletion
 async function deleteStudent(button) {
     const { id, name } = button.dataset;
     if (!confirm(`Are you sure you want to delete ${name}?`)) return;

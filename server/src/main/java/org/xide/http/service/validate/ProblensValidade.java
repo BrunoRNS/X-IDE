@@ -26,11 +26,14 @@ public class ProblensValidade {
 	}
 
 	public static boolean validadeTitle(Context ctx, String title) {
+
 		String value = title == null ? "" : title.trim();
+
 		if (value.length() < 5 || value.length() > 100) {
 			ctx.status(400).json(Map.of("error", "The title must have between 5 and 100 characters."));
 			return false;
 		}
+
 		return true;
 	}
 

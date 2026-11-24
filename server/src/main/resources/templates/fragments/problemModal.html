@@ -20,7 +20,7 @@
             </button>
         </div>
 
-        <form id="problemForm" method="post" action="/problens/new" enctype="multipart/form-data"
+        <form id="problemForm" method="post" enctype="multipart/form-data"
             class="max-h-[75vh] overflow-y-auto">
 
             <div class="space-y-5 p-5 sm:p-6">
@@ -38,12 +38,11 @@
                     </div>
                     <div class="relative">
                         <label class="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                            Color ballon
+                            Balloon color
                         </label>
                         <button type="button" id="button-dropdown" onclick="openDropdown(this)"
                             class="flex w-full items-center justify-between gap-2 rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5 text-sm text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800">
                             <span id="dropdown-selected" class="flex items-center gap-2">
-                                <!-- balloon selecionado aparece aqui -->
                                 <span class="text-zinc-400 dark:text-zinc-500">Select color</span>
                             </span>
                             <i class="fa-solid fa-chevron-down text-xs text-zinc-400 transition-transform"
@@ -65,11 +64,11 @@
                         class="block w-full cursor-pointer rounded-lg border border-zinc-200 bg-white text-sm text-zinc-600 file:mr-4 file:cursor-pointer file:border-0 file:bg-zinc-100 file:px-4 file:py-2.5 file:text-sm file:font-medium file:text-zinc-700 hover:file:bg-zinc-200 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:file:bg-zinc-800 dark:file:text-zinc-200">
                     <p id="problemPdfStatus" role="status" aria-live="polite"
                         class="text-xs text-zinc-500 dark:text-zinc-400">
-                        Choose a PDF to preview it.
+                        Choose a PDF to preview it. In edit mode, leave this empty to keep the current PDF.
                     </p>
                     <div id="problemPdfPreview"
                         class="hidden min-w-0 overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800">
-                        <iframe id="problemPdfViewer" src="/public/vendor/pdfjs/web/viewer.html"
+                        <iframe id="problemPdfUploadViewer" src="/public/vendor/pdfjs/web/viewer.html"
                             title="PDF.js problem statement viewer"
                             class="h-[60vh] min-h-80 w-full bg-white dark:bg-zinc-950"></iframe>
                     </div>
@@ -86,9 +85,9 @@
 
                 <div class="space-y-3">
                     <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                        Recommentation for IA
+                        Recommendation for the AI
                     </label>
-                    <textarea name="recommentation" rows="3" placeholder="e.g. Array list is obrigatory..."
+                    <textarea name="recommentation" rows="3" placeholder="e.g. An array list is required..."
                         class="w-full resize-y rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5 text-sm text-zinc-900 outline-none focus:border-red-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">
                                 </textarea>
                 </div>
@@ -106,7 +105,7 @@
                     <button type="button" onclick="addLangSoluction(false)"
                         class="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800">
                         <i class="fa-solid fa-plus text-xs"></i>
-                        Add Soluction
+                        Add solution
                     </button>
 
                 </div>
@@ -181,10 +180,10 @@
                     Cancel
                 </button>
 
-                <button type="submit"
+                <button id="submitProblemButton" type="submit"
                     class="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700">
                     <i class="fa-solid fa-plus" aria-hidden="true"></i>
-                    Create problem
+                    <span id="submitProblemLabel">Create problem</span>
                 </button>
 
             </div>

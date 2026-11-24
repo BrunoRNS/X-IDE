@@ -24,6 +24,7 @@ services:
       - "${BIND_ADDRESS:-127.0.0.1}:${CLASSROOM_PORT_RANGE:-8083-8102}:${CLASSROOM_PORT_RANGE:-8083-8102}"
     volumes:
       - tls_certs:/etc/nginx/certs
+      - uploads_data:/opt/xide/uploads
 
   mysql:
     image: mysql:8.4
@@ -67,3 +68,4 @@ volumes:
   mysql_data:
   ollama_data:
   tls_certs:
+  uploads_data:
