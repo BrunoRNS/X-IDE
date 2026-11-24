@@ -88,7 +88,7 @@ public class Problem {
 				    lang %s ,
 				    time_ms DOUBLE NOT NULL,
 				    PRIMARY KEY(id_problem, lang),
-				    CONSTRAINT fk_problem_soluction
+				    CONSTRAINT fk_problem_times
 					FOREIGN KEY (id_problem)
 					REFERENCES problem(id)
 					ON DELETE CASCADE
