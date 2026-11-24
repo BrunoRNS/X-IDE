@@ -1,0 +1,1 @@
+INSERT INTO soluctions(input, output, id_problem) VALUES (?,?,?)

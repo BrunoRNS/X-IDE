@@ -1,0 +1,1 @@
+DELETE FROM soluctions WHERE id_problem=?

@@ -1,0 +1,1 @@
+SELECT id, code, lang FROM example WHERE id_problem = ? ORDER BY id

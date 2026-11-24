@@ -15,11 +15,12 @@ import org.xide.models.Problem;
 import org.xide.models.Submission;
 import org.xide.models.User;
 import org.xide.models.enums.SubmissionState;
+import org.xide.utils.SqlUtil;
 
 public class SubmissionRepository {
 
 	public static List<Problem> getProblems() throws Exception {
-		String sql = "SELECT id, title, balao FROM problem ORDER BY id";
+		String sql = SqlUtil.readSqlToString("repository/submission/getProblems.sql");
 		java.sql.Connection conn = Connection.connect();
 		try (PreparedStatement statement = conn.prepareStatement(sql); ResultSet result = statement.executeQuery()) {
 			List<Problem> problems = new ArrayList<>();
@@ -35,7 +36,7 @@ public class SubmissionRepository {
 	}
 
 	public static List<User> getParticipants() throws Exception {
-		String sql = "SELECT id, name, email FROM users ORDER BY id";
+		String sql = SqlUtil.readSqlToString("repository/submission/getParticipants.sql");
 		java.sql.Connection conn = Connection.connect();
 		try (PreparedStatement statement = conn.prepareStatement(sql); ResultSet result = statement.executeQuery()) {
 			List<User> users = new ArrayList<>();
@@ -47,26 +48,7 @@ public class SubmissionRepository {
 	}
 
 	public static List<Submission> getSubmissionOrdemByDate() throws Exception {
-		String sql = """
-				SELECT
-				    s.id AS submission_id,
-				    s.state AS submission_state,
-				    s.date AS submission_date,
-				    u.id AS user_id,
-				    u.name AS user_name,
-				    u.email AS user_email,
-				    c.id AS code_id,
-				    c.file AS code_file,
-				    p.id AS problem_id,
-				    p.title AS problem_title,
-				    p.pdf AS problem_pdf,
-					p.balao AS problem_balao
-				FROM submissions s
-				JOIN code c ON c.id = s.code_id
-				JOIN users u ON u.id = c.id_user
-				JOIN problem p ON p.id = s.id_problem
-				ORDER BY s.date DESC
-				""";
+		String sql = SqlUtil.readSqlToString("repository/submission/getSubmissionOrderByDate.sql");
 
 		java.sql.Connection conn = Connection.connect();
 		try (PreparedStatement statement = conn.prepareStatement(sql); ResultSet result = statement.executeQuery()) {

@@ -7,3 +7,6 @@ deploy/certs/
 .env
 *.log
 uploads/*
+.settings/*
+.classpath
+.project

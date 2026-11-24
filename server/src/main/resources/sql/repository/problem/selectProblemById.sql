@@ -1,0 +1,1 @@
+SELECT id, title, balao, big_o, restriction, pdf FROM problem WHERE id = ?

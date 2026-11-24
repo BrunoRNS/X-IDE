@@ -23,6 +23,7 @@ import org.xide.models.enums.BalloonColor;
 import org.xide.models.enums.BigO;
 import org.xide.models.enums.Lang;
 import org.xide.models.enums.SubmissionState;
+import org.xide.utils.SqlUtil;
 
 public class ProblemRepository {
 
@@ -58,9 +59,7 @@ public class ProblemRepository {
 	}
 
 	public static void deleteProblemByid(long id) throws Exception {
-		String sql = """
-				DELETE FROM problem WHERE id = ?
-				""";
+		String sql = SqlUtil.readSqlToString("repository/problem/deleteProblemById.sql");
 		java.sql.Connection conn = Connection.connect();
 		PreparedStatement ps = conn.prepareStatement(sql);
 		ps.setLong(1, id);
@@ -69,10 +68,7 @@ public class ProblemRepository {
 
 	private static Long insertProblem(java.sql.Connection conn, String title, BalloonColor color, BigO bigo, Path pdf,
 			String recommentation) throws Exception {
-		String sql = """
-				INSERT INTO problem(title, balao, big_o, restriction, pdf)
-				VALUES(?,?,?,?,?)
-				""";
+		String sql = SqlUtil.readSqlToString("repository/problem/insertProblem.sql");
 
 		try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 			ps.setString(1, title);
@@ -93,9 +89,7 @@ public class ProblemRepository {
 	}
 
 	public static List<DtoProblem> findAllProblem() throws Exception {
-		String sql = """
-				SELECT id, title, balao, big_o FROM problem;
-				""";
+		String sql = SqlUtil.readSqlToString("repository/problem/findAllProblem.sql");
 		java.sql.Connection conn = Connection.connect();
 		PreparedStatement ps = conn.prepareStatement(sql);
 		ResultSet rs = ps.executeQuery();
@@ -135,8 +129,8 @@ public class ProblemRepository {
 
 	private static boolean updateProblemRecord(java.sql.Connection conn, Long id, String title, BalloonColor color,
 			BigO bigo, String recommentation, Path pdf) throws Exception {
-		String sql = pdf == null ? "UPDATE problem SET title=?, balao=?, big_o=?, restriction=? WHERE id=?"
-				: "UPDATE problem SET title=?, balao=?, big_o=?, restriction=?, pdf=? WHERE id=?";
+		String sql = pdf == null ? SqlUtil.readSqlToString("repository/problem/updateProblemRecord.sql")
+				: SqlUtil.readSqlToString("repository/problem/updateProblemRecordWithPdf.sql");
 		try (PreparedStatement statement = conn.prepareStatement(sql)) {
 			statement.setString(1, title);
 			statement.setString(2, color.cssColor());
@@ -155,9 +149,9 @@ public class ProblemRepository {
 
 	private static void replaceProblemChildren(java.sql.Connection conn, Long id, Map<Lang, Double> times,
 			List<Example> examples, List<Soluction> soluctions) throws Exception {
-		deleteByProblemId(conn, "problem_times", id);
-		deleteByProblemId(conn, "soluctions", id);
-		deleteByProblemId(conn, "example", id);
+		deleteByProblemId(conn, "repository/problem/deleteProblemTimes.sql", id);
+		deleteByProblemId(conn, "repository/problem/deleteSoluctions.sql", id);
+		deleteByProblemId(conn, "repository/problem/deleteExamples.sql", id);
 
 		insertTimes(conn, times, id);
 		insertSoluctions(conn, soluctions, id);
@@ -169,17 +163,16 @@ public class ProblemRepository {
 		insertExamples(conn, examples);
 	}
 
-	private static void deleteByProblemId(java.sql.Connection conn, String table, Long id) throws Exception {
-		try (PreparedStatement statement = conn.prepareStatement("DELETE FROM " + table + " WHERE id_problem=?")) {
+	private static void deleteByProblemId(java.sql.Connection conn, String sqlFile, Long id) throws Exception {
+		String sql = SqlUtil.readSqlToString(sqlFile);
+		try (PreparedStatement statement = conn.prepareStatement(sql)) {
 			statement.setLong(1, id);
 			statement.executeUpdate();
 		}
 	}
 
 	private static void insertTimes(java.sql.Connection conn, Map<Lang, Double> times, Long id) throws Exception {
-		String sql = """
-				INSERT INTO problem_times(id_problem, lang, time_ms) VALUES(?,?,?)
-				""";
+		String sql = SqlUtil.readSqlToString("repository/problem/insertTimes.sql");
 
 		try (PreparedStatement ps = conn.prepareStatement(sql)) {
 			for (Map.Entry<Lang, Double> entry : times.entrySet()) {
@@ -208,11 +201,7 @@ public class ProblemRepository {
 	}
 
 	private static Problem selectProblem(java.sql.Connection conn, Long id) throws Exception {
-		String sql = """
-				SELECT id, title, balao, big_o, restriction, pdf
-				FROM problem
-				WHERE id = ?
-				""";
+		String sql = SqlUtil.readSqlToString("repository/problem/selectProblemById.sql");
 
 		try (PreparedStatement ps = conn.prepareStatement(sql)) {
 			ps.setLong(1, id);
@@ -238,7 +227,7 @@ public class ProblemRepository {
 	}
 
 	private static List<Soluction> selectSoluctions(java.sql.Connection conn, Long id) throws Exception {
-		String sql = "SELECT id, input, output FROM soluctions WHERE id_problem = ? ORDER BY id";
+		String sql = SqlUtil.readSqlToString("repository/problem/selectSoluctions.sql");
 
 		List<Soluction> soluctions = new ArrayList<>();
 		try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -254,7 +243,7 @@ public class ProblemRepository {
 	}
 
 	private static List<Example> selectExamples(java.sql.Connection conn, Long id, Problem problem) throws Exception {
-		String sql = "SELECT id, code, lang FROM example WHERE id_problem = ? ORDER BY id";
+		String sql = SqlUtil.readSqlToString("repository/problem/selectExamples.sql");
 
 		List<Example> examples = new ArrayList<>();
 		try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -274,22 +263,7 @@ public class ProblemRepository {
 
 	private static List<Submission> selectSubmissions(java.sql.Connection conn, Long id, Problem problem)
 			throws Exception {
-		String sql = """
-				SELECT
-				    s.id AS submission_id,
-				    s.state AS submission_state,
-				    s.date AS submission_date,
-				    u.id AS user_id,
-				    u.name AS user_name,
-				    u.email AS user_email,
-				    c.id AS code_id,
-				    c.file AS code_file
-				FROM submissions s
-				JOIN code c ON c.id = s.code_id
-				JOIN users u ON u.id = c.id_user
-				WHERE s.id_problem = ?
-				ORDER BY s.date DESC
-				""";
+		String sql = SqlUtil.readSqlToString("repository/problem/selectSubmissions.sql");
 
 		List<Submission> submissions = new ArrayList<>();
 		try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -317,7 +291,7 @@ public class ProblemRepository {
 	}
 
 	private static Map<Lang, Double> selectTimes(java.sql.Connection conn, Long id) throws Exception {
-		String sql = "SELECT lang, time_ms FROM problem_times WHERE id_problem = ?";
+		String sql = SqlUtil.readSqlToString("repository/problem/selectTimes.sql");
 
 		Map<Lang, Double> times = new EnumMap<>(Lang.class);
 		try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -334,9 +308,7 @@ public class ProblemRepository {
 
 	private static void insertSoluctions(java.sql.Connection conn, List<Soluction> soluctions, Long id)
 			throws Exception {
-		String sql = """
-				INSERT INTO soluctions(input, output, id_problem) VALUES (?,?,?)
-				""";
+		String sql = SqlUtil.readSqlToString("repository/problem/insertSoluctions.sql");
 
 		try (PreparedStatement ps = conn.prepareStatement(sql)) {
 			for (Soluction soluction : soluctions) {
@@ -350,9 +322,7 @@ public class ProblemRepository {
 	}
 
 	private static void insertExamples(java.sql.Connection conn, List<Example> examples) throws Exception {
-		String sql = """
-				INSERT INTO example(code, id_problem, lang) VALUES (?,?,?)
-				""";
+		String sql = SqlUtil.readSqlToString("repository/problem/insertExamples.sql");
 
 		try (PreparedStatement ps = conn.prepareStatement(sql)) {
 			for (Example example : examples) {
