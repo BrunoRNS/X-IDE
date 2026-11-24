@@ -10,7 +10,7 @@ import org.xide.utils.SqlUtil;
 public class UserRepo {
 
 	public static User getUser(String email, String password) throws Exception {
-		String sql = SqlUtil.readSqlToString("repository/user/getUser.sql");
+		String sql = SqlUtil.readSqlToString("sql/repository/user/getUser.sql");
 		java.sql.Connection conn = Connection.connect();
 		PreparedStatement ps = conn.prepareStatement(sql);
 		ps.setString(1, email);
@@ -27,7 +27,7 @@ public class UserRepo {
 	}
 
 	public static List<User> findAll() throws Exception {
-		String sql = SqlUtil.readSqlToString("repository/user/findAll.sql");
+		String sql = SqlUtil.readSqlToString("sql/repository/user/findAll.sql");
 		java.sql.Connection conn = Connection.connect();
 		PreparedStatement ps = conn.prepareStatement(sql);
 		try (ResultSet rs = ps.executeQuery()) {
@@ -45,7 +45,7 @@ public class UserRepo {
 	}
 
 	public static User save(String email, String password, String name) throws Exception {
-		String sql = SqlUtil.readSqlToString("repository/user/save.sql");
+		String sql = SqlUtil.readSqlToString("sql/repository/user/save.sql");
 		java.sql.Connection conn = Connection.connect();
 		PreparedStatement ps = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
 		ps.setString(1, name);
@@ -62,7 +62,7 @@ public class UserRepo {
 	}
 
 	public static boolean deleteById(Long id) throws Exception {
-		String sql = SqlUtil.readSqlToString("repository/user/deleteById.sql");
+		String sql = SqlUtil.readSqlToString("sql/repository/user/deleteById.sql");
 		java.sql.Connection conn = Connection.connect();
 		PreparedStatement ps = conn.prepareStatement(sql);
 		ps.setLong(1, id);
@@ -70,7 +70,7 @@ public class UserRepo {
 	}
 
 	public static boolean update(User user) throws Exception {
-		String sql = SqlUtil.readSqlToString("repository/user/update.sql");
+		String sql = SqlUtil.readSqlToString("sql/repository/user/update.sql");
 		java.sql.Connection conn = Connection.connect();
 		PreparedStatement ps = conn.prepareStatement(sql);
 		ps.setString(1, user.getName());
@@ -81,7 +81,7 @@ public class UserRepo {
 	}
 
 	public static User getUserByEmailAndPassword(String email, String password) throws Exception {
-		String sql = SqlUtil.readSqlToString("repository/user/getUser.sql");
+		String sql = SqlUtil.readSqlToString("sql/repository/user/getUser.sql");
 		java.sql.Connection conn = Connection.connect();
 		PreparedStatement ps = conn.prepareStatement(sql);
 		ps.setString(1, email);

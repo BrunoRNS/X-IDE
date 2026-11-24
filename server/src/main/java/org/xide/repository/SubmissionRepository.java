@@ -20,7 +20,7 @@ import org.xide.utils.SqlUtil;
 public class SubmissionRepository {
 
 	public static List<Problem> getProblems() throws Exception {
-		String sql = SqlUtil.readSqlToString("repository/submission/getProblems.sql");
+		String sql = SqlUtil.readSqlToString("sql/repository/submission/getProblems.sql");
 		java.sql.Connection conn = Connection.connect();
 		try (PreparedStatement statement = conn.prepareStatement(sql); ResultSet result = statement.executeQuery()) {
 			List<Problem> problems = new ArrayList<>();
@@ -36,7 +36,7 @@ public class SubmissionRepository {
 	}
 
 	public static List<User> getParticipants() throws Exception {
-		String sql = SqlUtil.readSqlToString("repository/submission/getParticipants.sql");
+		String sql = SqlUtil.readSqlToString("sql/repository/submission/getParticipants.sql");
 		java.sql.Connection conn = Connection.connect();
 		try (PreparedStatement statement = conn.prepareStatement(sql); ResultSet result = statement.executeQuery()) {
 			List<User> users = new ArrayList<>();
@@ -48,7 +48,7 @@ public class SubmissionRepository {
 	}
 
 	public static List<Submission> getSubmissionOrdemByDate() throws Exception {
-		String sql = SqlUtil.readSqlToString("repository/submission/getSubmissionOrderByDate.sql");
+		String sql = SqlUtil.readSqlToString("sql/repository/submission/getSubmissionOrderByDate.sql");
 
 		java.sql.Connection conn = Connection.connect();
 		try (PreparedStatement statement = conn.prepareStatement(sql); ResultSet result = statement.executeQuery()) {
