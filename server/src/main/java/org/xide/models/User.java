@@ -1,5 +1,7 @@
 package org.xide.models;
 
+import org.xide.utils.SqlUtil;
+
 import jakarta.websocket.Session;
 
 public class User {
@@ -60,15 +62,7 @@ public class User {
 	}
 
 	public static String getTableCreate() {
-		return """
-				     CREATE TABLE IF NOT EXISTS users (
-				         id INT NOT NULL AUTO_INCREMENT,
-				         name VARCHAR(100) NOT NULL,
-				         password VARCHAR(100) NOT NULL,
-				         email VARCHAR(200) NOT NULL,
-				         PRIMARY KEY(id)
-				     );
-				""";
+		return SqlUtil.readSqlToString("sql/users.sql");
 	}
 
 	public Long getId() {

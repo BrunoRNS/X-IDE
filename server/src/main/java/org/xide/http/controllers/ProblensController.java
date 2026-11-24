@@ -42,7 +42,7 @@ public class ProblensController {
 			Problem problem = ProblemManagementService.create(dto, pdf);
 
 			ctx.status(201)
-				.json(Map.of("id", problem.getId(), "title", problem.getTitile(), "pdf", problem.getPdf().toString()));
+				.json(Map.of("id", problem.getId(), "title", problem.getTitle(), "pdf", problem.getPdf().toString()));
 		}
 		catch (IllegalArgumentException e) {
 			ctx.status(400).json(Map.of("error", e.getMessage()));
@@ -143,7 +143,7 @@ public class ProblensController {
 						.map(entry -> new Limits(entry.getKey(), entry.getValue()))
 						.toList();
 
-			ProblemDetails dto = new ProblemDetails(problem.getId(), problem.getTitile(),
+			ProblemDetails dto = new ProblemDetails(problem.getId(), problem.getTitle(),
 					problem.getBalao() == null ? BalloonColor.RED.cssColor() : problem.getBalao().cssColor(),
 					problem.getBigO(), problem.getRestriction(), exampleCodes, examples, limits,
 					"/problems/" + problem.getId() + "/pdf");

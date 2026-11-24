@@ -3,6 +3,7 @@ package org.xide.models;
 import java.time.LocalDateTime;
 
 import org.xide.models.enums.SubmissionState;
+import org.xide.utils.SqlUtil;
 
 public class Submission {
 
@@ -30,31 +31,11 @@ public class Submission {
 	}
 
 	public static String getTableCreate() {
-		return """
-				CREATE TABLE IF NOT EXISTS submissions(
-				    id INT NOT NULL AUTO_INCREMENT,
-				    state %s ,
-				    code_id INT NOT NULL,
-				    id_problem INT NOT NULL,
-					date DATETIME,
-				    CONSTRAINT uq_submission_code UNIQUE (code_id),
-				    CONSTRAINT fk_submission_code FOREIGN KEY(code_id)
-				    REFERENCES code(id)
-				    ON DELETE CASCADE
-				    ON UPDATE CASCADE,
-				    CONSTRAINT fk_submission_problem FOREIGN KEY(id_problem) REFERENCES problem(id),
-				    PRIMARY KEY (id)
-				);
-				""".formatted(SubmissionState.getTableCreate());
+		return SqlUtil.readSqlToString("sql/submissions.sql");
 	}
 
 	public static String getTriggerInsert() {
-		return """
-				CREATE TRIGGER IF NOT EXISTS submissions_before_insert
-				BEFORE INSERT ON submissions
-				FOR EACH ROW
-				SET NEW.date = NOW();
-				""";
+		return SqlUtil.readSqlToString("sql/submissions_before_insert.sql");
 	}
 
 	public User getUser() {

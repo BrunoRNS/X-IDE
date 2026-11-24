@@ -12,12 +12,6 @@ public enum BigO {
 		this.name = name;
 	}
 
-	public static String getTableCreate() {
-		return """
-				ENUM('n1', 'logn', 'n', 'nlogn', 'ne2', 'ne3') NOT NULL
-				""";
-	}
-
 	/** Accepts the database values and the labels displayed in the problem form. */
 	public static BigO fromDatabase(String value) {
 		if (value == null || value.isBlank()) {

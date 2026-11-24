@@ -19,14 +19,14 @@ import org.xide.models.enums.SubmissionState;
 public class SubmissionRepository {
 
 	public static List<Problem> getProblems() throws Exception {
-		String sql = "SELECT id, titile, balao FROM problem ORDER BY id";
+		String sql = "SELECT id, title, balao FROM problem ORDER BY id";
 		java.sql.Connection conn = Connection.connect();
 		try (PreparedStatement statement = conn.prepareStatement(sql); ResultSet result = statement.executeQuery()) {
 			List<Problem> problems = new ArrayList<>();
 			while (result.next()) {
 				Problem problem = new Problem();
 				problem.setId(result.getLong("id"));
-				problem.setTitile(result.getString("titile"));
+				problem.setTitle(result.getString("title"));
 				problem.setBalao(result.getString("balao"));
 				problems.add(problem);
 			}
@@ -58,7 +58,7 @@ public class SubmissionRepository {
 				    c.id AS code_id,
 				    c.file AS code_file,
 				    p.id AS problem_id,
-				    p.titile AS problem_title,
+				    p.title AS problem_title,
 				    p.pdf AS problem_pdf,
 					p.balao AS problem_balao
 				FROM submissions s
@@ -99,7 +99,7 @@ public class SubmissionRepository {
 	private static Problem getProblem(ResultSet result) throws SQLException {
 		Problem problem = new Problem();
 		problem.setId(result.getLong("problem_id"));
-		problem.setTitile(result.getString("problem_title"));
+		problem.setTitle(result.getString("problem_title"));
 		String pdf = result.getString("problem_pdf");
 		String balao = result.getString("problem_balao");
 		if (pdf != null) {

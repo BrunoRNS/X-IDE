@@ -32,7 +32,7 @@ public class SubmissionController {
 		try {
 			return SubmissionRepository.getSubmissionOrdemByDate()
 				.stream()
-				.map(s -> new HistoryDto(s.getId(), s.getUser().getName(), s.getProblem().getTitile(),
+				.map(s -> new HistoryDto(s.getId(), s.getUser().getName(), s.getProblem().getTitle(),
 						s.getState().toString().toLowerCase(), s.getProblem().getBalao().cssColor()))
 				.toList();
 		}
@@ -46,7 +46,7 @@ public class SubmissionController {
 		try {
 			List<ProblemDto> problems = SubmissionRepository.getProblems()
 				.stream()
-				.map(p -> new ProblemDto(p.getId(), p.getTitile(), p.getBalao().cssColor()))
+				.map(p -> new ProblemDto(p.getId(), p.getTitle(), p.getBalao().cssColor()))
 				.toList();
 			List<ParticipantDto> participants = SubmissionRepository.getParticipants()
 				.stream()

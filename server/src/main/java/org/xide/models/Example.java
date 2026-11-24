@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.xide.models.enums.Lang;
+import org.xide.utils.SqlUtil;
 
 public class Example {
 
@@ -32,19 +33,7 @@ public class Example {
 	}
 
 	public static String getTableCreate() {
-		return """
-				CREATE TABLE IF NOT EXISTS example(
-				    id INT NOT NULL AUTO_INCREMENT,
-				    code TEXT NOT NULL,
-				    id_problem INT NOT NULL,
-				    lang %s,
-				    PRIMARY KEY (id),
-				    CONSTRAINT fk_problem_example
-				        FOREIGN KEY (id_problem)
-				        REFERENCES problem(id)
-				        ON DELETE CASCADE
-				);
-				""".formatted(Lang.getTableCreate());
+		return SqlUtil.readSqlToString("sql/example.sql");
 	}
 
 	public static Example createExampleBySql(String prefix, ResultSet rs) throws SQLException {

@@ -6,6 +6,7 @@ import java.util.Map;
 import org.xide.models.enums.BigO;
 import org.xide.models.enums.BalloonColor;
 import org.xide.models.enums.Lang;
+import org.xide.utils.SqlUtil;
 
 public class Problem {
 
@@ -13,7 +14,7 @@ public class Problem {
 
 	private List<Example> examples;
 
-	private String titile;
+	private String title;
 
 	private Path pdf;
 
@@ -29,11 +30,11 @@ public class Problem {
 
 	private Map<Lang, Double> times;
 
-	public Problem(Long id, List<Example> examples, String titile, Path pdf, List<Soluction> soluctions,
+	public Problem(Long id, List<Example> examples, String title, Path pdf, List<Soluction> soluctions,
 			List<Submission> submissions, BalloonColor balao, String restriction, BigO bigO, Map<Lang, Double> times) {
 		this.id = id;
 		this.examples = examples;
-		this.titile = titile;
+		this.title = title;
 		this.pdf = pdf;
 		this.soluctions = soluctions;
 		this.submissions = submissions;
@@ -43,8 +44,8 @@ public class Problem {
 		this.times = times;
 	}
 
-	public Problem(String titile, Path pdf, String restriction, BigO bigO, Map<Lang, Double> times) {
-		this.titile = titile;
+	public Problem(String title, Path pdf, String restriction, BigO bigO, Map<Lang, Double> times) {
+		this.title = title;
 		this.pdf = pdf;
 		this.soluctions = List.of();
 		this.submissions = List.of();
@@ -53,8 +54,8 @@ public class Problem {
 		this.times = times;
 	}
 
-	public Problem(String titile, Path pdf, String restriction, BigO bigO, Map<Lang, Double> times, String balao) {
-		this.titile = titile;
+	public Problem(String title, Path pdf, String restriction, BigO bigO, Map<Lang, Double> times, String balao) {
+		this.title = title;
 		this.pdf = pdf;
 		this.soluctions = List.of();
 		this.submissions = List.of();
@@ -68,36 +69,15 @@ public class Problem {
 	}
 
 	public static String getProblemTableCreate() {
-		return """
-				CREATE TABLE IF NOT EXISTS problem(
-				    id INT NOT NULL AUTO_INCREMENT,
-				    titile TEXT NOT NULL,
-					balao TEXT,
-				    big_o %s ,
-					restriction TEXT,
-				    pdf TEXT NOT NULL,
-				    PRIMARY KEY(id)
-				);
-				""".formatted(BigO.getTableCreate());
+		return SqlUtil.readSqlToString("sql/problem.sql");
 	}
 
 	public static String getProblemTimesTableCreate() {
-		return """
-				CREATE TABLE IF NOT EXISTS problem_times(
-				    id_problem INT NOT NULL,
-				    lang %s ,
-				    time_ms DOUBLE NOT NULL,
-				    PRIMARY KEY(id_problem, lang),
-				    CONSTRAINT fk_problem_times
-					FOREIGN KEY (id_problem)
-					REFERENCES problem(id)
-					ON DELETE CASCADE
-				);
-				""".formatted(Lang.getTableCreate());
+		return SqlUtil.readSqlToString("sql/problem_times.sql");
 	}
 
-	public String getTitile() {
-		return titile;
+	public String getTitle() {
+		return title;
 	}
 
 	public Long getId() {
@@ -108,8 +88,8 @@ public class Problem {
 		this.id = id;
 	}
 
-	public void setTitile(String titile) {
-		this.titile = titile;
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 	public Path getPdf() {

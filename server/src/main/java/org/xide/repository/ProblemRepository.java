@@ -70,7 +70,7 @@ public class ProblemRepository {
 	private static Long insertProblem(java.sql.Connection conn, String title, BalloonColor color, BigO bigo, Path pdf,
 			String recommentation) throws Exception {
 		String sql = """
-				INSERT INTO problem(titile, balao, big_o, restriction, pdf)
+				INSERT INTO problem(title, balao, big_o, restriction, pdf)
 				VALUES(?,?,?,?,?)
 				""";
 
@@ -94,14 +94,14 @@ public class ProblemRepository {
 
 	public static List<DtoProblem> findAllProblem() throws Exception {
 		String sql = """
-				SELECT id, titile, balao, big_o FROM problem;
+				SELECT id, title, balao, big_o FROM problem;
 				""";
 		java.sql.Connection conn = Connection.connect();
 		PreparedStatement ps = conn.prepareStatement(sql);
 		ResultSet rs = ps.executeQuery();
 		List<DtoProblem> all = new ArrayList<>();
 		while (rs.next()) {
-			String title = rs.getString("titile");
+			String title = rs.getString("title");
 			BalloonColor balloonColor = BalloonColor.fromDatabase(rs.getString("balao"));
 			BigO bigO = BigO.fromDatabase(rs.getString("big_o"));
 			all.add(new DtoProblem(rs.getLong("id"), title, balloonColor.cssColor(), bigO));
@@ -135,8 +135,8 @@ public class ProblemRepository {
 
 	private static boolean updateProblemRecord(java.sql.Connection conn, Long id, String title, BalloonColor color,
 			BigO bigo, String recommentation, Path pdf) throws Exception {
-		String sql = pdf == null ? "UPDATE problem SET titile=?, balao=?, big_o=?, restriction=? WHERE id=?"
-				: "UPDATE problem SET titile=?, balao=?, big_o=?, restriction=?, pdf=? WHERE id=?";
+		String sql = pdf == null ? "UPDATE problem SET title=?, balao=?, big_o=?, restriction=? WHERE id=?"
+				: "UPDATE problem SET title=?, balao=?, big_o=?, restriction=?, pdf=? WHERE id=?";
 		try (PreparedStatement statement = conn.prepareStatement(sql)) {
 			statement.setString(1, title);
 			statement.setString(2, color.cssColor());
@@ -209,7 +209,7 @@ public class ProblemRepository {
 
 	private static Problem selectProblem(java.sql.Connection conn, Long id) throws Exception {
 		String sql = """
-				SELECT id, titile, balao, big_o, restriction, pdf
+				SELECT id, title, balao, big_o, restriction, pdf
 				FROM problem
 				WHERE id = ?
 				""";
@@ -224,7 +224,7 @@ public class ProblemRepository {
 
 				Problem problem = new Problem();
 				problem.setId(rs.getLong("id"));
-				problem.setTitile(rs.getString("titile"));
+				problem.setTitle(rs.getString("title"));
 				problem.setBalao(rs.getString("balao"));
 				problem.setBigO(BigO.fromDatabase(rs.getString("big_o")));
 				problem.setRestriction(rs.getString("restriction"));

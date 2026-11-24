@@ -13,12 +13,6 @@ public enum Lang {
 		this.name = name;
 	}
 
-	public static String getTableCreate() {
-		return """
-				ENUM('python', 'kotlin', 'java', 'cpp', 'c', 'rust', 'go', 'groovy', 'javascript') NOT NULL
-				""";
-	}
-
 	/** Accepts the database values and the labels displayed in the problem form. */
 	public static Lang fromDatabase(String value) {
 		if (value == null || value.isBlank()) {
