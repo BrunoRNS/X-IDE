@@ -3,6 +3,18 @@
 Run commands from the project root using `make <command>`. Running `make` without
 a command displays the help (`help`).
 
+## Windows
+
+The Makefile supports both `cmd.exe`/PowerShell and Git Bash/MSYS2. GNU make on
+Windows uses `cmd.exe` by default unless `SHELL` points to a POSIX shell, so the
+recipes select `mvnw.cmd` or `./mvnw` and the matching shell syntax
+automatically. The LAN IP is detected with `Find-NetRoute` on `cmd.exe` and with
+`ip`/`hostname -I` (falling back to PowerShell) on POSIX shells.
+
+`make communication-test` runs the Bash script and therefore needs `bash`
+(Git Bash/MSYS2). On a native Windows shell, use
+`make communication-test-windows` instead.
+
 ## Web interface
 
 After `make run-server`, open the site over HTTPS:

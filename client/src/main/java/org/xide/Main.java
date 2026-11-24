@@ -6,11 +6,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javax.swing.JOptionPane;
 import org.xide.client.sockets.WebSocketClient;
+import org.xide.frame.ConnectFrame;
+import org.xide.frame.LoadingFrame;
+import org.xide.frame.LoginFrame;
 import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
-import org.xide.ui.ConnectFrame;
-import org.xide.ui.LoadingFrame;
-import org.xide.ui.LoginFrame;
 
 public final class Main {
 

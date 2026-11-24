@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <th:block th:replace="~{templates/fragments/head :: commonHead('Competition | X-IDE')}"></th:block>
+
+    <style type="text/tailwindcss">
+        #rankingView:fullscreen,
+        #rankingView.ranking-fullscreen-fallback {
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            max-width: none;
+            margin: 0;
+            padding: clamp(0.75rem, 2vw, 2rem);
+            overflow: hidden;
+            background: #fff;
+            color: #18181b;
+        }
+
+        .dark #rankingView:fullscreen,
+        .dark #rankingView.ranking-fullscreen-fallback {
+            background: #09090b;
+            color: #f4f4f5;
+        }
+
+        #rankingView:fullscreen #rankingWrap,
+        #rankingView.ranking-fullscreen-fallback #rankingWrap {
+            display: block;
+            flex: 1 1 auto;
+            min-height: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #rankingView:fullscreen #rankingWrap table,
+        #rankingView.ranking-fullscreen-fallback #rankingWrap table {
+            width: 100%;
+            min-width: 0;
+            height: 100%;
+            table-layout: fixed;
+            font-size: var(--ranking-font-size, 1rem);
+        }
+
+        #rankingView:fullscreen #rankingWrap th,
+        #rankingView:fullscreen #rankingWrap td,
+        #rankingView.ranking-fullscreen-fallback #rankingWrap th,
+        #rankingView.ranking-fullscreen-fallback #rankingWrap td {
+            padding: var(--ranking-cell-y, 0.4rem) var(--ranking-cell-x, 0.5rem) !important;
+            font-size: inherit;
+            line-height: 1.15;
+        }
+
+        #rankingView:fullscreen #rankingWrap tbody tr,
+        #rankingView.ranking-fullscreen-fallback #rankingWrap tbody tr {
+            height: var(--ranking-row-height, auto);
+        }
+
+        #rankingView:fullscreen #rankingWrap td,
+        #rankingView.ranking-fullscreen-fallback #rankingWrap td {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #rankingView:fullscreen #rankingWrap svg,
+        #rankingView.ranking-fullscreen-fallback #rankingWrap svg {
+            width: var(--ranking-balloon-size, 1.25rem);
+            height: auto;
+        }
+
+        body.ranking-fullscreen-active {
+            overflow: hidden;
+        }
+    </style>
+
+</head>
+
+<body class="min-h-screen bg-white text-zinc-900
+             dark:bg-zinc-950 dark:text-zinc-100
+             transition-colors duration-300">
+
+    <div th:replace="~{templates/fragments/menu :: menu}"></div>
+
+
+    <main class="mx-auto w-full max-w-5xl px-6 py-10">
+        <div th:replace="~{templates/fragments/competition :: header}"></div>
+        <div th:replace="~{templates/fragments/competition :: actions}"></div>
+        <div th:replace="~{templates/fragments/competition :: submissionHistory}"></div>
+        <div th:replace="~{templates/fragments/competition :: ranking}"></div>
+
+
+        <section th:if="${!status}" th:fragment="problems" class="mt-8" aria-labelledby="problemsTitle">
+
+            <div
+                class="flex flex-wrap items-end justify-between gap-3 border-b border-zinc-200 pb-3 dark:border-zinc-800">
+                <div>
+                    <h2 id="problemsTitle" class="text-lg font-semibold">
+                        Programming problems
+                    </h2>
+                    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                        Manage the problems available in your competition.
+                    </p>
+                </div>
+
+                <button type="button" onclick="openModel()"
+                    class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700">
+                    <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                    Add problem
+                </button>
+            </div>
+
+            <!-- Problem count -->
+            <div class="mt-5 flex items-center justify-between">
+                <p class="text-sm text-zinc-500 dark:text-zinc-400">
+                    Available challenges
+                </p>
+
+                <span id="problemCount"
+                    class="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 dark:bg-red-500/10 dark:text-red-400">
+                    0 problems
+                </span>
+            </div>
+
+            <!-- Empty state -->
+            <div id="empty"
+                class="mt-4 rounded-xl border border-dashed border-zinc-300 px-4 py-12 text-center dark:border-zinc-800">
+
+                <div
+                    class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100 text-zinc-400 dark:bg-zinc-900 dark:text-zinc-500">
+                    <i class="fa-solid fa-code text-xl" aria-hidden="true"></i>
+                </div>
+
+                <h3 class="mt-4 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                    No problems yet
+                </h3>
+
+                <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                    Add your first programming problem to get started.
+                </p>
+            </div>
+
+            <!-- Loading -->
+            <div id="problemsLoading" class="hidden mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div class="h-44 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-900"></div>
+                <div class="h-44 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-900"></div>
+                <div class="h-44 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-900"></div>
+            </div>
+
+            <!-- Problems -->
+            <div id="problemsContainer" class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            </div>
+
+        </section>
+
+    </main>
+    <div th:replace="~{templates/fragments/problemModal :: problemModal}"></div>
+    <div th:replace="~{templates/fragments/problemViewModal :: problemViewModal}"></div>
+
+    <script src="/public/vendor/aos.js"></script>
+    <script src="/public/find_all_problens.js" defer></script>
+    <script src="/public/view_problem.js?v=problem-view-2" defer></script>
+    <script src="/public/competition.js?v=balloon-colors-1" defer></script>
+    <script type="module" src="/public/problens.js?v=problem-edit-1"></script>
+    <script>
+        AOS.init({
+            duration: 700,
+            easing: 'ease-out-cubic',
+            once: true,
+            offset: 40
+        });
+
+    </script>
+</body>
+
+</html>

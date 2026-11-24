@@ -15,6 +15,13 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  # Maven Central rate-limits GitHub's shared runner IPs (HTTP 429). The same
+  # mirror serves dependencies (ci-settings.xml) and the Maven distribution
+  # itself (MVNW_REPOURL rewrites the wrapper's Central URL).
+  MAVEN_ARGS: "-s .mvn/ci-settings.xml"
+  MVNW_REPOURL: https://maven-central.storage-download.googleapis.com/maven2
+
 jobs:
   lint:
     name: lint · spring-javaformat
@@ -159,7 +166,7 @@ jobs:
           java-version: '17'
           cache: maven
       - name: Run all module tests (common, client, server)
-        run: ./mvnw -B -ntp -U test
+        run: ./mvnw -B -ntp test
       - name: Upload surefire reports
         if: failure()
         uses: actions/upload-artifact@v4
@@ -210,6 +217,8 @@ jobs:
           docker run --rm \
             --platform ${{ matrix.platform }} \
             -e EXPECTED_ARCH=${{ matrix.arch }} \
+            -e MAVEN_ARGS \
+            -e MVNW_REPOURL \
             -v "$PWD":/workspace \
             -v "$HOME/.m2":/root/.m2 \
             -w /workspace \
@@ -231,7 +240,7 @@ jobs:
               echo "=== MAVEN VERSION ==="
               ./mvnw -version
               echo "=== RUN TESTS ==="
-              ./mvnw -B -ntp -U test
+              ./mvnw -B -ntp test
             '
       - name: Upload surefire reports
         if: failure()
@@ -262,7 +271,7 @@ jobs:
           java -XshowSettings:properties -version 2>&1 \
             | grep -q "sun.arch.data.model = 32"
       - name: Run all module tests (common, client, server)
-        run: ./mvnw -B -ntp -U test
+        run: ./mvnw -B -ntp test
       - name: Upload surefire reports
         if: failure()
         uses: actions/upload-artifact@v4

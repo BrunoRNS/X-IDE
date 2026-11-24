@@ -3,11 +3,11 @@ package org.xide.controller;
 import java.util.function.Consumer;
 import javax.swing.SwingUtilities;
 import org.xide.ExamIntegrityMonitor;
+import org.xide.frame.LoginFrame;
+import org.xide.frame.MainFrame;
 import org.xide.sockets.annotations.SocketParam;
 import org.xide.sockets.annotations.WebSocketController;
 import org.xide.sockets.annotations.WebSocketRoute;
-import org.xide.ui.LoginFrame;
-import org.xide.ui.MainFrame;
 
 @WebSocketController
 public class AuthController {

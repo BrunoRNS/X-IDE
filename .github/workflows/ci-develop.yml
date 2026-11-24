@@ -17,6 +17,13 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  # Maven Central rate-limits GitHub's shared runner IPs (HTTP 429). The same
+  # mirror serves dependencies (ci-settings.xml) and the Maven distribution
+  # itself (MVNW_REPOURL rewrites the wrapper's Central URL).
+  MAVEN_ARGS: "-s .mvn/ci-settings.xml"
+  MVNW_REPOURL: https://maven-central.storage-download.googleapis.com/maven2
+
 jobs:
   lint:
     name: lint · spring-javaformat
@@ -139,4 +146,4 @@ jobs:
           java-version: '17'
           cache: maven
       - name: Run ${{ matrix.module }} tests
-        run: ./mvnw -B -ntp -U -pl ${{ matrix.module }} -am test
+        run: ./mvnw -B -ntp -pl ${{ matrix.module }} -am test

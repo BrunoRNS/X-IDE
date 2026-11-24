@@ -51,7 +51,7 @@ public class LoginSocketControllerTest {
 	@Test
 	public void logoutRemovesTheSessionFromTheLoggedSet() {
 		Session session = fakeSession();
-		ClientSessions.registerLogin(session);
+		ClientSessions.registerLogin(new User("Ada", "123", "ada@x.io", 1L), session);
 		try {
 			WebSocketRouter router = new WebSocketRouter();
 			router.register(new LoginSocketController());

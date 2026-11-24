@@ -1,5 +1,7 @@
 package org.xide.models;
 
+import java.time.LocalDateTime;
+
 import org.xide.models.enums.SubmissionState;
 
 public class Submission {
@@ -7,6 +9,8 @@ public class Submission {
 	private Long id;
 
 	private User user;
+
+	private LocalDateTime date;
 
 	private Code code;
 
@@ -32,6 +36,7 @@ public class Submission {
 				    state %s ,
 				    code_id INT NOT NULL,
 				    id_problem INT NOT NULL,
+					date DATETIME,
 				    CONSTRAINT uq_submission_code UNIQUE (code_id),
 				    CONSTRAINT fk_submission_code FOREIGN KEY(code_id)
 				    REFERENCES code(id)
@@ -41,6 +46,15 @@ public class Submission {
 				    PRIMARY KEY (id)
 				);
 				""".formatted(SubmissionState.getTableCreate());
+	}
+
+	public static String getTriggerInsert() {
+		return """
+				CREATE TRIGGER IF NOT EXISTS submissions_before_insert
+				BEFORE INSERT ON submissions
+				FOR EACH ROW
+				SET NEW.date = NOW();
+				""";
 	}
 
 	public User getUser() {
@@ -81,6 +95,14 @@ public class Submission {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public LocalDateTime getDate() {
+		return date;
+	}
+
+	public void setDate(LocalDateTime date) {
+		this.date = date;
 	}
 
 }

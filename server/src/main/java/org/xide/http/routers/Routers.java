@@ -1,7 +1,9 @@
 package org.xide.http.routers;
 
 import org.xide.http.controllers.ClassController;
+import org.xide.http.controllers.CompetitionController;
 import org.xide.http.controllers.HelloController;
+import org.xide.http.controllers.ProblensController;
 import org.xide.http.controllers.StudentsController;
 
 import io.javalin.config.JavalinConfig;
@@ -44,6 +46,34 @@ public class Routers {
 
 		config.routes.post("/class/{id}", (ctx) -> {
 			ClassController.index(ctx);
+		});
+
+		config.routes.get("/competition", (ctx) -> {
+			CompetitionController.index(ctx);
+		});
+
+		config.routes.post("/problens/new", (ctx) -> {
+			ProblensController.registerNewProblem(ctx);
+		});
+
+		config.routes.put("/problems/{id}", (ctx) -> {
+			ProblensController.updateProblem(ctx);
+		});
+
+		config.routes.get("/problens/all", (ctx) -> {
+			ProblensController.getAllProblem(ctx);
+		});
+
+		config.routes.post("/problens/id", (ctx) -> {
+			ProblensController.getProblemById(ctx);
+		});
+
+		config.routes.get("/problems/{id}/pdf", (ctx) -> {
+			ProblensController.getProblemPdf(ctx);
+		});
+
+		config.routes.delete("/problems/delete/{id}", (ctx) -> {
+			ProblensController.deleteProblemById(ctx);
 		});
 	}
 
