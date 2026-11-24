@@ -24,8 +24,11 @@ public class Soluction {
 				    input TEXT NOT NULL,
 				    output TEXT NOT NULL,
 				    id_problem INT NOT NULL,
-				    CONSTRAINT fk_problem_soluction FOREIGN KEY (id_problem) REFERENCES problem(id),
-				    primary key(id)
+				    PRIMARY KEY(id),
+				    CONSTRAINT fk_problem_soluction
+				        FOREIGN KEY (id_problem)
+				        REFERENCES problem(id)
+				        ON DELETE CASCADE
 				);
 				""";
 	}

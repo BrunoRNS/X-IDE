@@ -2,9 +2,6 @@ package org.xide.sockets.controllers.submission;
 
 import java.util.List;
 
-import org.xide.models.Submission;
-import org.xide.models.Problem;
-import org.xide.models.User;
 import org.xide.repository.SubmissionRepository;
 import org.xide.sockets.annotations.WebSocketController;
 import org.xide.sockets.annotations.WebSocketRoute;

@@ -71,6 +71,10 @@ public class Routers {
 		config.routes.get("/problems/{id}/pdf", (ctx) -> {
 			ProblensController.getProblemPdf(ctx);
 		});
+
+		config.routes.delete("/problems/delete/{id}", (ctx) -> {
+			ProblensController.deleteProblemById(ctx);
+		});
 	}
 
 }

@@ -88,8 +88,10 @@ public class Problem {
 				    lang %s ,
 				    time_ms DOUBLE NOT NULL,
 				    PRIMARY KEY(id_problem, lang),
-				    CONSTRAINT fk_pt_problem FOREIGN KEY(id_problem)
-				        REFERENCES problem(id) ON DELETE CASCADE
+				    CONSTRAINT fk_problem_soluction
+					FOREIGN KEY (id_problem)
+					REFERENCES problem(id)
+					ON DELETE CASCADE
 				);
 				""".formatted(Lang.getTableCreate());
 	}

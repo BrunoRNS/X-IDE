@@ -1,13 +1,10 @@
 package org.xide.http.controllers;
 
 import java.util.Map;
-import java.util.logging.Logger;
 
 import io.javalin.http.Context;
 
 public class CompetitionController {
-
-	private static final Logger LOGGER = Logger.getLogger(CompetitionController.class.getName());
 
 	private static boolean state = false;
 

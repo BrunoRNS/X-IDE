@@ -25,7 +25,7 @@ public class InitDatabase {
 			smt.execute(Problem.getProblemTableCreate());
 			addMissingProblemColumns(smt);
 			smt.execute(Problem.getProblemTimesTableCreate());
-			smt.execute(Example.createTable());
+			smt.execute(Example.getTableCreate());
 			smt.execute(Soluction.getTableCreate());
 			smt.execute(Code.getTableCreate());
 			smt.execute(Submission.getTableCreate());

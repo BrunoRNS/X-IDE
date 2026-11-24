@@ -57,6 +57,16 @@ public class ProblemRepository {
 		}
 	}
 
+	public static void deleteProblemByid(long id) throws Exception {
+		String sql = """
+				DELETE FROM problem WHERE id = ?
+				""";
+		java.sql.Connection conn = Connection.connect();
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setLong(1, id);
+		ps.execute();
+	}
+
 	private static Long insertProblem(java.sql.Connection conn, String title, BalloonColor color, BigO bigo, Path pdf,
 			String recommentation) throws Exception {
 		String sql = """

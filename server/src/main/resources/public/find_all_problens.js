@@ -205,7 +205,24 @@ function editProblem(id) {
     if (window.openProblemEditor) window.openProblemEditor(id);
 }
 
+async function deleteProblemById(id) {
+    try {
+        const response = await fetch('/problems/delete/' + id, {
+            method: 'DELETE',
+        });
+        if (!response.ok) {
+            throw new Error(`error: ${response.status}`);
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+    }
+}
+
+
 function deleteProblem(id) {
-    console.log("Delete problem", id);
+    if (confirm("Are you sure you wantto delete problem by id: " + id)) {
+        deleteProblemById(id);
+        alert("Deleted problem sucess");
+    }
 }
 document.addEventListener("DOMContentLoaded", renderProblems);
