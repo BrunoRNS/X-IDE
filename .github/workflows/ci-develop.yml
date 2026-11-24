@@ -18,8 +18,11 @@ permissions:
   contents: read
 
 env:
-  # Maven Central rate-limits GitHub's shared runner IPs (HTTP 429).
+  # Maven Central rate-limits GitHub's shared runner IPs (HTTP 429). The same
+  # mirror serves dependencies (ci-settings.xml) and the Maven distribution
+  # itself (MVNW_REPOURL rewrites the wrapper's Central URL).
   MAVEN_ARGS: "-s .mvn/ci-settings.xml"
+  MVNW_REPOURL: https://maven-central.storage-download.googleapis.com/maven2
 
 jobs:
   lint:
