@@ -1,4 +1,4 @@
-import { openDropdown, initializeBalloonPicker } from './balloons.js';
+import { openDropdown, initializeBalloonPicker } from './balloons.js?v=problem-edit-2';
 import { deleteExample, createNewExample } from './examples.js';
 import { addLangLimit, addLangSolution, createBigO } from './fields.js';
 import { openProblemEditor, openProblemModal, resetProblemForm } from './editor.js';
@@ -8,6 +8,8 @@ import {
     initializePdfPreview
 } from './pdf-preview.js';
 import { problemForm, problemModal, problemState } from './state.js';
+import { openModal, closeStudentModal, addItem } from './modal.js?v=problem-edit-3';
+
 
 function exposeInlineHandlers() {
     window.openModel = openProblemModal;
@@ -17,6 +19,7 @@ function exposeInlineHandlers() {
     window.createNewExample = createNewExample;
     window.deleteExample = deleteExample;
     window.openProblemEditor = openProblemEditor;
+    window.addItem = addItem;
 }
 
 function initializeProblemForm() {
@@ -98,6 +101,13 @@ function initializeDateValidation() {
         );
     });
 }
+
+window.openCompetitionModal = function () {
+    openModal({
+        title: 'Start new competition',
+        description: 'Start competition in server X-IDE.',
+    });
+};
 
 exposeInlineHandlers();
 initializeProblemForm();

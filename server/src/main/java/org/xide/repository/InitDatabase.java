@@ -35,14 +35,27 @@ public class InitDatabase {
 		System.out.println("Tables create!");
 	}
 
-	/** Keeps databases created before the restriction column was added in sync. */
+	/**
+	 * Keeps databases created with older schemas in sync: the title column was once
+	 * created as `titile`, and `restriction` was added later.
+	 */
 	private void addMissingProblemColumns(Statement smt) throws Exception {
-		boolean hasRestriction;
-		try (ResultSet columns = smt.executeQuery("SHOW COLUMNS FROM problem LIKE 'restriction'")) {
-			hasRestriction = columns.next();
+		if (!hasColumn(smt, "problem", "title")) {
+			if (hasColumn(smt, "problem", "titile")) {
+				smt.execute("ALTER TABLE problem CHANGE COLUMN titile title TEXT NOT NULL");
+			}
+			else {
+				smt.execute("ALTER TABLE problem ADD COLUMN title TEXT NOT NULL");
+			}
 		}
-		if (!hasRestriction) {
+		if (!hasColumn(smt, "problem", "restriction")) {
 			smt.execute("ALTER TABLE problem ADD COLUMN restriction TEXT");
+		}
+	}
+
+	private boolean hasColumn(Statement smt, String table, String column) throws Exception {
+		try (ResultSet columns = smt.executeQuery("SHOW COLUMNS FROM " + table + " LIKE '" + column + "'")) {
+			return columns.next();
 		}
 	}
 

@@ -157,14 +157,27 @@
         </section>
 
     </main>
+    <div th:replace="~{templates/fragments/modal :: modal(
+    'Manage competition',
+    'Manage competition dates',
+    ~{templates/fragments/competition-form :: competitionForm}
+)}"></div>
     <div th:replace="~{templates/fragments/problemModal :: problemModal}"></div>
     <div th:replace="~{templates/fragments/problemViewModal :: problemViewModal}"></div>
+
+    <div id="countdownOverlay"
+        class="fixed inset-0 z-[60] hidden flex-col items-center justify-center bg-black/85 p-6 backdrop-blur-sm"
+        style="z-index: 60;">
+        <p id="countdownLabel" class="text-sm font-semibold uppercase tracking-[0.3em] text-zinc-400">Starts in</p>
+        <p id="countdownValue" class="mt-2 font-black tabular-nums text-white" style="font-size: 7rem;">--</p>
+        <p id="countdownEnd" class="mt-4 text-sm text-zinc-400"></p>
+    </div>
 
     <script src="/public/vendor/aos.js"></script>
     <script src="/public/find_all_problens.js" defer></script>
     <script src="/public/view_problem.js?v=problem-view-2" defer></script>
     <script src="/public/competition.js?v=balloon-colors-1" defer></script>
-    <script type="module" src="/public/problens.js?v=problem-edit-1"></script>
+    <script type="module" src="/public/problens.js?v=problem-edit-3"></script>
     <script>
         AOS.init({
             duration: 700,
