@@ -206,23 +206,34 @@ function editProblem(id) {
 }
 
 async function deleteProblemById(id) {
-    try {
-        const response = await fetch('/problems/delete/' + id, {
-            method: 'DELETE',
-        });
-        if (!response.ok) {
-            throw new Error(`error: ${response.status}`);
+    const response = await fetch('/problems/delete/' + id, {
+        method: 'DELETE',
+    });
+
+    if (!response.ok) {
+        let message = `error: ${response.status}`;
+        try {
+            const payload = await response.json();
+            message = payload.error || message;
+        } catch (ignored) {
+            // keep the status message when the body is not JSON
         }
-    } catch (error) {
-        console.error('Erro:', error);
+        throw new Error(message);
     }
 }
 
 
-function deleteProblem(id) {
-    if (confirm("Are you sure you wantto delete problem by id: " + id)) {
-        deleteProblemById(id);
-        alert("Deleted problem sucess");
+async function deleteProblem(id) {
+    if (!confirm("Are you sure you want to delete problem by id: " + id + "?")) {
+        return;
+    }
+
+    try {
+        await deleteProblemById(id);
+        await renderProblems();
+    } catch (error) {
+        console.error('Erro ao deletar problema:', error);
+        alert('Não foi possível deletar o problema: ' + error.message);
     }
 }
 document.addEventListener("DOMContentLoaded", renderProblems);

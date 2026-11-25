@@ -58,12 +58,34 @@ public class ProblemRepository {
 		}
 	}
 
-	public static void deleteProblemByid(long id) throws Exception {
-		String sql = SqlUtil.readSqlToString("sql/repository/problem/deleteProblemById.sql");
+	public static boolean deleteProblemById(long id) throws Exception {
 		java.sql.Connection conn = Connection.connect();
-		PreparedStatement ps = conn.prepareStatement(sql);
-		ps.setLong(1, id);
-		ps.execute();
+		boolean autoCommit = conn.getAutoCommit();
+		conn.setAutoCommit(false);
+
+		try {
+			// Remove children explicitly: databases created before the ON DELETE CASCADE
+			// constraints were added still reject the delete on problem.
+			deleteByProblemId(conn, "submissions", id);
+			deleteByProblemId(conn, "code", id);
+			deleteByProblemId(conn, "example", id);
+			deleteByProblemId(conn, "soluctions", id);
+			deleteByProblemId(conn, "problem_times", id);
+
+			try (PreparedStatement ps = conn.prepareStatement("DELETE FROM problem WHERE id = ?")) {
+				ps.setLong(1, id);
+				boolean deleted = ps.executeUpdate() > 0;
+				conn.commit();
+				return deleted;
+			}
+		}
+		catch (Exception e) {
+			conn.rollback();
+			throw e;
+		}
+		finally {
+			conn.setAutoCommit(autoCommit);
+		}
 	}
 
 	private static Long insertProblem(java.sql.Connection conn, String title, BalloonColor color, BigO bigo, Path pdf,
