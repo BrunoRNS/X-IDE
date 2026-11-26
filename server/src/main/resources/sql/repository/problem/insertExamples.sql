@@ -1,0 +1,1 @@
+INSERT INTO example(code, id_problem, lang) VALUES (?,?,?)

@@ -1,0 +1,55 @@
+
+<div th:fragment="studentForm">
+
+    <form action="/students/register"
+          method="POST"
+          class="mt-6 space-y-4">
+
+        <input type="hidden" name="id">
+
+        <div>
+            <label for="studentName"
+                   class="mb-2 block text-sm font-medium">
+                Student Name
+            </label>
+
+            <input type="text"
+                   id="studentName"
+                   name="name"
+                   placeholder="Enter student name"
+                   required
+                   class="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-900">
+        </div>
+
+        <div>
+            <label for="studentEmail"
+                   class="mb-2 block text-sm font-medium">
+                Email Address
+            </label>
+
+            <input type="email"
+                   id="studentEmail"
+                   name="email"
+                   placeholder="student@example.com"
+                   required
+                   class="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-900">
+        </div>
+
+        <div class="flex gap-3 pt-3">
+
+            <button type="button"
+                    onclick="closeStudentModal()"
+                    class="flex-1 rounded-lg border border-zinc-200 px-4 py-3 text-sm font-medium">
+                Cancel
+            </button>
+
+            <button type="submit"
+                    class="flex-1 rounded-lg bg-red-600 px-4 py-3 text-sm font-semibold text-white hover:bg-red-700">
+                <i class="fa-solid fa-plus mr-1"></i>
+                Register
+            </button>
+
+        </div>
+    </form>
+
+</div>

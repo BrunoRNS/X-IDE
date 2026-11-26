@@ -61,6 +61,7 @@ export function openDropdown() {
 
 export function initializeBalloonPicker() {
     const container = document.getElementById('content-dropdown');
+    if (!container) return;
 
     balloonColors.forEach((color) => {
         const button = document.createElement('button');
@@ -73,8 +74,9 @@ export function initializeBalloonPicker() {
     });
 
     document.addEventListener('click', (event) => {
-        const dropdown = document.getElementById('dropdown');
+        const dropdown = document.getElementById('button-dropdown');
         const content = document.getElementById('content-dropdown');
+        if (!dropdown || !content) return;
 
         if (!dropdown.contains(event.target) && !content.classList.contains('hidden')) {
             content.classList.add('hidden');

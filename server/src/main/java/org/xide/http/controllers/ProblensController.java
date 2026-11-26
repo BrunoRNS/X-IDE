@@ -200,15 +200,22 @@ public class ProblensController {
 	}
 
 	public static void deleteProblemById(Context ctx) {
-		Long id = Long.parseLong(ctx.pathParam("id"));
 		try {
-			ProblemRepository.deleteProblemByid(id);
+			Long id = Long.parseLong(ctx.pathParam("id"));
+
+			if (!ProblemRepository.deleteProblemById(id)) {
+				ctx.status(404).json(Map.of("error", "Problem not found."));
+				return;
+			}
+
 			ctx.status(200).json(Map.of("id", id));
 		}
+		catch (NumberFormatException e) {
+			ctx.status(400).json(Map.of("error", "Invalid problem id."));
+		}
 		catch (Exception e) {
-			e.printStackTrace();
-			LOGGER.log(Level.SEVERE, "Could not delete problem by id: " + id, e);
-			ctx.status(500).json(Map.of("error", "Could not delete problem by id: " + id));
+			LOGGER.log(Level.SEVERE, "Could not delete problem", e);
+			ctx.status(500).json(Map.of("error", "Could not delete the problem."));
 		}
 	}
 

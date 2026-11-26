@@ -113,13 +113,11 @@
                             student@example.com
                         </td>
 
-                       <td class="px-5 py-4 text-zinc-500 dark:text-zinc-400"
-                            th:text="${student.password}">
+                        <td class="px-5 py-4 text-zinc-500 dark:text-zinc-400" th:text="${student.password}">
                             ••••••••
                         </td>
 
-                        <td class="px-5 py-4 text-right text-zinc-400 dark:text-zinc-500"
-                            th:text="${student.id}">
+                        <td class="px-5 py-4 text-right text-zinc-400 dark:text-zinc-500" th:text="${student.id}">
                             0
                         </td>
 
@@ -156,8 +154,11 @@
             </table>
         </div>
 
-        <div th:replace="~{templates/fragments/modal :: modal('Register Student', 'Add a new student to X-IDE.')}"></div>
-
+        <div th:replace="~{templates/fragments/modal :: modal(
+    'Register student',
+    'Add a new student',
+    ~{templates/fragments/student-form :: studentForm}
+)}"></div>
     </main>
 
     <script src="/public/vendor/aos.js"></script>

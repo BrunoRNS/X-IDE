@@ -33,7 +33,7 @@ public class Example {
 	}
 
 	public static String getTableCreate() {
-		return SqlUtil.readSqlToString("sql/example.sql");
+		return SqlUtil.readSqlToString("sql/tables/example.sql");
 	}
 
 	public static Example createExampleBySql(String prefix, ResultSet rs) throws SQLException {

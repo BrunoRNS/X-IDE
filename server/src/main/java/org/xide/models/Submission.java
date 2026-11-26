@@ -31,11 +31,11 @@ public class Submission {
 	}
 
 	public static String getTableCreate() {
-		return SqlUtil.readSqlToString("sql/submissions.sql");
+		return SqlUtil.readSqlToString("sql/tables/submissions.sql");
 	}
 
 	public static String getTriggerInsert() {
-		return SqlUtil.readSqlToString("sql/submissions_before_insert.sql");
+		return SqlUtil.readSqlToString("sql/tables/submissions_before_insert.sql");
 	}
 
 	public User getUser() {

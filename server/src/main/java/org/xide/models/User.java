@@ -62,7 +62,7 @@ public class User {
 	}
 
 	public static String getTableCreate() {
-		return SqlUtil.readSqlToString("sql/users.sql");
+		return SqlUtil.readSqlToString("sql/tables/users.sql");
 	}
 
 	public Long getId() {

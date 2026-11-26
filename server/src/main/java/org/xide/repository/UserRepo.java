@@ -5,11 +5,12 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import org.xide.models.User;
+import org.xide.utils.SqlUtil;
 
 public class UserRepo {
 
 	public static User getUser(String email, String password) throws Exception {
-		String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
+		String sql = SqlUtil.readSqlToString("sql/repository/user/getUser.sql");
 		java.sql.Connection conn = Connection.connect();
 		PreparedStatement ps = conn.prepareStatement(sql);
 		ps.setString(1, email);
@@ -26,7 +27,7 @@ public class UserRepo {
 	}
 
 	public static List<User> findAll() throws Exception {
-		String sql = "SELECT id, name, email, password FROM users ORDER BY id";
+		String sql = SqlUtil.readSqlToString("sql/repository/user/findAll.sql");
 		java.sql.Connection conn = Connection.connect();
 		PreparedStatement ps = conn.prepareStatement(sql);
 		try (ResultSet rs = ps.executeQuery()) {
@@ -44,7 +45,7 @@ public class UserRepo {
 	}
 
 	public static User save(String email, String password, String name) throws Exception {
-		String sql = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
+		String sql = SqlUtil.readSqlToString("sql/repository/user/save.sql");
 		java.sql.Connection conn = Connection.connect();
 		PreparedStatement ps = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
 		ps.setString(1, name);
@@ -61,7 +62,7 @@ public class UserRepo {
 	}
 
 	public static boolean deleteById(Long id) throws Exception {
-		String sql = "DELETE FROM users WHERE id = ?;";
+		String sql = SqlUtil.readSqlToString("sql/repository/user/deleteById.sql");
 		java.sql.Connection conn = Connection.connect();
 		PreparedStatement ps = conn.prepareStatement(sql);
 		ps.setLong(1, id);
@@ -69,7 +70,7 @@ public class UserRepo {
 	}
 
 	public static boolean update(User user) throws Exception {
-		String sql = "UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?";
+		String sql = SqlUtil.readSqlToString("sql/repository/user/update.sql");
 		java.sql.Connection conn = Connection.connect();
 		PreparedStatement ps = conn.prepareStatement(sql);
 		ps.setString(1, user.getName());
@@ -80,7 +81,7 @@ public class UserRepo {
 	}
 
 	public static User getUserByEmailAndPassword(String email, String password) throws Exception {
-		String sql = "SELECT * FROM users WHERE email = ? AND password = ?";
+		String sql = SqlUtil.readSqlToString("sql/repository/user/getUser.sql");
 		java.sql.Connection conn = Connection.connect();
 		PreparedStatement ps = conn.prepareStatement(sql);
 		ps.setString(1, email);

@@ -20,7 +20,7 @@ public class Soluction {
 	}
 
 	public static String getTableCreate() {
-		return SqlUtil.readSqlToString("sql/soluctions.sql");
+		return SqlUtil.readSqlToString("sql/tables/soluctions.sql");
 	}
 
 	public String getIn() {

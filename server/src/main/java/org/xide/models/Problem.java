@@ -69,11 +69,11 @@ public class Problem {
 	}
 
 	public static String getProblemTableCreate() {
-		return SqlUtil.readSqlToString("sql/problem.sql");
+		return SqlUtil.readSqlToString("sql/tables/problem.sql");
 	}
 
 	public static String getProblemTimesTableCreate() {
-		return SqlUtil.readSqlToString("sql/problem_times.sql");
+		return SqlUtil.readSqlToString("sql/tables/problem_times.sql");
 	}
 
 	public String getTitle() {

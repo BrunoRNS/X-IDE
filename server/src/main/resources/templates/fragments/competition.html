@@ -19,13 +19,15 @@
     <button th:if="${!status}" 
         type="button" 
         class="action-button inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-700"
-        onclick="openModalStartCompetition()"
+        onclick="openCompetitionModal()"
     >
         <i class="fa-solid fa-play" aria-hidden="true"></i>
         Start competition
     </button>
 
-    <button th:if="${status}" type="button" class="action-button inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700">
+    <button th:if="${status}"
+    onclick="closeCompetition()"
+    type="button" class="action-button inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700">
         <i class="fa-solid fa-stop" aria-hidden="true"></i>
         End competition
     </button>

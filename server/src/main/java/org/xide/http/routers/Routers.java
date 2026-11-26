@@ -75,6 +75,14 @@ public class Routers {
 		config.routes.delete("/problems/delete/{id}", (ctx) -> {
 			ProblensController.deleteProblemById(ctx);
 		});
+
+		config.routes.post("/competition/start", (ctx) -> {
+			CompetitionController.start(ctx);
+		});
+
+		config.routes.delete("/competition/stop", (ctx) -> {
+			CompetitionController.stop(ctx);
+		});
 	}
 
 }
