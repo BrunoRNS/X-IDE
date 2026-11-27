@@ -5,7 +5,15 @@ COMPOSE_ARGS ?=
 COMPOSE := docker compose --env-file .env -f infra/compose.yaml
 COMPOSE_DEV := $(COMPOSE) -f infra/compose.dev.yaml
 
-CLIENT_JAR := client/target/client-1.0-SNAPSHOT-all.jar
+# Project version comes from VERSION (the single source of truth maintained by
+# `make version`). Jar names are version-independent thanks to <finalName> and the
+# client shade plugin's outputFile, so a version bump never breaks copy/run scripts.
+PROJECT_VERSION := $(strip $(file <VERSION))
+ifeq ($(PROJECT_VERSION),)
+PROJECT_VERSION := $(strip $(shell python3 scripts/version.py --print))
+endif
+
+CLIENT_JAR := client/target/client-all.jar
 CLIENT_ENDPOINT ?= wss://localhost:8443/ws/socket
 CLIENT_ROUTE ?= /develop/ping
 CLIENT_MESSAGE ?= ping
@@ -43,6 +51,24 @@ EXIT_FAIL := exit /b 1
 NOOP := rem
 endif
 
+# `make version v1.2.3` passes the version as an extra goal. Give those goals a
+# no-op rule so make does not treat them as missing files; the real work is done
+# by the `version` target, which reads VERSION_GOALS from MAKECMDGOALS below.
+VERSION_GOALS := $(filter-out version version-check,$(filter v%,$(MAKECMDGOALS)))
+ifneq ($(strip $(VERSION_GOALS)),)
+.PHONY: $(VERSION_GOALS)
+$(VERSION_GOALS):
+	@python3 scripts/version.py --validate "$@"
+endif
+
+ifeq ($(origin V),command line)
+VERSION_V := $(V)
+endif
+ifeq ($(origin VERSION),command line)
+VERSION_CLI := $(VERSION)
+endif
+VERSION_ARG ?= $(strip $(firstword $(VERSION_GOALS)) $(VERSION_V) $(VERSION_CLI))
+
 # Auto-detected LAN IP: source address of the default route, used as TLS_HOST when
 # neither the shell environment nor .env defines one. Fallback: hostname -I on
 # POSIX shells and Find-NetRoute on Windows cmd.exe.
@@ -77,8 +103,8 @@ endif
 .PHONY: run-server run-dev-server stop-server server-logs stack-status
 .PHONY: run-client run-clients communication-test communication-test-windows remote-test run-dev-client
 .PHONY: run-model
-.PHONY: format lint imports-check imports-apply
-.PHONY: configure help exit quit
+.PHONY: format lint imports-check imports-apply line-endings-check line-endings-apply
+.PHONY: configure version version-check help exit quit
 
 define HELP_TEXT
 ████████████████████████████████████████████████████████████████████████████████████████████████████
@@ -121,10 +147,12 @@ Build scopes (see each module's src/main/java and src/test/java package-info.jav
 JUnit scopes:
   test-common | test-client | test-server | test-integration | test-all
 
-Code style (Spring Java Format + scripts/JavaImportFormatter.java):
-  format                              Rewrite all Java sources and sort imports.
-  lint                                Fail when a source is not formatted or
-                                      imports are out of order.
+Code style (LF line endings + Spring Java Format + JavaImportFormatter.java):
+  format                              Normalize every text file to LF, rewrite
+                                      Java sources and sort imports.
+  lint                                Fail on CR line endings, bad formatting
+                                      or out-of-order imports.
+  line-endings-check | line-endings-apply  Check or normalize LF in all text files.
   imports-check | imports-apply       Check or rewrite import order only.
 
 Runtime:
@@ -163,6 +191,13 @@ Runtime:
 
 Project:
   configure | help | exit | quit
+  version [V=v1.2.3]            Set the release version in VERSION, all pom.xml
+                                files and the client's --version output.
+                                Also accepts: make version v1.2.3 or
+                                make version VERSION=1.2.3. With no argument,
+                                the highest local vX.Y.Z tag is used.
+                                Javadoc @since tags are never changed.
+  version-check                 Fail if VERSION, the POMs and the client disagree.
 
 Example local workflow:
   run-server                          # starts the stack
@@ -203,11 +238,11 @@ package-server:
 	$(MVNW) $(MVN_ARGS) -B -ntp -pl server -am -DskipTests package
 
 package-server-bundles: package-server
-	python3 scripts/package-server.py --variant all --version 1.0.0 --platforms linux/amd64,linux/arm64 --output-dir dist
+	python3 scripts/package-server.py --variant all --version $(PROJECT_VERSION) --platforms linux/amd64,linux/arm64 --output-dir dist
 
 package-client:
 	$(MVNW) $(MVN_ARGS) -B -ntp -pl client -am -DskipTests package
-	python3 scripts/package-client.py --target auto --version 1.0.0 --output-dir dist
+	python3 scripts/package-client.py --target auto --version $(PROJECT_VERSION) --output-dir dist
 
 jpackage: package-client
 	@echo "Client bundle created in dist/"
@@ -227,10 +262,16 @@ test-integration:
 test-all:
 	$(MVNW) $(MVN_ARGS) test
 
-format: imports-apply
+line-endings-check:
+	python3 scripts/line_endings.py --check
+
+line-endings-apply:
+	python3 scripts/line_endings.py --apply
+
+format: line-endings-apply imports-apply
 	$(MVNW) $(MVN_ARGS) spring-javaformat:apply
 
-lint: imports-check
+lint: line-endings-check imports-check
 	$(MVNW) $(MVN_ARGS) spring-javaformat:validate
 
 imports-check:
@@ -238,6 +279,12 @@ imports-check:
 
 imports-apply:
 	java scripts/JavaImportFormatter.java --apply
+
+version:
+	@python3 scripts/version.py $(if $(VERSION_ARG),"$(VERSION_ARG)")
+
+version-check:
+	@python3 scripts/version.py --check
 
 ifeq ($(POSIX_SHELL),1)
 configure:

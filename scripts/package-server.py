@@ -32,6 +32,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 RELEASE = ROOT / "infra" / "release"
 
+
+def project_version() -> str:
+    """Return the repository version written by `make version`."""
+    version_file = ROOT / "VERSION"
+    if version_file.is_file():
+        value = version_file.read_text(encoding="utf-8").strip()
+        if value:
+            return value
+    return "0.0.0"
+
 IMAGE_TAGS = {
     "full": "xide-full-server:local",
     "site": "xide-server-site:local",
@@ -84,7 +94,9 @@ def check_docker() -> None:
 
 
 def check_server_jar() -> None:
-    jar = ROOT / "server" / "target" / "server-1.0-SNAPSHOT.jar"
+    # server pom.xml sets <finalName>server</finalName>, so the jar name does not
+    # change when `make version` updates the POM version.
+    jar = ROOT / "server" / "target" / "server.jar"
     if not jar.is_file():
         raise SystemExit(
             "server JAR not found; run "
@@ -170,7 +182,7 @@ def main() -> None:
         default="all",
         help="bundle to build (default: all)",
     )
-    parser.add_argument("--version", default="0.0.0", help="release version")
+    parser.add_argument("--version", default=project_version(), help="release version")
     parser.add_argument(
         "--platforms",
         default="linux/amd64",

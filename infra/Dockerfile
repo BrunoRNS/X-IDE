@@ -13,7 +13,7 @@ RUN apt-get update \
 WORKDIR /opt/xide
 
 
-COPY server/target/server-1.0-SNAPSHOT.jar /opt/xide/server.jar
+COPY server/target/server.jar /opt/xide/server.jar
 
 
 # XIDE_SERVER_ROLE (full, site, websocket) selects one of these configurations at

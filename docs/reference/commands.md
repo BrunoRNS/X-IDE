@@ -55,8 +55,10 @@ Complete reference for all Makefile commands.
 
 | Command | Description |
 |---------|-------------|
-| `make format` | Rewrites all Java sources and sorts imports (Spring Java Format + Import Formatter) |
-| `make lint` | Fails when a source is not formatted or imports are out of order |
+| `make format` | Normalizes every text file to LF, rewrites Java sources and sorts imports |
+| `make lint` | Fails on CR line endings, bad formatting or out-of-order imports |
+| `make line-endings-check` | Fails if any text file contains CR |
+| `make line-endings-apply` | Rewrites text files with LF line endings |
 | `make imports-check` | Checks import order only |
 | `make imports-apply` | Rewrites import order only |
 
@@ -66,6 +68,18 @@ Complete reference for all Makefile commands.
 |---------|-------------|
 | `make help` | Displays command help |
 | `make exit` / `make quit` | Prints `bye` |
+
+### Versioning Commands
+
+The version lives in the root `VERSION` file. `make version` updates that file, all four `pom.xml` files, and the constant printed by `java -jar client/target/client-all.jar --version`. Javadoc `@since` tags are documentation history and are never changed. Jar filenames are version-independent (`client-all.jar` via the shade plugin's `outputFile`, and `server.jar` via `<finalName>`).
+
+| Command | Description |
+|---------|-------------|
+| `make version V=v1.2.3` | Sets the version from the `V` variable |
+| `make version v1.2.3` | Same, using the version as a make goal |
+| `make version VERSION=1.2.3` | Same, using the `VERSION` variable |
+| `make version` | Uses the highest local `vX.Y.Z` tag; fails if none exists |
+| `make version-check` | Fails if `VERSION`, the POMs and the client constant disagree |
 
 ## Options
 
@@ -98,7 +112,7 @@ make run-model MODEL_NAME=qwen2.5-coder:1.5b
 When running the client JAR directly, omit `--endpoint` to enter the server IP in the window. To connect without the window, pass the endpoint using `--endpoint`; the route is the first positional argument:
 
 ```bash
-java -jar client/target/client-1.0-SNAPSHOT-all.jar \
+java -jar client/target/client-all.jar \
   --endpoint wss://localhost:8443/ws/socket /develop/ping --message ping
 ```
 

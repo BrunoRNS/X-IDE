@@ -125,7 +125,7 @@ Started separately with `make run-model`. Not required for core functionality.
 
 ### 6. Swing Desktop Client
 
-Standalone shaded JAR (`client/target/client-1.0-SNAPSHOT-all.jar`):
+Standalone shaded JAR (`client/target/client-all.jar`):
 
 - **Connection**: WSS to `/ws/socket` endpoint
 - **Certificate Pinning**: TOFU (Trust On First Use) model

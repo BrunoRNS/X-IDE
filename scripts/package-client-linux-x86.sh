@@ -9,9 +9,9 @@
 set -euo pipefail
 
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
-VERSION="${1:-1.0.0}"
+VERSION="${1:-$(python3 "$ROOT/scripts/version.py" --print)}"
 OUT="${2:-dist}"
-JAR="${3:-client/target/client-1.0-SNAPSHOT-all.jar}"
+JAR="${3:-client/target/client-all.jar}"
 
 if [ ! -f "$ROOT/$JAR" ]; then
     echo "missing $JAR; run './mvnw -pl client -am -DskipTests package' first" >&2

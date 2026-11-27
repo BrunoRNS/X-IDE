@@ -8,7 +8,7 @@ $ErrorActionPreference = "Continue"
 if ($env:CLIENT_ENDPOINT) { $Endpoint = $env:CLIENT_ENDPOINT }
 
 
-$Jar = "client/target/client-1.0-SNAPSHOT-all.jar"
+$Jar = "client/target/client-all.jar"
 
 if (-not (Test-Path $Jar)) {
     Write-Host "client JAR not found: $Jar (run 'make package-all' or '.\mvnw.cmd -pl client -am package' first)"

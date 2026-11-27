@@ -27,6 +27,17 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
+
+def project_version() -> str:
+    """Return the repository version written by `make version`."""
+    version_file = ROOT / "VERSION"
+    if version_file.is_file():
+        value = version_file.read_text(encoding="utf-8").strip()
+        if value:
+            return value
+    return "1.0.0"
+
+
 TARGETS = {
     "linux-x86": {"os": "linux", "arch": "x86", "bits": 32, "format": "tar.gz"},
     "linux-x86_64": {"os": "linux", "arch": "x86_64", "bits": 64, "format": "tar.gz"},
@@ -134,6 +145,11 @@ def find_client_jar(explicit: str | None) -> Path:
         if not jar.is_file():
             raise SystemExit(f"client JAR not found: {jar}")
         return jar.resolve()
+    # The shaded jar has a stable name (see the shade plugin's outputFile in
+    # client/pom.xml); the glob only accepts older versioned jars left in target/.
+    stable = ROOT / "client" / "target" / "client-all.jar"
+    if stable.is_file():
+        return stable.resolve()
     candidates = sorted((ROOT / "client/target").glob("client-*-all.jar"))
     if not candidates:
         raise SystemExit(
@@ -245,7 +261,7 @@ def main() -> None:
         choices=["auto", *TARGETS],
         help="target bundle name, or 'auto' to detect the host JDK",
     )
-    parser.add_argument("--version", default="1.0.0", help="release version")
+    parser.add_argument("--version", default=project_version(), help="release version")
     parser.add_argument("--jar", help="path to the shaded client JAR")
     parser.add_argument("--output-dir", default="dist", help="bundle output directory")
     args = parser.parse_args()

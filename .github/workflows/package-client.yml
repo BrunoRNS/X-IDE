@@ -68,7 +68,7 @@ jobs:
 
           jpackage --type app-image --name XIDE-Client \
             --input client/target \
-            --main-jar client-1.0-SNAPSHOT-all.jar \
+            --main-jar client-all.jar \
             --main-class org.xide.Main \
             --dest dist
 
@@ -90,6 +90,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
+      # The 32-bit (x86) JDK shipped by setup-java needs 32-bit runtime
+      # libraries on the x64 runner; without them jpackage cannot start
+      # (e.g. "libz.so.1: cannot open shared object file"). Install them
+      # before setting up Java so every check can run.
+      - name: Install 32-bit runtime libraries
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y libc6-i386 zlib1g:i386 lib32z1 binutils
+
       - name: Set up Java 17
         uses: actions/setup-java@v6
         with:
@@ -110,7 +120,7 @@ jobs:
 
           jpackage --type app-image --name XIDE-Client \
             --input client/target \
-            --main-jar client-1.0-SNAPSHOT-all.jar \
+            --main-jar client-all.jar \
             --main-class org.xide.Main \
             --dest dist
 
@@ -152,7 +162,7 @@ jobs:
 
           jpackage --type app-image --name XIDE-Client \
             --input client/target \
-            --main-jar client-1.0-SNAPSHOT-all.jar \
+            --main-jar client-all.jar \
             --main-class org.xide.Main \
             --dest dist
 
@@ -194,7 +204,7 @@ jobs:
 
           jpackage --type app-image --name XIDE-Client `
             --input client/target `
-            --main-jar client-1.0-SNAPSHOT-all.jar `
+            --main-jar client-all.jar `
             --main-class org.xide.Main `
             --dest dist
 
@@ -236,7 +246,7 @@ jobs:
 
           jpackage --type app-image --name XIDE-Client `
             --input client/target `
-            --main-jar client-1.0-SNAPSHOT-all.jar `
+            --main-jar client-all.jar `
             --main-class org.xide.Main `
             --dest dist
 
@@ -278,7 +288,7 @@ jobs:
 
           jpackage --type app-image --name XIDE-Client `
             --input client/target `
-            --main-jar client-1.0-SNAPSHOT-all.jar `
+            --main-jar client-all.jar `
             --main-class org.xide.Main `
             --dest dist
 
@@ -320,7 +330,7 @@ jobs:
 
           jpackage --type app-image --name XIDE-Client \
             --input client/target \
-            --main-jar client-1.0-SNAPSHOT-all.jar \
+            --main-jar client-all.jar \
             --main-class org.xide.Main \
             --dest dist
 
@@ -362,7 +372,7 @@ jobs:
 
           jpackage --type app-image --name XIDE-Client \
             --input client/target \
-            --main-jar client-1.0-SNAPSHOT-all.jar \
+            --main-jar client-all.jar \
             --main-class org.xide.Main \
             --dest dist
 

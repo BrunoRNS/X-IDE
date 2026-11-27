@@ -7,13 +7,13 @@
         <?m2e execute onConfiguration,onIncremental?>
         <groupId>org.xide</groupId>
         <artifactId>xide</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <groupId>org.xide</groupId>
     <artifactId>common</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 
     <properties>
         <maven.compiler.release>17</maven.compiler.release>

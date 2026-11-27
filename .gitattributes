@@ -1,0 +1,25 @@
+# Keep text files with LF line endings in the working tree and in Git.
+* text=auto eol=lf
+
+# Binary assets must never be normalized.
+*.bcmap binary
+*.class binary
+*.dll binary
+*.dylib binary
+*.exe binary
+*.gif binary
+*.gz binary
+*.ico binary
+*.jar binary
+*.jpeg binary
+*.jpg binary
+*.mp3 binary
+*.mp4 binary
+*.pdf binary
+*.png binary
+*.so binary
+*.tar binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
+*.zip binary

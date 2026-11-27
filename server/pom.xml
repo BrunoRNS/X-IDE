@@ -7,12 +7,12 @@
         <?m2e execute onConfiguration,onIncremental?>
         <groupId>org.xide</groupId>
         <artifactId>xide</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>org.xide</groupId>
     <artifactId>server</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <dependencies>
         <dependency>
             <groupId>com.github.librepdf</groupId>
@@ -48,7 +48,7 @@
             <groupId>io.javalin</groupId>
             <artifactId>javalin-rendering-thymeleaf</artifactId>
             <version>7.2.4</version>
-        </dependency>   
+        </dependency>
         <dependency>
             <groupId>io.javalin</groupId>
             <artifactId>javalin</artifactId>
@@ -88,6 +88,7 @@
     </properties>
 
     <build>
+        <finalName>server</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

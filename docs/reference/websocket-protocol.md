@@ -304,10 +304,10 @@ This runs `infra/communication-test.sh` which:
 
 ```bash
 # Interactive mode (opens connection window)
-java -jar client/target/client-1.0-SNAPSHOT-all.jar
+java -jar client/target/client-all.jar
 
 # Direct mode
-java -jar client/target/client-1.0-SNAPSHOT-all.jar \
+java -jar client/target/client-all.jar \
   --endpoint wss://localhost:8443/ws/socket /develop/ping --message ping
 ```
 

@@ -108,6 +108,8 @@ Awaitility's version is managed in the root `pom.xml`; declare it with
 |---|---|
 | `make help` | Displays command help. |
 | `make exit` or `make quit` | Prints `bye`. |
+| `make version V=v1.2.3` | Sets the release version in `VERSION`, every `pom.xml`, and the client's `--version` output. Also accepts `make version v1.2.3` or `make version VERSION=1.2.3`. Without an argument it uses the highest local `vX.Y.Z` tag. `@since` tags are not changed. |
+| `make version-check` | Verifies that `VERSION`, the POMs and the client constant agree. |
 
 ## Options
 
@@ -137,7 +139,7 @@ window. To connect without the window, pass the endpoint using `--endpoint`; the
 is the first positional argument:
 
 ```sh
-java -jar client/target/client-1.0-SNAPSHOT-all.jar \
+java -jar client/target/client-all.jar \
   --endpoint wss://localhost:8443/ws/socket /develop/ping --message ping
 ```
 

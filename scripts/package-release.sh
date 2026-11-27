@@ -14,11 +14,11 @@
 
 set -euo pipefail
 
-VERSION="${1:?usage: package-release.sh <version> <output-dir>}"
-OUT="${2:?usage: package-release.sh <version> <output-dir>}"
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
-CLIENT_JAR="$ROOT/client/target/client-1.0-SNAPSHOT-all.jar"
-SERVER_JAR="$ROOT/server/target/server-1.0-SNAPSHOT-all.jar"
+VERSION="${1:-$(python3 "$ROOT/scripts/version.py" --print)}"
+OUT="${2:?usage: package-release.sh <version> <output-dir>}"
+CLIENT_JAR="$ROOT/client/target/client-all.jar"
+SERVER_JAR="$ROOT/server/target/server.jar"
 
 for jar in "$CLIENT_JAR" "$SERVER_JAR"; do
     if [ ! -f "$jar" ]; then
@@ -35,8 +35,8 @@ emit_readme() {
 X-IDE $VERSION - $target bundle
 
 Contents:
-  client-1.0-SNAPSHOT-all.jar   standalone WebSocket client (shaded, self-contained)
-  server-1.0-SNAPSHOT-all.jar   WebSocket + HTTP server (shaded, self-contained)
+  client-all.jar   standalone WebSocket client (shaded, self-contained)
+  server.jar       WebSocket + HTTP server (shaded, self-contained)
   run-server.sh / run-server.cmd   start the server (MySQL DB_* env vars required)
   run-client.sh / run-client.cmd   send a message: [endpoint] [route] [--message payload]
 

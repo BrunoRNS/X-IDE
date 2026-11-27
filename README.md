@@ -143,7 +143,7 @@ docker compose --env-file .env -f infra/compose.yaml -f infra/compose.dev.yaml b
 - **Database** isolated in private Compose network
 - **Ollama** bound to localhost only
 
-> ⚠️ **Limitations**: Passwords stored as plain text. No rate limiting, auditing, or database TLS. Designed for trusted classroom LANs only. Do not expose port 8443 to the internet.
+> **Limitations**: Passwords stored as plain text. No rate limiting, auditing, or database TLS. Designed for trusted classroom LANs only. Do not expose port 8443 to the internet.
 
 ## Documentation
 
@@ -155,7 +155,8 @@ docker compose --env-file .env -f infra/compose.yaml -f infra/compose.dev.yaml b
 | [Commands](docs/reference/commands.md) | Complete Makefile reference |
 | [WebSocket Protocol](docs/reference/websocket-protocol.md) | SocketMessage format and routes |
 | [Security](docs/guides/security.md) | TLS, authentication, limitations |
-| [Troubleshooting](docs/guides/troubleshooting.md) | Common issues |
+| [Code of Conduct](docs/code_of_conduct.md) | Our Standards and Our Pledge |
+| [Development Guideline](docs/development.md) | How to contribute, Project Patterns |
 
 ## Releases
 
@@ -177,9 +178,3 @@ GitHub Actions builds on every push:
 ## License
 
 **BSD 3-Clause** — see [LICENSE](LICENSE) for details.
-
----
-
-<p align="center">
-  <sub>Built for classroom environments. Not a sandbox for untrusted code execution.</sub>
-</p>

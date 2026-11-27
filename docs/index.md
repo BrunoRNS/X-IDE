@@ -11,7 +11,7 @@ Welcome to the X-IDE documentation. This project is a Java 17 Maven multi-module
 | [Configuration](reference/configuration.md) | Environment variables and settings |
 | [Commands](reference/commands.md) | All Makefile commands |
 | [WebSocket Protocol](reference/websocket-protocol.md) | SocketMessage format and routes |
-| [Development](development/setup.md) | Local development workflow |
+| [Development and Contributing](development.md) | Project patterns, local workflow, and pull requests |
 | [Testing](development/testing.md) | Testing strategies and patterns |
 | [Packaging](development/packaging.md) | Building release bundles |
 | [Security](guides/security.md) | TLS, authentication, and limitations |
@@ -39,4 +39,4 @@ All components run in a single Docker/Podman Compose stack.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
+See the [Development and Contribution Guide](development.md) for design patterns, local workflow, commit conventions, and pull request guidelines.

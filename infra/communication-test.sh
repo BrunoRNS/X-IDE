@@ -3,7 +3,7 @@
 set -uo pipefail
 
 ENDPOINT="${CLIENT_ENDPOINT:-wss://localhost:8443/ws/socket}"
-JAR="client/target/client-1.0-SNAPSHOT-all.jar"
+JAR="client/target/client-all.jar"
 
 if [ ! -f "$JAR" ]; then
     echo "client JAR not found: $JAR (run 'make package-all' first)"
