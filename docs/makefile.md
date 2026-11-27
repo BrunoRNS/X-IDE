@@ -92,7 +92,7 @@ Awaitility's version is managed in the root `pom.xml`; declare it with
 | `make configure` | Creates `.env` from `.env.example` if `.env` does not exist; it does not overwrite an existing file. |
 | `make run-server` | Configures the environment, builds the `app` image without cache, and starts the Compose stack in the foreground (Ctrl+C stops it). The web UI is available at `https://<server-ip>:8443/`. |
 | `make run-dev-server` | Same stack, but bind-mounts `server/src/main/resources` with the Thymeleaf cache disabled, so template and static-file edits appear on browser refresh. |
-| `make run-model` | Starts Ollama in CPU mode and downloads `qwen2.5-coder:3b` (about 2 GB on first run). Its API is available at `http://localhost:11434`. |
+| `make run-model` | Starts Ollama in CPU mode and downloads `qwen2.5-coder:3b` (about 2 GB on first run). Its API is available at `http://localhost:11434`. X-IDE integration is via WebSocket through Tyrus. |
 | `make stop-server` | Stops and removes the Compose stack services. |
 | `make server-logs` | Follows the Compose services' logs. |
 | `make stack-status` | Shows the status of the Compose services. |
