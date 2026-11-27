@@ -18,6 +18,13 @@ import org.xide.protocol.SocketMessageCodec;
 import org.xide.sockets.ClientSessions;
 import org.xide.sockets.annotations.WebSocketRouter;
 
+/**
+ * Unit tests for {@link org.xide.sockets.controllers.auth.LoginSocketController} login
+ * and logout routing, statuses, and session registration, with a stubbed user lookup.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 class LoginSocketControllerTest {
 
 	@Test

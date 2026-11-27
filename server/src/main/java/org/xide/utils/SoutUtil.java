@@ -5,6 +5,13 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
+/**
+ * Utilities to load classpath resources as UTF-8 text and print them to standard output.
+ * Instances cannot be created.
+ *
+ * @since v1.0.0
+ * @author BrunoRNS
+ */
 public final class SoutUtil {
 
 	private SoutUtil() {

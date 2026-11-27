@@ -16,6 +16,17 @@ import jakarta.websocket.Session;
 import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
 
+/**
+ * Registry and dispatcher for annotated WebSocket routes. {@link #register(Object)}
+ * validates and indexes {@link WebSocketRoute} methods of a {@link WebSocketController},
+ * resolves parameters (full {@link SocketMessage}, {@link jakarta.websocket.Session}, or
+ * {@link org.xide.sockets.annotations.SocketParam}-bound payload fields converted with
+ * Jackson), invokes the handler, and wraps non-null results in a response
+ * {@link SocketMessage}.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class WebSocketRouter {
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -123,7 +134,12 @@ public class WebSocketRouter {
 		return resolvers;
 	}
 
-	/** Resolves a handler argument from a named field of the request payload. */
+	/**
+	 * Resolves a handler argument from a named field of the request payload.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	private record PayloadResolver(String name, JavaType type) implements ArgumentResolver {
 		@Override
 		public Object resolve(SocketMessage request, Session session) {
@@ -141,12 +157,26 @@ public class WebSocketRouter {
 		}
 	}
 
+	/**
+	 * Functional interface producing a handler argument from a request message and
+	 * WebSocket session.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	private interface ArgumentResolver {
 
 		Object resolve(SocketMessage request, Session session);
 
 	}
 
+	/**
+	 * Bound route: controller instance, reflective {@link java.lang.reflect.Method},
+	 * argument resolvers, and whether the route requires a logged-in session.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	private record RouteHandler(Object controller, Method method, ArgumentResolver[] resolvers,
 			boolean protectedRoute) {
 	}

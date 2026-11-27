@@ -4,6 +4,14 @@ import java.nio.file.Path;
 
 import org.xide.utils.SqlUtil;
 
+/**
+ * Model of a source-code submission artifact: id, path to the source file, related
+ * {@link Problem}, and submitting {@link User}. Provides the SQL schema for the
+ * {@code code} table.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class Code {
 
 	private Long id;

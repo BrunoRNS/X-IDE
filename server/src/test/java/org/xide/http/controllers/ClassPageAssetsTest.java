@@ -15,6 +15,13 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
+/**
+ * Tests that the classroom page template and public script contain the expected elements
+ * and markers.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 class ClassPageAssetsTest {
 
 	@Test

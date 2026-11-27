@@ -3,6 +3,13 @@ package org.xide.models;
 import jakarta.websocket.Session;
 import org.xide.utils.SqlUtil;
 
+/**
+ * Model of a user (student/teacher): id, name, password, email, and active WebSocket
+ * {@link jakarta.websocket.Session}. Provides the SQL schema for the {@code users} table.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class User {
 
 	private Long id;

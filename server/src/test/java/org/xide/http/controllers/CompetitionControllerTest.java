@@ -18,6 +18,13 @@ import org.junit.jupiter.api.Test;
 import org.xide.http.routers.Routers;
 import org.xide.states.CompetitionState;
 
+/**
+ * Integration tests for {@link org.xide.http.controllers.CompetitionController} endpoints
+ * with a real Javalin app and reset competition state.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 class CompetitionControllerTest {
 
 	private static final ObjectMapper JSON = new ObjectMapper();

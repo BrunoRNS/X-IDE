@@ -26,6 +26,16 @@ import org.xide.protocol.SocketMessageCodec;
 import org.xide.sockets.annotations.WebSocketRouter;
 import org.xide.sockets.annotations.WebSocketScanner;
 
+/**
+ * Singleton WebSocket client connecting to the X-IDE server. Registers annotated
+ * controllers from the client package on a shared router, sends
+ * {@link org.xide.protocol.SocketMessage} frames, tracks per-route response queues for
+ * {@link #receive(String, long, TimeUnit)}, and, for {@code wss} endpoints, pins the
+ * server certificate with {@link org.xide.client.tls.ServerCertificateTrustManager}.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class WebSocketClient {
 
 	private static WebSocketClient instance;

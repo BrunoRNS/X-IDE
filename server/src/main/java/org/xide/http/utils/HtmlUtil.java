@@ -4,6 +4,13 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+/**
+ * Utilities for loading HTML templates from classpath resources and substituting
+ * {@code {{placeholder}}} tokens with values.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class HtmlUtil {
 
 	public static String load(String path) throws Exception {

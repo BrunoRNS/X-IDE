@@ -10,6 +10,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.xide.states.CompetitionState;
 
+/**
+ * Unit tests for
+ * {@link org.xide.sockets.controllers.competition.CompetitionSocketController} countdown
+ * routes over {@link org.xide.states.CompetitionState}.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 class CompetitionSocketControllerTest {
 
 	private final CompetitionSocketController controller = new CompetitionSocketController();

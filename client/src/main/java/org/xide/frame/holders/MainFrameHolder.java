@@ -2,7 +2,12 @@ package org.xide.frame.holders;
 
 import org.xide.frame.MainFrame;
 
-/** Owns the single {@link MainFrame} instance and controls its lifecycle. */
+/**
+ * Owns the single {@link MainFrame} instance and controls its lifecycle.
+ *
+ * @since v1.0.0
+ * @author BrunoRNS
+ */
 public final class MainFrameHolder {
 
 	private static volatile MainFrame instance;

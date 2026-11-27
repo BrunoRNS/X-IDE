@@ -2,7 +2,12 @@ package org.xide.models.enums;
 
 import java.util.Locale;
 
-/** Colors assigned to competition problems' balloons. */
+/**
+ * Colors assigned to competition problems' balloons.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public enum BalloonColor {
 
 	RED("#dc2626"), BLUE("#2563eb"), GREEN("#16a34a"), YELLOW("#ca8a04"), ORANGE("#ea580c"), PURPLE("#9333ea"),

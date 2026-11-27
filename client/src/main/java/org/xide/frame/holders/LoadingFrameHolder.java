@@ -2,7 +2,12 @@ package org.xide.frame.holders;
 
 import org.xide.frame.LoadingFrame;
 
-/** Owns the single {@link LoadingFrame} instance and controls its lifecycle. */
+/**
+ * Owns the single {@link LoadingFrame} instance and controls its lifecycle.
+ *
+ * @since v1.0.0
+ * @author BrunoRNS
+ */
 public final class LoadingFrameHolder {
 
 	private static volatile LoadingFrame instance;

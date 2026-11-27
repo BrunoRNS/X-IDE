@@ -2,6 +2,14 @@ package org.xide.models.enums;
 
 import java.util.Locale;
 
+/**
+ * Programming languages supported for solutions and examples.
+ * {@link #fromDatabase(String)} accepts stored values and display labels (e.g.
+ * {@code c++}/{@code cpp}, {@code js}).
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public enum Lang {
 
 	PYTHON("python"), KOTLIN("kotlin"), JAVA("java"), CPP("cpp"), C("c"), RUST("rust"), GO("go"), GROOVY("groovy"),

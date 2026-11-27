@@ -15,6 +15,9 @@ import java.util.regex.Pattern;
  * <p>
  * Usage: {@code java scripts/JavaImportFormatter.java --apply} or
  * {@code java scripts/JavaImportFormatter.java --check}.
+ *
+ * @since v1.0.0
+ * @author BrunoRNS
  */
 public final class JavaImportFormatter {
 
@@ -198,9 +201,22 @@ public final class JavaImportFormatter {
 		System.err.println("Usage: java scripts/JavaImportFormatter.java --apply|--check [directory]");
 	}
 
+	/**
+	 * Result of formatting a source file: the formatted source and an error message, if any.
+	 *
+	 * @since v1.0.0
+	 * @author BrunoRNS
+	 */
 	private record FormatResult(String source, String error) {
 	}
 
+	/**
+	 * Parsed import statement with its static flag, imported name, and optional trailing
+	 * comment.
+	 *
+	 * @since v1.0.0
+	 * @author BrunoRNS
+	 */
 	private record ImportEntry(boolean isStatic, String name, String comment) {
 	}
 

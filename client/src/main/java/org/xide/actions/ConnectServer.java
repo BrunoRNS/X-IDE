@@ -5,6 +5,15 @@ import java.awt.event.ActionListener;
 
 import org.xide.frame.holders.ConnectFrameHolder;
 
+/**
+ * Swing action for the connect screen: validates the server IP address entered by the
+ * user and submits the corresponding secure WebSocket endpoint
+ * ({@code wss://<ip>:8443/ws/socket}) to
+ * {@link org.xide.frame.holders.ConnectFrameHolder}.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class ConnectServer implements ActionListener {
 
 	@Override

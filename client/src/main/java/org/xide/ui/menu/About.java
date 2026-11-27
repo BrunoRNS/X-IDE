@@ -25,6 +25,14 @@ import io.simpleide.api.Editors;
 import io.simpleide.ui.editor.Editor;
 import io.simpleide.ui.treefile.TypeFile;
 
+/**
+ * "About" tab panel of the exam environment: welcome text, supported languages, judging
+ * explanation, exam integrity rules, bundled example codes per language, and developer
+ * credits.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public final class About extends JPanel implements Scrollable {
 
 	private static final Color WELCOME_COLOR = new Color(255, 241, 242);

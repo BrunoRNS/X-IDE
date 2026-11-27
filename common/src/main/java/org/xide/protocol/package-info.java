@@ -5,5 +5,8 @@
  *
  * <p>
  * Make scopes touching this module: {@code build-common}, {@code test-common}.
+ *
+ * @author LuisOtavio13
+ * @since v1.0.0
  */
 package org.xide.protocol;

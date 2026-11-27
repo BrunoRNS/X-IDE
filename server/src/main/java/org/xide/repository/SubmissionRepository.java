@@ -17,6 +17,13 @@ import org.xide.models.User;
 import org.xide.models.enums.SubmissionState;
 import org.xide.utils.SqlUtil;
 
+/**
+ * JDBC repository for submissions: lists problems, participants, and submissions ordered
+ * by date for competition views.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class SubmissionRepository {
 
 	public static List<Problem> getProblems() throws Exception {

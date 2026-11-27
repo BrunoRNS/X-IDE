@@ -11,8 +11,22 @@ import org.xide.http.service.LoadPdfUsers;
 import org.xide.models.User;
 import org.xide.repository.UserRepo;
 
+/**
+ * HTTP controller for students/users: list page, PDF export of users
+ * ({@link org.xide.http.service.LoadPdfUsers}), registration, update, and deletion via
+ * {@link org.xide.repository.UserRepo}.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class StudentsController {
 
+	/**
+	 * Request body for registering or updating a user: name and email.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	public record UserDTO(String name, String email) {
 	}
 

@@ -25,6 +25,14 @@ import org.xide.models.enums.Lang;
 import org.xide.models.enums.SubmissionState;
 import org.xide.utils.SqlUtil;
 
+/**
+ * JDBC repository for problems: insert/update/delete with transactions, per-language
+ * times, examples, solutions, submissions, and queries ({@link #selectProblemById(Long)},
+ * {@link #findAllProblem()}).
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class ProblemRepository {
 
 	public static Problem insertProblem(String title, BalloonColor color, BigO bigo, Path pdf, String recommentation,

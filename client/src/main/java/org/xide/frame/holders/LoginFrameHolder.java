@@ -2,7 +2,12 @@ package org.xide.frame.holders;
 
 import org.xide.frame.LoginFrame;
 
-/** Owns the single {@link LoginFrame} instance and controls its lifecycle. */
+/**
+ * Owns the single {@link LoginFrame} instance and controls its lifecycle.
+ *
+ * @since v1.0.0
+ * @author BrunoRNS
+ */
 public final class LoginFrameHolder {
 
 	private static volatile LoginFrame instance;

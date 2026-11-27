@@ -19,6 +19,16 @@ import org.xide.repository.Connection;
 import org.xide.repository.InitDatabase;
 import org.xide.sockets.WebSocketServer;
 
+/**
+ * Entry point of the X-IDE server. Starts the Javalin HTTP server on port 8081 (Thymeleaf
+ * rendering, static assets, routes registered by {@link org.xide.http.routers.Routers}),
+ * starts the secure WebSocket server ({@link org.xide.sockets.WebSocketServer}),
+ * initializes the MySQL database schema ({@link org.xide.repository.InitDatabase}), and
+ * blocks until shutdown.
+ *
+ * @since v1.0.0
+ * @author luisotavio15
+ */
 public class Main {
 
 	public static void main(String[] args) throws Exception {

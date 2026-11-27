@@ -16,6 +16,13 @@ import org.xide.sockets.annotations.WebSocketRoute;
 import org.xide.sockets.annotations.WebSocketRouter;
 import org.xide.sockets.controllers.develop.DevelopSocketController;
 
+/**
+ * Unit tests for {@link org.xide.sockets.annotations.WebSocketRouter} dispatch, parameter
+ * resolution, protected routes, and registration validation.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class WebSocketRouterTest {
 
 	@Test
@@ -95,6 +102,12 @@ public class WebSocketRouterTest {
 		assertEquals(false, router.isProtected("/open"));
 	}
 
+	/**
+	 * Test controller returning a DTO or no response.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	@WebSocketController
 	public static final class ResultController {
 
@@ -109,6 +122,12 @@ public class WebSocketRouterTest {
 
 	}
 
+	/**
+	 * Test controller echoing bound parameters.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	@WebSocketController
 	public static final class ParamsController {
 
@@ -119,6 +138,12 @@ public class WebSocketRouterTest {
 
 	}
 
+	/**
+	 * Test controller with an unsupported parameter type to check registration failure.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	@WebSocketController
 	public static final class UnresolvableController {
 
@@ -129,6 +154,12 @@ public class WebSocketRouterTest {
 
 	}
 
+	/**
+	 * Test controller with a protected route.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	@WebSocketController
 	public static final class SecureController {
 
@@ -144,9 +175,21 @@ public class WebSocketRouterTest {
 
 	}
 
+	/**
+	 * Simple DTO fixture returned by test controllers.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	private record ResultDto(String status) {
 	}
 
+	/**
+	 * Simple DTO fixture for bound-parameter tests.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	private record ParamsDto(String name, int attempts) {
 	}
 

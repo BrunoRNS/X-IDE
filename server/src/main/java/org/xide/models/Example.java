@@ -6,6 +6,14 @@ import java.sql.SQLException;
 import org.xide.models.enums.Lang;
 import org.xide.utils.SqlUtil;
 
+/**
+ * Model of an example snippet attached to a {@link Problem}: id, source code, programming
+ * {@link org.xide.models.enums.Lang}, and owning problem. Provides the SQL schema and
+ * row-mapping for the {@code example} table.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class Example {
 
 	private Long id;

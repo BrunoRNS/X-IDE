@@ -32,6 +32,14 @@ import org.xide.ui.menu.About;
 import org.xide.ui.menu.Editor;
 import org.xide.ui.menu.Problems;
 
+/**
+ * Main exam panel: header with branding and an "End session" button
+ * ({@link org.xide.actions.EndSession}) plus a tabbed area with About, Editor, and
+ * Problems tabs, with custom flat tab styling.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public final class TabbeMenu extends JPanel {
 
 	public static final Color ACCENT_COLOR = new Color(210, 28, 43);
@@ -163,6 +171,14 @@ public final class TabbeMenu extends JPanel {
 		return new ImageIcon(scaled);
 	}
 
+	/**
+	 * Custom {@link javax.swing.plaf.basic.BasicTabbedPaneUI} rendering flat tabs with an
+	 * accent underline for the selected tab, rounded hover backgrounds, and no focus
+	 * border.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	private static final class ModernTabbedPaneUI extends BasicTabbedPaneUI {
 
 		@Override

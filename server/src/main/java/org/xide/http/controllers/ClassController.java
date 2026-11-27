@@ -17,12 +17,28 @@ import io.javalin.http.Context;
 import io.javalin.http.UploadedFile;
 import org.xide.http.service.ClassService;
 
+/**
+ * HTTP controller for classroom sharing. Hosts uploaded folder contents on per-classroom
+ * embedded Javalin servers, tracks hosted classrooms, exposes JSON status endpoints, and
+ * serves the classroom page. Authorship/ownership semantics follow the controller
+ * methods.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class ClassController {
 
 	private static final Logger LOGGER = Logger.getLogger(ClassController.class.getName());
 
 	private static final ConcurrentHashMap<Long, HostedClass> SERVERS = new ConcurrentHashMap<>();
 
+	/**
+	 * Internal record describing a hosted classroom: id, host address, port, number of
+	 * files, the embedded server, and its URL.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	private record HostedClass(long id, String ip, int port, int files, Javalin server) {
 
 		Map<String, Object> toJson() {

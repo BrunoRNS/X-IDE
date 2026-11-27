@@ -19,6 +19,15 @@ import org.xide.models.Soluction;
 import org.xide.models.enums.Lang;
 import org.xide.repository.ProblemRepository;
 
+/**
+ * Service creating and updating problems transactionally: stores the uploaded PDF
+ * ({@link ProblensService}), persists via {@link org.xide.repository.ProblemRepository},
+ * replaces child data, and cleans up uploaded files on failure. Instances cannot be
+ * created.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public final class ProblemManagementService {
 
 	private static final Logger LOGGER = Logger.getLogger(ProblemManagementService.class.getName());

@@ -19,6 +19,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.xide.models.User;
 
+/**
+ * Unit tests for {@link org.xide.repository.UserRepo} update/delete SQL and parameter
+ * binding using a fake JDBC driver.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class UserRepoMutationTest {
 
 	private static final JdbcFixture JDBC = new JdbcFixture();
@@ -57,6 +64,13 @@ public class UserRepoMutationTest {
 		assertFalse(UserRepo.update(user));
 	}
 
+	/**
+	 * Fake {@link java.sql.Driver} and invocation handler capturing SQL and parameters
+	 * and returning canned update counts.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	private static final class JdbcFixture implements Driver {
 
 		private String sql;

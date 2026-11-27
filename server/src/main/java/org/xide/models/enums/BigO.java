@@ -2,6 +2,14 @@ package org.xide.models.enums;
 
 import java.util.Locale;
 
+/**
+ * Asymptotic complexity classes offered in problem forms: O(1), O(log n), O(n), O(n log
+ * n), O(n²), O(n³). {@link #fromDatabase(String)} accepts stored values and display
+ * labels.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public enum BigO {
 
 	N1("n1"), LOGN("logn"), N("n"), NLOGN("nlogn"), Ne2("ne2"), Ne3("ne3");

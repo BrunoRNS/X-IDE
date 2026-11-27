@@ -11,17 +11,41 @@ import org.xide.sockets.annotations.SocketParam;
 import org.xide.sockets.annotations.WebSocketController;
 import org.xide.sockets.annotations.WebSocketRoute;
 
+/**
+ * WebSocket controller for authentication. {@code /auth/login} checks credentials via
+ * {@link org.xide.repository.UserRepo} (pluggable {@link UserLookup}), registers the
+ * login session, and returns a {@link Dto} status; {@code /auth/logout} (protected)
+ * unregisters and returns status. (Spelling kept from the original code.)
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 @WebSocketController
 public class LoginSocketController {
 
 	private static final Logger LOGGER = Logger.getLogger(LoginSocketController.class.getName());
 
+	/**
+	 * Response payload carrying the status string ("sucess"/"invalid").
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	public static record Dto(String status) {
 	}
 
 	/** Finds users for the login check; tests swap it out to skip the database. */
 	UserLookup userLookup = UserRepo::getUserByEmailAndPassword;
 
+	/**
+	 * Functional interface looking up a {@link org.xide.models.User} by email and
+	 * password; defaults to
+	 * {@link org.xide.repository.UserRepo#getUserByEmailAndPassword(String, String)} and
+	 * is swappable in tests.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	interface UserLookup {
 
 		User find(String email, String password) throws Exception;

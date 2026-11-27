@@ -10,6 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * Reads SQL scripts from classpath resources as UTF-8 strings and can combine a directory
+ * of {@code .sql} files into a single output file.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio
+ */
 public class SqlUtil {
 
 	public static String readSqlToString(String resourcePath) {

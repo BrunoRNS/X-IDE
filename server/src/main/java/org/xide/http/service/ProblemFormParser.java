@@ -12,7 +12,12 @@ import org.xide.models.enums.BalloonColor;
 import org.xide.models.enums.BigO;
 import org.xide.models.enums.Lang;
 
-/** Converts the multipart problem form into validated application data. */
+/**
+ * Converts the multipart problem form into validated application data.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public final class ProblemFormParser {
 
 	private ProblemFormParser() {

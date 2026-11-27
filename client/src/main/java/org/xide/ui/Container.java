@@ -15,6 +15,14 @@ import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 
+/**
+ * Rounded panel rendering Markdown content as HTML in a read-only editor pane, on a
+ * custom background color. Picks a contrasting text color automatically when none is
+ * given.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public final class Container extends JPanel {
 
 	private static final long serialVersionUID = 1L;

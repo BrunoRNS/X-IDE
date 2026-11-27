@@ -2,6 +2,14 @@ package org.xide.models;
 
 import org.xide.utils.SqlUtil;
 
+/**
+ * Model of an input/output example pair ("solution" sample) for a problem: id, input, and
+ * expected output. Provides the SQL schema for the {@code soluctions} table. (Name kept
+ * from the original code.)
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class Soluction {
 
 	private Long id;

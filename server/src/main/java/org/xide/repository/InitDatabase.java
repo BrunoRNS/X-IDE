@@ -11,6 +11,14 @@ import org.xide.models.Soluction;
 import org.xide.models.Submission;
 import org.xide.models.User;
 
+/**
+ * Creates database tables from bundled SQL scripts if absent and migrates older schemas
+ * (e.g. renames legacy {@code titile} column, adds {@code restriction}). SQL loaded via
+ * {@link org.xide.utils.SqlUtil}.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class InitDatabase {
 
 	private static Connection databaseConection;

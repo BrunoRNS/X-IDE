@@ -4,7 +4,12 @@ import java.util.concurrent.ExecutionException;
 
 import org.xide.frame.ConnectFrame;
 
-/** Owns the single {@link ConnectFrame} instance and controls its lifecycle. */
+/**
+ * Owns the single {@link ConnectFrame} instance and controls its lifecycle.
+ *
+ * @since v1.0.0
+ * @author BrunoRNS
+ */
 public final class ConnectFrameHolder {
 
 	private static volatile ConnectFrame instance;

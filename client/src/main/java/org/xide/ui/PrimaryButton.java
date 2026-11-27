@@ -12,6 +12,13 @@ import java.awt.event.MouseEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 
+/**
+ * Rounded, accent-colored {@link javax.swing.JButton} with hover/pressed/disabled visual
+ * states used for primary actions.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public final class PrimaryButton extends JButton {
 
 	private static final Color BASE = new Color(210, 28, 43);

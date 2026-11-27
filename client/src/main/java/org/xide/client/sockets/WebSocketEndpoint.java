@@ -13,6 +13,15 @@ import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
 import org.xide.sockets.annotations.WebSocketRouter;
 
+/**
+ * Client-side Jakarta WebSocket endpoint. Decodes incoming server frames, forwards them
+ * to a sink, dispatches known routes through the shared
+ * {@link org.xide.sockets.annotations.WebSocketRouter}, and synchronously sends handler
+ * responses back to the server.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 @ClientEndpoint
 public class WebSocketEndpoint {
 

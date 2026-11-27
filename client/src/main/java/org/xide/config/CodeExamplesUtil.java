@@ -5,6 +5,13 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Utility for loading text resources from the classpath, used to read the bundled code
+ * example files. Instances cannot be created.
+ *
+ * @since v1.0.0
+ * @author BrunoRNS
+ */
 public final class CodeExamplesUtil {
 
 	private static final String CODE_EXAMPLES_PATH = "/code-examples/";

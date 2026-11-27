@@ -9,6 +9,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+/**
+ * Tests that competition page assets (modal script and template) expose the expected
+ * elements and behaviors.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 class CompetitionPageAssetsTest {
 
 	@Test

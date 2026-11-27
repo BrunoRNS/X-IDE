@@ -7,5 +7,8 @@
  * <p>
  * Make scopes touching this module: {@code build-client}, {@code test-client}, {@code
  * test-integration}, {@code run-client}, {@code communication-test}.
+ *
+ * @author LuisOtavio13
+ * @since v1.0.0
  */
 package org.xide.client.sockets;

@@ -14,6 +14,14 @@ import org.xide.client.sockets.WebSocketClient;
 import org.xide.frame.holders.LoginFrameHolder;
 import org.xide.frame.holders.MainFrameHolder;
 
+/**
+ * Swing action that ends the exam session. Asks for confirmation, sends {@code
+ * /auth/logout} to the server, stops {@link org.xide.ExamIntegrityMonitor}, closes the
+ * main frame, and returns the user to the login screen.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class EndSession implements ActionListener {
 
 	private static final String END_LABEL = "End session";

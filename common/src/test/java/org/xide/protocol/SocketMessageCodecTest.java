@@ -4,6 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
+/**
+ * Unit tests for {@link SocketMessageCodec} round trips, structured payloads, and text
+ * payloads.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 class SocketMessageCodecTest {
 
 	@Test
@@ -30,6 +37,12 @@ class SocketMessageCodecTest {
 		assertEquals("ping", message.payload().asText());
 	}
 
+	/**
+	 * Simple payload fixture used to test object-to-JSON conversion.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	private record LoginRequest(String email, String password) {
 	}
 

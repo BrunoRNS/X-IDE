@@ -27,6 +27,14 @@ import javax.swing.border.LineBorder;
 
 import org.xide.actions.ConnectServer;
 
+/**
+ * Swing frame shown first, asking for the server IP address to connect to. Exposes a
+ * {@link java.util.concurrent.CompletableFuture} that completes with the chosen secure
+ * WebSocket endpoint when the user submits or cancels.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public final class ConnectFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
@@ -193,6 +201,13 @@ public final class ConnectFrame extends JFrame {
 		endpointSelection.complete(endpoint2);
 	}
 
+	/**
+	 * Text field that paints a gray placeholder hint when empty and unfocused.
+	 * Package-private helper used by {@link ConnectFrame}.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	public static class PlaceholderTextField extends JTextField {
 
 		private static final long serialVersionUID = 1L;

@@ -9,6 +9,15 @@ import org.xide.models.enums.BigO;
 import org.xide.models.enums.Lang;
 import org.xide.utils.SqlUtil;
 
+/**
+ * Model of a competitive-programming problem: id, title, PDF path, examples, solutions,
+ * submissions, balloon color, restriction text, {@link org.xide.models.enums.BigO}, and
+ * per-language time limits. Provides the SQL schema for the {@code problem} and {@code
+ * problem_times} tables.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class Problem {
 
 	private Long id;

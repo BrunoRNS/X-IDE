@@ -6,7 +6,12 @@ import java.nio.file.Path;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-/** Best-effort local check used to enforce the exam client's environment policy. */
+/**
+ * Best-effort local check used to enforce the exam client's environment policy.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public final class VirtualMachineDetector {
 
 	private VirtualMachineDetector() {

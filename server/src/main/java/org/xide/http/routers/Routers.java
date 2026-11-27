@@ -7,6 +7,13 @@ import org.xide.http.controllers.HelloController;
 import org.xide.http.controllers.ProblensController;
 import org.xide.http.controllers.StudentsController;
 
+/**
+ * Registers all HTTP routes of the server on a Javalin configuration, mapping paths to
+ * controller handlers.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class Routers {
 
 	public static void register(JavalinConfig config) {

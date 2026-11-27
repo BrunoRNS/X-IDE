@@ -11,6 +11,12 @@ import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
 import org.xide.sockets.annotations.WebSocketRouter;
 
+/**
+ * Unit tests for {@link org.xide.controller.AuthController} login-status dispatch.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 class AuthControllerTest {
 
 	@Test

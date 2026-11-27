@@ -5,6 +5,14 @@ import java.time.LocalDateTime;
 import org.xide.models.enums.SubmissionState;
 import org.xide.utils.SqlUtil;
 
+/**
+ * Model of a user submission to a problem: id, {@link User}, {@link Code},
+ * {@link Problem}, {@link org.xide.models.enums.SubmissionState}, and submission date.
+ * Provides the SQL schema for the {@code submissions} table and its trigger.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class Submission {
 
 	private Long id;

@@ -14,6 +14,13 @@ import org.xide.sockets.annotations.WebSocketController;
 import org.xide.sockets.annotations.WebSocketRoute;
 import org.xide.sockets.annotations.WebSocketRouter;
 
+/**
+ * Unit tests for {@link org.xide.client.sockets.WebSocketEndpoint} message dispatch to
+ * client controllers and handling of unknown routes.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 class WebSocketEndpointTest {
 
 	@Test
@@ -41,6 +48,12 @@ class WebSocketEndpointTest {
 		assertEquals(List.of(), handled);
 	}
 
+	/**
+	 * Test WebSocket controller recording handled statuses into a list.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	@WebSocketController
 	public static final class RecordingController {
 

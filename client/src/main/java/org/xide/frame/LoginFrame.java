@@ -27,6 +27,15 @@ import javax.swing.border.LineBorder;
 
 import org.xide.actions.Login;
 
+/**
+ * Swing login frame asking for email and password before entering the exam. Wires the
+ * {@link org.xide.actions.Login} action, shows status messages, and renders a password
+ * field with hidden input. Holds the "X-IDE" branding and layout used before the main
+ * frame opens.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public final class LoginFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
@@ -234,6 +243,13 @@ public final class LoginFrame extends JFrame {
 		return new String(password.getPassword());
 	}
 
+	/**
+	 * Password field that paints a gray placeholder hint when empty and unfocused.
+	 * Package- private helper used by {@link LoginFrame}.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	private static class PlaceholderPasswordField extends JPasswordField {
 
 		private static final long serialVersionUID = 1L;

@@ -20,6 +20,16 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+/**
+ * X.509 trust manager implementing trust-on-first-use certificate pinning. Accepts a
+ * server certificate when it chains to the system trust store or its SHA-256 fingerprint
+ * matches the pin stored for the endpoint in
+ * {@code ~/.xide/trusted-certificates.properties} or the {@code XIDE_TLS_FINGERPRINT}
+ * environment variable; saves new pins atomically.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public final class ServerCertificateTrustManager implements X509TrustManager {
 
 	private static final Object STORE_LOCK = new Object();

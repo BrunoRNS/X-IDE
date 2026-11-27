@@ -24,6 +24,18 @@ import org.xide.models.Soluction;
 import org.xide.models.enums.BalloonColor;
 import org.xide.repository.ProblemRepository;
 
+/**
+ * HTTP controller for problem management. Register, update, list, fetch details, serve
+ * PDFs, and delete problems, validating input
+ * ({@link org.xide.http.service.validate.ProblensValidade}), parsing multipart forms
+ * ({@link org.xide.http.service.ProblemFormParser}), delegating persistence
+ * ({@link org.xide.http.service.ProblemManagementService} /
+ * {@link org.xide.repository.ProblemRepository}), and mapping results to DTOs
+ * ({@link org.xide.http.dto.ProblemDtos}).
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class ProblensController {
 
 	private static final Logger LOGGER = Logger.getLogger(ProblensController.class.getName());

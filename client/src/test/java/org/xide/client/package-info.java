@@ -5,5 +5,8 @@
  *
  * <p>
  * Make scope: {@code test-integration} (enable with {@code -Dsocket.it=true}).
+ *
+ * @author LuisOtavio13
+ * @since v1.0.0
  */
 package org.xide.client;

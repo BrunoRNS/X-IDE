@@ -10,6 +10,13 @@ import java.util.UUID;
 import io.javalin.http.UploadedFile;
 import io.javalin.util.FileUtil;
 
+/**
+ * Saves uploaded problem PDFs to the uploads directory with a random UUID prefix and a
+ * sanitized filename, preventing path traversal.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class ProblensService {
 
 	private static final String UPLOADS_DIRECTORY_PROPERTY = "xide.uploads.dir";

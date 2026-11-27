@@ -10,6 +10,14 @@ import java.util.concurrent.TimeUnit;
 
 import org.xide.models.Problem;
 
+/**
+ * Global competition state: start/end times, scheduled tasks that set started/stopped
+ * flags (single-threaded scheduler), participating problems, and started flag, with
+ * accessors. (Field spellings kept from the original code.)
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class CompetitionState {
 
 	private final static ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();

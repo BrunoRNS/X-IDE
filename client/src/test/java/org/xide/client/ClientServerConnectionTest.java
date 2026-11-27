@@ -25,6 +25,14 @@ import org.junit.jupiter.api.Timeout;
 import org.xide.client.sockets.WebSocketClient;
 import org.xide.protocol.SocketMessage;
 
+/**
+ * Integration test that starts the Docker Compose stack (MySQL + server + Nginx) when not
+ * already running, connects a real {@link org.xide.client.sockets.WebSocketClient}
+ * through the proxy, and verifies request/response round trips.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 class ClientServerConnectionTest {
 
 	private static final String WS_PATH = "/ws/socket";
@@ -198,6 +206,13 @@ class ClientServerConnectionTest {
 		}
 	}
 
+	/**
+	 * Result of an external process invocation in tests: exit code, captured output, and
+	 * error output.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	private record CommandResult(boolean success, String output) {
 	}
 

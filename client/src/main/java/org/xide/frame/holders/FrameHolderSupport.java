@@ -4,7 +4,12 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.SwingUtilities;
 
-/** Shared helpers for the frame holders. */
+/**
+ * Shared helpers for the frame holders.
+ *
+ * @since v1.0.0
+ * @author BrunoRNS
+ */
 final class FrameHolderSupport {
 
 	private FrameHolderSupport() {

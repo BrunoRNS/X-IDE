@@ -6,6 +6,14 @@ import java.util.Map;
 import io.javalin.http.Context;
 import io.javalin.http.UploadedFile;
 
+/**
+ * Validation helpers for problem uploads: checks that a PDF was provided (by content type
+ * or extension) and that titles have between 5 and 100 characters, emitting HTTP error
+ * responses on the Javalin context. (Name kept from the original code.)
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class ProblensValidade {
 
 	public static boolean validadePdf(Context ctx, UploadedFile uploadedFile) {

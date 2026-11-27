@@ -11,8 +11,23 @@ import org.xide.models.Problem;
 import org.xide.repository.ProblemRepository;
 import org.xide.states.CompetitionState;
 
+/**
+ * HTTP controller for competitions. Renders the competition page, starts a competition
+ * with a time window and problem list ({@link org.xide.http.service.CompetitionService}),
+ * and stops it ({@link org.xide.states.CompetitionState}).
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class CompetitionController {
 
+	/**
+	 * Request body for starting a competition: ISO start/end dates and the list of
+	 * problem ids.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	public static record CompetitionRequest(String startDate, String endDate, List<Long> problemIds) {
 	}
 

@@ -13,6 +13,9 @@ import org.xide.protocol.SocketMessage;
  * Tracks the client sessions currently connected to the WebSocket server and the last
  * pong one of them answered with, so server-side routes can push messages to clients and
  * introspect their answers.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
  */
 public final class ClientSessions {
 

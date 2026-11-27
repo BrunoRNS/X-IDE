@@ -3,6 +3,13 @@ package org.xide.protocol;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * Jackson-based codec translating between {@link SocketMessage} and JSON text, and
+ * converting arbitrary objects to {@link com.fasterxml.jackson.databind.JsonNode} trees.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class SocketMessageCodec {
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();

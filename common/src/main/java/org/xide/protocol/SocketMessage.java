@@ -4,6 +4,17 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
+/**
+ * Immutable WebSocket protocol frame. {@code route} selects the handler and must not be
+ * blank; {@code payload} carries arbitrary JSON; {@code response} marks a message as a
+ * response to a previous request (and is omitted from JSON when {@code false}).
+ * {@link #PING} and {@link #PONG} are the ping/pong payloads;
+ * {@link #response(String, JsonNode)} and {@link #textResponse(String, String)} build
+ * response frames.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public record SocketMessage(String route, JsonNode payload,
 		@JsonInclude(JsonInclude.Include.NON_DEFAULT) boolean response) {
 

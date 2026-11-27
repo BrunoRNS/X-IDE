@@ -15,6 +15,9 @@ import java.util.Locale;
  * enabled by the {@code XIDE_DEV_MODE} environment variable or the {@code xide.dev.mode}
  * system property, and automatically when the client runs from exploded classes (IDE or
  * {@code target/classes}) instead of the packaged JAR.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
  */
 public final class DevMode {
 

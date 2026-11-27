@@ -11,7 +11,12 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingConstants;
 
-/** Shown while the client establishes its initial server connection. */
+/**
+ * Shown while the client establishes its initial server connection.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public final class LoadingFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;

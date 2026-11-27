@@ -8,6 +8,13 @@ import java.util.List;
 import org.xide.models.User;
 import org.xide.utils.SqlUtil;
 
+/**
+ * JDBC repository for users: find all, find by credentials, save, update, delete. SQL
+ * loaded via {@link org.xide.utils.SqlUtil}.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class UserRepo {
 
 	public static User getUser(String email, String password) throws Exception {

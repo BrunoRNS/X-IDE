@@ -14,6 +14,13 @@ import com.lowagie.text.pdf.PdfWriter;
 import org.xide.models.User;
 import org.xide.repository.UserRepo;
 
+/**
+ * Generates an in-memory PDF (OpenPDF) with one card per user (name, email, id, password)
+ * for printing/download.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class LoadPdfUsers {
 
 	public static byte[] selectUsers() {

@@ -18,6 +18,15 @@ import org.xide.sockets.endpoints.WebSocketEndpoint;
 import org.xide.utils.EnvRead;
 import org.xide.utils.SoutUtil;
 
+/**
+ * Singleton secure (TLS, Nginx edge) WebSocket server (Tyrus) on port 8082 at
+ * {@code /ws}, scanning and registering controllers, exposing the shared
+ * {@link org.xide.sockets.annotations.WebSocketRouter}, and printing connection info
+ * (public host/port and certificate SHA-256 fingerprint) for students.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public final class WebSocketServer {
 
 	private static WebSocketServer instance;

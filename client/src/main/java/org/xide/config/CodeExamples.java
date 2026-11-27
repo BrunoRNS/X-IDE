@@ -1,5 +1,12 @@
 package org.xide.config;
 
+/**
+ * Holds bundled hello-world example programs for each supported language, loaded once
+ * from classpath resources ({@code /code-examples/}) via {@link CodeExamplesUtil}.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public final class CodeExamples {
 
 	public static final String PYTHON = CodeExamplesUtil.load("python.txt");

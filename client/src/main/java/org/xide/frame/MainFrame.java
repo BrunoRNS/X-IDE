@@ -17,6 +17,15 @@ import javax.swing.SwingUtilities;
 import org.xide.DevMode;
 import org.xide.ui.TabbeMenu;
 
+/**
+ * Full-screen, undecorated main exam frame hosting the {@link org.xide.ui.TabbeMenu}.
+ * Consumes key combinations that could escape fullscreen, keeps the window always on top,
+ * enforces a single monitor when not in development mode ({@link org.xide.DevMode}), and
+ * blocks accidental closing.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public final class MainFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;

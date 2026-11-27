@@ -17,6 +17,16 @@ import org.xide.sockets.ClientSessions;
 import org.xide.sockets.WebSocketServer;
 import org.xide.sockets.annotations.WebSocketRouter;
 
+/**
+ * Server-side Jakarta WebSocket endpoint at {@code /socket}. Decodes
+ * {@link org.xide.protocol.SocketMessage} frames, rejects requests to protected routes
+ * without a logged-in session, dispatches via the shared router, sends responses
+ * synchronously, records response frames, tracks sessions in
+ * {@link org.xide.sockets.ClientSessions}, and reports errors on {@code /error}.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 @ServerEndpoint("/socket")
 public final class WebSocketEndpoint {
 

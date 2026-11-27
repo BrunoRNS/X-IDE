@@ -15,6 +15,14 @@ import io.javalin.http.UploadedFile;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.util.FileUtil;
 
+/**
+ * Service for classroom sharing: writes uploaded files (with path sanitization) into a
+ * per-classroom upload directory, starts an embedded Javalin static-file server on a free
+ * port, and cleans the directory first.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class ClassService {
 
 	private static final String UPLOADS_DIRECTORY_PROPERTY = "xide.uploads.dir";

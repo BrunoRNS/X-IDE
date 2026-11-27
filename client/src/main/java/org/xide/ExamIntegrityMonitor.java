@@ -17,6 +17,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Monitors exam-session integrity on the desktop client. Watches window focus changes
+ * and, on Linux, active-TTY switches, and terminates the client ({@code System.exit(3)})
+ * when a violation is detected after a short grace period. Started with {@link #start()}
+ * when a session begins and stopped with {@link #stop()} when returning to the login
+ * screen.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public final class ExamIntegrityMonitor {
 
 	private static final Path ACTIVE_TTY = Path.of("/sys/class/tty/tty0/active");

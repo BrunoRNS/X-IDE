@@ -10,6 +10,15 @@ import org.xide.sockets.ClientSessions;
 import org.xide.sockets.annotations.WebSocketController;
 import org.xide.sockets.annotations.WebSocketRoute;
 
+/**
+ * WebSocket controller with development routes: {@code /develop/ping} replies {@code
+ * pong}, {@code /develop/ping-clients} pushes a ping to all connected clients, and {@code
+ * /develop/last-pong} returns the payload of the last pong recorded by
+ * {@link org.xide.sockets.ClientSessions}.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 @WebSocketController
 public final class DevelopSocketController {
 

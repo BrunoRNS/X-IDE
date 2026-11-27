@@ -10,6 +10,15 @@ import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.ScanResult;
 
+/**
+ * Classpath scanner (ClassGraph) that finds {@link WebSocketController} classes in a
+ * package, sorts them by name, instantiates them with a public no-argument constructor,
+ * and returns them ready to be registered in a {@link WebSocketRouter}. Instances cannot
+ * be created.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public final class WebSocketScanner {
 
 	private WebSocketScanner() {

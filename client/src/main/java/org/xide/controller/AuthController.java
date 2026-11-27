@@ -11,6 +11,16 @@ import org.xide.sockets.annotations.SocketParam;
 import org.xide.sockets.annotations.WebSocketController;
 import org.xide.sockets.annotations.WebSocketRoute;
 
+/**
+ * Client-side WebSocket controller for the {@code /auth/login} response route. On a
+ * {@code
+ * sucess} status it disposes the login frame, opens the main frame, and starts
+ * {@link org.xide.ExamIntegrityMonitor}; otherwise it shows an error message. Callbacks
+ * are replaceable for tests.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 @WebSocketController
 public class AuthController {
 

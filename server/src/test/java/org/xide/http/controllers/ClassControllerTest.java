@@ -27,6 +27,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.xide.http.routers.Routers;
 
+/**
+ * Integration tests for {@link org.xide.http.controllers.ClassController}: folder upload
+ * security, hosted server lifecycle, and JSON responses, using a Javalin app and
+ * temporary directory.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 class ClassControllerTest {
 
 	private static final ObjectMapper JSON = new ObjectMapper();
@@ -240,6 +248,12 @@ class ClassControllerTest {
 		out.write("\r\n".getBytes(StandardCharsets.UTF_8));
 	}
 
+	/**
+	 * Test fixture pairing a file name with its content for uploads.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	private record Upload(String path, String contentType, String content) {
 	}
 

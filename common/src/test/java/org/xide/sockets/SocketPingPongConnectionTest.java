@@ -47,6 +47,9 @@ import org.xide.sockets.annotations.WebSocketRouter;
  * Requests are dispatched through the router and responses are identified independently
  * of their payload, so a response containing {@code pong} is never dispatched as another
  * request.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
  */
 public class SocketPingPongConnectionTest {
 
@@ -118,6 +121,9 @@ public class SocketPingPongConnectionTest {
 	/**
 	 * Server side of the connection: decodes the frame, dispatches pings through the
 	 * router and sends the response back, while capturing pongs sent by the client.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
 	 */
 	@ServerEndpoint("/socket")
 	public static final class TestServerEndpoint {
@@ -145,6 +151,9 @@ public class SocketPingPongConnectionTest {
 	/**
 	 * Client side of the connection: decodes the frame, dispatches pings through the
 	 * router and sends the response back, while capturing pongs sent by the server.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
 	 */
 	@ClientEndpoint
 	public static final class TestClientEndpoint {
@@ -208,7 +217,12 @@ public class SocketPingPongConnectionTest {
 		session.getAsyncRemote().sendText(SocketMessageCodec.encode(message)).get();
 	}
 
-	/** Same contract as the production controllers: ping in, pong out. */
+	/**
+	 * Same contract as the production controllers: ping in, pong out.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	@WebSocketController
 	public static final class PingController {
 
@@ -219,7 +233,12 @@ public class SocketPingPongConnectionTest {
 
 	}
 
-	/** Shared state between the container-created server endpoint and the tests. */
+	/**
+	 * Shared state between the container-created server endpoint and the tests.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	private static final class Hub {
 
 		static volatile Session clientSessionOnServer;
@@ -234,7 +253,12 @@ public class SocketPingPongConnectionTest {
 
 	}
 
-	/** Captures the pong (or the failure) of one direction of the handshake. */
+	/**
+	 * Captures the pong (or the failure) of one direction of the handshake.
+	 *
+	 * @since v1.0.0
+	 * @author LuisOtavio13
+	 */
 	private static final class ResponseSink {
 
 		private final CountDownLatch pong = new CountDownLatch(1);

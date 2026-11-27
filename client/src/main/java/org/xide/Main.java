@@ -16,6 +16,16 @@ import org.xide.frame.holders.LoginFrameHolder;
 import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
 
+/**
+ * Entry point of the X-IDE desktop client. Parses command-line arguments, verifies the
+ * client is not running in a virtual machine, connects to the server over WebSocket,
+ * shows the connection/login/loading frames, and sends an initial request. Supports
+ * {@code
+ * --endpoint}, {@code --message}, and {@code --version}; see {@link Argument}.
+ *
+ * @since v1.0.0
+ * @author luisotavio15
+ */
 public final class Main {
 
 	private static final String VERSION = "1.0.0";
@@ -120,6 +130,7 @@ public final class Main {
 				}
 				case MESSAGE -> message = value(args, ++i, argument.flag());
 				case USER, PASSWORD -> fail(argument.flag() + ": not yet implemented");
+				default -> fail("Unexpected value: " + argument);
 			}
 		}
 	}

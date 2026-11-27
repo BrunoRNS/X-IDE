@@ -4,6 +4,14 @@ import java.sql.DriverManager;
 
 import org.xide.utils.EnvRead;
 
+/**
+ * Provides the shared JDBC connection to MySQL, configured from {@code DB_HOST}, {@code
+ * DB_PORT}, {@code DB_NAME}, {@code DB_USER}, {@code DB_PASSWORD} (via
+ * {@link org.xide.utils.EnvRead}).
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
 public class Connection {
 
 	private static String url;
