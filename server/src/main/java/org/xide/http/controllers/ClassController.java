@@ -12,11 +12,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.xide.http.service.ClassService;
-
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.http.UploadedFile;
+import org.xide.http.service.ClassService;
 
 public class ClassController {
 

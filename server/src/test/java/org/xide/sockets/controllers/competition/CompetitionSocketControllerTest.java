@@ -1,47 +1,43 @@
 package org.xide.sockets.controllers.competition;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.time.LocalDateTime;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.xide.states.CompetitionState;
 
-public class CompetitionSocketControllerTest {
+class CompetitionSocketControllerTest {
 
 	private final CompetitionSocketController controller = new CompetitionSocketController();
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	@SuppressWarnings("unused")
+	void setUp() {
 		reset();
 	}
 
-	@After
-	public void tearDown() {
+	@AfterEach
+	@SuppressWarnings("unused")
+	void tearDown() {
 		reset();
-	}
-
-	private static void reset() {
-		CompetitionState.stop();
-		CompetitionState.setStartDate(null);
-		CompetitionState.setEndDate(null);
 	}
 
 	@Test
-	public void timeToStartReturnsMinusOneWhenStartIsUnset() {
+	void timeToStartReturnsMinusOneWhenStartIsUnset() {
 		assertEquals(-1L, controller.timeToStart(null));
 	}
 
 	@Test
-	public void timeToEndReturnsMinusOneWhenEndIsUnset() {
+	void timeToEndReturnsMinusOneWhenEndIsUnset() {
 		assertEquals(-1L, controller.timeToEnd(null));
 	}
 
 	@Test
-	public void timeToStartCountsDownToAFutureStart() {
+	void timeToStartCountsDownToAFutureStart() {
 		CompetitionState.setStartDate(LocalDateTime.now().plusSeconds(120));
 
 		long seconds = controller.timeToStart(null);
@@ -50,14 +46,14 @@ public class CompetitionSocketControllerTest {
 	}
 
 	@Test
-	public void timeToStartReturnsZeroWhenStartIsPast() {
+	void timeToStartReturnsZeroWhenStartIsPast() {
 		CompetitionState.setStartDate(LocalDateTime.now().minusSeconds(60));
 
 		assertEquals(0L, controller.timeToStart(null));
 	}
 
 	@Test
-	public void timeToEndCountsDownToAFutureEnd() {
+	void timeToEndCountsDownToAFutureEnd() {
 		CompetitionState.setEndDate(LocalDateTime.now().plusSeconds(300));
 
 		long seconds = controller.timeToEnd(null);
@@ -66,10 +62,16 @@ public class CompetitionSocketControllerTest {
 	}
 
 	@Test
-	public void timeToEndReturnsZeroWhenEndIsPast() {
+	void timeToEndReturnsZeroWhenEndIsPast() {
 		CompetitionState.setEndDate(LocalDateTime.now().minusSeconds(60));
 
 		assertEquals(0L, controller.timeToEnd(null));
+	}
+
+	private static void reset() {
+		CompetitionState.stop();
+		CompetitionState.setStartDate(null);
+		CompetitionState.setEndDate(null);
 	}
 
 }

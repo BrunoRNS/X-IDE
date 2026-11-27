@@ -1,14 +1,15 @@
 package org.xide;
 
-import io.javalin.Javalin;
-import io.javalin.config.JavalinConfig;
-import io.javalin.http.staticfiles.Location;
-import io.javalin.rendering.template.JavalinThymeleaf;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+
+import io.javalin.Javalin;
+import io.javalin.config.JavalinConfig;
+import io.javalin.http.staticfiles.Location;
+import io.javalin.rendering.template.JavalinThymeleaf;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
@@ -62,6 +63,7 @@ public class Main {
 	 * from the filesystem with the Thymeleaf cache disabled, so HTML edits show up on
 	 * browser refresh without rebuilding or restarting anything.
 	 */
+	@SuppressWarnings("unused")
 	private static Path devResourcesRoot() {
 		String value = System.getenv("XIDE_DEV_RESOURCES");
 		if (value == null || value.isBlank()) {

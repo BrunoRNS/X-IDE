@@ -1,19 +1,20 @@
 package org.xide.controller;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.junit.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
 import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
 import org.xide.sockets.annotations.WebSocketRouter;
 
-public class AuthControllerTest {
+class AuthControllerTest {
 
 	@Test
-	public void sucessStatusRunsTheSucessFlow() {
+	void sucessStatusRunsTheSucessFlow() {
 		AuthController controller = new AuthController();
 		List<String> handled = new ArrayList<>();
 		controller.onSucess = handled::add;
@@ -28,7 +29,7 @@ public class AuthControllerTest {
 	}
 
 	@Test
-	public void anyOtherStatusRunsTheRejectedFlow() {
+	void anyOtherStatusRunsTheRejectedFlow() {
 		AuthController controller = new AuthController();
 		List<String> handled = new ArrayList<>();
 		controller.onSucess = handled::add;

@@ -6,7 +6,7 @@ public enum BigO {
 
 	N1("n1"), LOGN("logn"), N("n"), NLOGN("nlogn"), Ne2("ne2"), Ne3("ne3");
 
-	private String name;
+	private final String name;
 
 	private BigO(String name) {
 		this.name = name;

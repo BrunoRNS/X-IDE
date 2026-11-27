@@ -1,8 +1,5 @@
 package org.xide.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -15,14 +12,20 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.junit.AfterClass;
-import org.junit.Assume;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.xide.client.sockets.WebSocketClient;
 import org.xide.protocol.SocketMessage;
 
-public class ClientServerConnectionTest {
+class ClientServerConnectionTest {
 
 	private static final String WS_PATH = "/ws/socket";
 
@@ -42,10 +45,11 @@ public class ClientServerConnectionTest {
 
 	private static boolean stackAlreadyRunning;
 
-	@BeforeClass
-	public static void startStackAndConnect() throws Exception {
-		Assume.assumeTrue("Integration test disabled: enable it with `make test-integration` (or -Dsocket.it=true)",
-				Boolean.getBoolean("socket.it"));
+	@BeforeAll
+	@SuppressWarnings("unused")
+	static void startStackAndConnect() throws Exception {
+		Assumptions.assumeTrue(Boolean.getBoolean("socket.it"),
+				"Integration test disabled: enable it with `make test-integration` (or -Dsocket.it=true)");
 		projectRoot = findProjectRoot();
 		requireDocker();
 		ensureEnvFile();
@@ -59,8 +63,9 @@ public class ClientServerConnectionTest {
 		client = connect();
 	}
 
-	@AfterClass
-	public static void stopClientAndStack() {
+	@AfterAll
+	@SuppressWarnings("unused")
+	static void stopClientAndStack() {
 		if (client != null) {
 			try {
 				client.close();
@@ -74,8 +79,9 @@ public class ClientServerConnectionTest {
 		}
 	}
 
-	@Test(timeout = 60_000)
-	public void serverAnswersPongWhenClientSendsPing() throws Exception {
+	@Test
+	@Timeout(60)
+	void serverAnswersPongWhenClientSendsPing() throws Exception {
 		client.sendRequest("/develop/ping", SocketMessage.PING).get();
 
 		SocketMessage response = client.receive("/develop/ping", RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
@@ -83,26 +89,22 @@ public class ClientServerConnectionTest {
 		assertEquals(SocketMessage.textResponse("/develop/ping", SocketMessage.PONG), response);
 	}
 
-	@Test(timeout = 60_000)
-	public void clientAnswersPongWhenServerSendsPing() throws Exception {
+	@Test
+	@Timeout(60)
+	void clientAnswersPongWhenServerSendsPing() throws Exception {
 		// Ask the server to push a ping to every connected client (this one included).
 		client.sendRequest("/develop/ping-clients", "go").get();
 
 		// The client answers the pushed ping with a pong, which the server
 		// records; poll until it shows up.
-		long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(RESPONSE_TIMEOUT_SECONDS);
-		SocketMessage response = null;
-		while (System.nanoTime() < deadline) {
-			client.sendRequest("/develop/last-pong", "check").get();
-			SocketMessage last = client.receive("/develop/last-pong", 1, TimeUnit.SECONDS);
-			if (last != null && SocketMessage.PONG.equals(last.payload().asText())) {
-				response = last;
-				break;
-			}
-			Thread.sleep(200);
-		}
-
-		assertEquals(SocketMessage.textResponse("/develop/last-pong", SocketMessage.PONG), response);
+		await().atMost(RESPONSE_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+			.pollInterval(200, TimeUnit.MILLISECONDS)
+			.ignoreExceptions()
+			.untilAsserted(() -> {
+				client.sendRequest("/develop/last-pong", "check").get();
+				SocketMessage response = client.receive("/develop/last-pong", 1, TimeUnit.SECONDS);
+				assertEquals(SocketMessage.textResponse("/develop/last-pong", SocketMessage.PONG), response);
+			});
 	}
 
 	private static void requireDocker() {
@@ -145,7 +147,7 @@ public class ClientServerConnectionTest {
 		List<String> command = new ArrayList<>(
 				List.of("docker", "compose", "--env-file", ".env", "-f", "infra/compose.yaml"));
 		command.addAll(List.of(args));
-		return run(timeoutMillis, inheritOutput, command.toArray(new String[0]));
+		return run(timeoutMillis, inheritOutput, command.toArray(String[]::new));
 	}
 
 	private static void awaitHealthy() throws Exception {
@@ -154,37 +156,22 @@ public class ClientServerConnectionTest {
 			.uri(URI.create("http://127.0.0.1:" + httpPort + "/healthz"))
 			.timeout(Duration.ofSeconds(5))
 			.build();
-		long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(HEALTH_TIMEOUT_SECONDS);
-		while (System.nanoTime() < deadline) {
-			try {
+		await().atMost(HEALTH_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+			.pollInterval(1, TimeUnit.SECONDS)
+			.ignoreExceptions()
+			.untilAsserted(() -> {
 				HttpResponse<String> response = http.send(request, HttpResponse.BodyHandlers.ofString());
-				if (response.statusCode() == 200) {
-					return;
-				}
-			}
-			catch (IOException notUpYet) {
-				// keep waiting for Nginx
-			}
-			Thread.sleep(1_000);
-		}
-		fail("Compose stack did not become healthy within " + HEALTH_TIMEOUT_SECONDS + "s");
+				assertEquals(200, response.statusCode(), "Compose stack did not become healthy");
+			});
 	}
 
 	private static WebSocketClient connect() throws Exception {
 
 		URI uri = URI.create("ws://127.0.0.1:" + httpPort + WS_PATH);
-		long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(CONNECT_TIMEOUT_SECONDS);
-		while (true) {
-			try {
-				return WebSocketClient.getInstance(uri);
-			}
-			catch (IOException | jakarta.websocket.DeploymentException notUpYet) {
-				if (System.nanoTime() > deadline) {
-					throw notUpYet;
-				}
-				Thread.sleep(1_000);
-			}
-		}
+		return await().atMost(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+			.pollInterval(1, TimeUnit.SECONDS)
+			.ignoreExceptions()
+			.until(() -> WebSocketClient.getInstance(uri), connected -> connected != null);
 	}
 
 	private static CommandResult run(long timeoutMillis, String... command) {
@@ -206,7 +193,7 @@ public class ClientServerConnectionTest {
 					: new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 			return new CommandResult(process.exitValue() == 0, output);
 		}
-		catch (Exception e) {
+		catch (IOException | InterruptedException e) {
 			return new CommandResult(false, e.toString());
 		}
 	}

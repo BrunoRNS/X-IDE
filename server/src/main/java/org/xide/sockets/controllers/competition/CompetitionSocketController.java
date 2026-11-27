@@ -3,11 +3,10 @@ package org.xide.sockets.controllers.competition;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+import jakarta.websocket.Session;
 import org.xide.sockets.annotations.WebSocketController;
 import org.xide.sockets.annotations.WebSocketRoute;
 import org.xide.states.CompetitionState;
-
-import jakarta.websocket.Session;
 
 @WebSocketController
 public class CompetitionSocketController {

@@ -1,5 +1,6 @@
 package org.xide;
 
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,7 +53,7 @@ public final class DevMode {
 			return location != null && "file".equals(location.getProtocol())
 					&& Files.isDirectory(Path.of(location.toURI()));
 		}
-		catch (Exception ex) {
+		catch (URISyntaxException ex) {
 			return false;
 		}
 	}

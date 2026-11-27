@@ -1,17 +1,16 @@
 
 package org.xide.http.service;
 
+import java.awt.Color;
+import java.io.ByteArrayOutputStream;
+import java.util.List;
+
 import com.lowagie.text.Document;
 import com.lowagie.text.Font;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
-
-import java.awt.Color;
-import java.io.ByteArrayOutputStream;
-import java.util.List;
-
 import org.xide.models.User;
 import org.xide.repository.UserRepo;
 

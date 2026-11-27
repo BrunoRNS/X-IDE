@@ -1,12 +1,11 @@
 package org.xide.http.routers;
 
+import io.javalin.config.JavalinConfig;
 import org.xide.http.controllers.ClassController;
 import org.xide.http.controllers.CompetitionController;
 import org.xide.http.controllers.HelloController;
 import org.xide.http.controllers.ProblensController;
 import org.xide.http.controllers.StudentsController;
-
-import io.javalin.config.JavalinConfig;
 
 public class Routers {
 

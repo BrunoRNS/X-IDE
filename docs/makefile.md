@@ -53,6 +53,38 @@ allow port 8443 in the host/router firewall; do not forward it from the internet
 | `make test-integration` | Runs socket integration tests; the socket service must be available. |
 | `make test-all` | Runs the tests for all modules. |
 
+### Waiting in tests
+
+Do not use `Thread.sleep` to wait for asynchronous work (a WebSocket reply, a container
+becoming healthy, a connection opening). Use Awaitility so the test continues as soon as
+the condition is true and fails with a clear timeout instead:
+
+```java
+import static org.awaitility.Awaitility.await;
+
+await().atMost(10, TimeUnit.SECONDS)
+    .pollInterval(200, TimeUnit.MILLISECONDS)
+    .ignoreExceptions() // connection refused, socket not open yet, ...
+    .untilAsserted(() -> {
+        SocketMessage response = client.receive("/develop/pong", 1, TimeUnit.SECONDS);
+        assertEquals(SocketMessage.textResponse("/develop/pong", SocketMessage.PONG), response);
+    });
+```
+
+`untilAsserted` retries while the JUnit assertion fails. Exceptions thrown by the polled
+call are retried only when `ignoreExceptions()` is present; Awaitility fails fast on them
+by default. For a wait that must return a value, use `until(supplier, predicate)`:
+
+```java
+WebSocketClient client = await().atMost(60, TimeUnit.SECONDS)
+    .pollInterval(1, TimeUnit.SECONDS)
+    .ignoreExceptions()
+    .until(() -> WebSocketClient.getInstance(uri), connected -> connected != null);
+```
+
+Awaitility's version is managed in the root `pom.xml`; declare it with
+`<scope>test</scope>` in each module that uses it.
+
 ## Server and communication
 
 | Command | Description |

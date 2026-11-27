@@ -1,10 +1,12 @@
 package org.xide.controller;
 
 import java.util.function.Consumer;
+
 import javax.swing.SwingUtilities;
+
 import org.xide.ExamIntegrityMonitor;
-import org.xide.frame.LoginFrame;
-import org.xide.frame.MainFrame;
+import org.xide.frame.holders.LoginFrameHolder;
+import org.xide.frame.holders.MainFrameHolder;
 import org.xide.sockets.annotations.SocketParam;
 import org.xide.sockets.annotations.WebSocketController;
 import org.xide.sockets.annotations.WebSocketRoute;
@@ -16,14 +18,14 @@ public class AuthController {
 	Consumer<String> onSucess = status -> {
 		System.out.println("Login sucess");
 		SwingUtilities.invokeLater(() -> {
-			LoginFrame.disposeFrame();
-			new MainFrame();
+			LoginFrameHolder.disposeFrame();
+			MainFrameHolder.startFrame();
 			ExamIntegrityMonitor.start();
 		});
 	};
 
 	/** Runs when the server rejects the login; tests swap it out. */
-	Consumer<String> onRejected = status -> LoginFrame
+	Consumer<String> onRejected = status -> LoginFrameHolder
 		.setMessage("Invalid email or password, or this user does not exist");
 
 	@WebSocketRoute("/auth/login")

@@ -77,7 +77,7 @@ endif
 .PHONY: run-server run-dev-server stop-server server-logs stack-status
 .PHONY: run-client run-clients communication-test communication-test-windows remote-test run-dev-client
 .PHONY: run-model
-.PHONY: format lint
+.PHONY: format lint imports-check imports-apply
 .PHONY: configure help exit quit
 
 define HELP_TEXT
@@ -120,9 +120,11 @@ Build scopes (see each module's src/main/java and src/test/java package-info.jav
 JUnit scopes:
   test-common | test-client | test-server | test-integration | test-all
 
-Code style (Spring Java Format, configured in pom.xml and .springjavaformatconfig):
-  format                              Rewrite all Java sources in the style.
-  lint                                Fail when a source is not formatted.
+Code style (Spring Java Format + scripts/JavaImportFormatter.java):
+  format                              Rewrite all Java sources and sort imports.
+  lint                                Fail when a source is not formatted or
+                                      imports are out of order.
+  imports-check | imports-apply       Check or rewrite import order only.
 
 Runtime:
   build-server-image                  Build the Docker image used by run-server.
@@ -214,11 +216,17 @@ test-integration:
 test-all:
 	$(MVNW) $(MVN_ARGS) test
 
-format:
+format: imports-apply
 	$(MVNW) $(MVN_ARGS) spring-javaformat:apply
 
-lint:
+lint: imports-check
 	$(MVNW) $(MVN_ARGS) spring-javaformat:validate
+
+imports-check:
+	java scripts/JavaImportFormatter.java --check
+
+imports-apply:
+	java scripts/JavaImportFormatter.java --apply
 
 ifeq ($(POSIX_SHELL),1)
 configure:

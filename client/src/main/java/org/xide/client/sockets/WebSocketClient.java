@@ -1,8 +1,5 @@
 package org.xide.client.sockets;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import jakarta.websocket.DeploymentException;
-import jakarta.websocket.Session;
 import java.io.IOException;
 import java.net.URI;
 import java.security.GeneralSecurityException;
@@ -12,8 +9,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.websocket.DeploymentException;
+import jakarta.websocket.Session;
 import org.glassfish.tyrus.client.ClientManager;
 import org.glassfish.tyrus.client.ClientProperties;
 import org.glassfish.tyrus.client.SslEngineConfigurator;

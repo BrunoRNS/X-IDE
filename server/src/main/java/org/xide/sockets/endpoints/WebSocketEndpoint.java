@@ -1,5 +1,9 @@
 package org.xide.sockets.endpoints;
 
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import jakarta.websocket.CloseReason;
 import jakarta.websocket.OnClose;
 import jakarta.websocket.OnError;
@@ -7,9 +11,6 @@ import jakarta.websocket.OnMessage;
 import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
-import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
 import org.xide.sockets.ClientSessions;

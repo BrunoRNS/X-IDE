@@ -1,25 +1,27 @@
 package org.xide.sockets.controllers.auth;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import jakarta.websocket.Session;
 import java.lang.reflect.Proxy;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Optional;
-import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import jakarta.websocket.Session;
+import org.junit.jupiter.api.Test;
 import org.xide.models.User;
 import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
 import org.xide.sockets.ClientSessions;
 import org.xide.sockets.annotations.WebSocketRouter;
 
-public class LoginSocketControllerTest {
+class LoginSocketControllerTest {
 
 	@Test
-	public void validCredentialsRespondWithSucessStatus() {
+	void validCredentialsRespondWithSucessStatus() {
 		LoginSocketController controller = new LoginSocketController();
 		controller.userLookup = (email, password) -> new User("Ada", password, email, 1L);
 		WebSocketRouter router = new WebSocketRouter();
@@ -34,7 +36,7 @@ public class LoginSocketControllerTest {
 	}
 
 	@Test
-	public void unknownUserRespondsWithInvalidStatus() {
+	void unknownUserRespondsWithInvalidStatus() {
 		LoginSocketController controller = new LoginSocketController();
 		controller.userLookup = (email, password) -> null;
 		WebSocketRouter router = new WebSocketRouter();
@@ -49,7 +51,7 @@ public class LoginSocketControllerTest {
 	}
 
 	@Test
-	public void logoutRemovesTheSessionFromTheLoggedSet() {
+	void logoutRemovesTheSessionFromTheLoggedSet() {
 		Session session = fakeSession();
 		ClientSessions.registerLogin(new User("Ada", "123", "ada@x.io", 1L), session);
 		try {
@@ -68,8 +70,8 @@ public class LoginSocketControllerTest {
 		}
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void databaseFailureFailsTheRoute() {
+	@Test
+	void databaseFailureFailsTheRoute() {
 		LoginSocketController controller = new LoginSocketController();
 		controller.userLookup = (email, password) -> {
 			throw new SQLException("db down");
@@ -77,8 +79,9 @@ public class LoginSocketControllerTest {
 		WebSocketRouter router = new WebSocketRouter();
 		router.register(controller);
 
-		router.dispatch(new SocketMessage("/auth/login",
-				SocketMessageCodec.toJsonNode(Map.of("email", "ada@x.io", "password", "123"))));
+		assertThatThrownBy(() -> router.dispatch(new SocketMessage("/auth/login",
+				SocketMessageCodec.toJsonNode(Map.of("email", "ada@x.io", "password", "123")))))
+			.isInstanceOf(IllegalStateException.class);
 	}
 
 	private static Session fakeSession() {

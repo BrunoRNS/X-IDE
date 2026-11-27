@@ -1,14 +1,15 @@
 package org.xide.sockets.controllers.auth;
 
-import jakarta.websocket.Session;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import jakarta.websocket.Session;
 import org.xide.models.User;
 import org.xide.repository.UserRepo;
+import org.xide.sockets.ClientSessions;
 import org.xide.sockets.annotations.SocketParam;
 import org.xide.sockets.annotations.WebSocketController;
 import org.xide.sockets.annotations.WebSocketRoute;
-import org.xide.sockets.ClientSessions;
 
 @WebSocketController
 public class LoginSocketController {
@@ -32,7 +33,7 @@ public class LoginSocketController {
 		if (session != null) {
 			User user = ClientSessions.getUser(session);
 			ClientSessions.unregisterLogin(session);
-			LOGGER.info("Logout success " + user.getName());
+			LOGGER.log(Level.INFO, "Logout success {0}", user.getName());
 			return new Dto("sucess");
 		}
 		LOGGER.info("Logout success: user not found");

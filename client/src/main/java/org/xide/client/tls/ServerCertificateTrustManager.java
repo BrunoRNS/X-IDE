@@ -15,6 +15,7 @@ import java.security.cert.X509Certificate;
 import java.util.HexFormat;
 import java.util.Locale;
 import java.util.Properties;
+
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
@@ -63,7 +64,6 @@ public final class ServerCertificateTrustManager implements X509TrustManager {
 
 			try {
 				systemTrustManager.checkServerTrusted(chain, authType);
-				return;
 			}
 			catch (CertificateException untrustedCertificate) {
 				confirmAndSavePin(fingerprint);

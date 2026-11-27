@@ -1,13 +1,14 @@
 package org.xide.client.sockets;
 
-import jakarta.websocket.ClientEndpoint;
-import jakarta.websocket.OnMessage;
-import jakarta.websocket.OnOpen;
-import jakarta.websocket.Session;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import jakarta.websocket.ClientEndpoint;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
 import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
 import org.xide.sockets.annotations.WebSocketRouter;

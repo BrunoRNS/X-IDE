@@ -5,12 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import io.javalin.http.Context;
 import org.xide.http.service.CompetitionService;
 import org.xide.models.Problem;
 import org.xide.repository.ProblemRepository;
 import org.xide.states.CompetitionState;
-
-import io.javalin.http.Context;
 
 public class CompetitionController {
 

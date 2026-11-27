@@ -4,13 +4,15 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.TimeUnit;
+
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+
 import org.xide.ExamIntegrityMonitor;
 import org.xide.client.sockets.WebSocketClient;
-import org.xide.frame.LoginFrame;
-import org.xide.frame.MainFrame;
+import org.xide.frame.holders.LoginFrameHolder;
+import org.xide.frame.holders.MainFrameHolder;
 
 public class EndSession implements ActionListener {
 
@@ -42,7 +44,9 @@ public class EndSession implements ActionListener {
 			WebSocketClient.getInstance().sendRequest("/auth/logout", "").get(5, TimeUnit.SECONDS);
 		}
 		catch (Exception failure) {
-			failure.printStackTrace();
+			Throwable thrown = failure.getCause();
+			// Maybe in future change to LOGGER, now it can still stay as stderr
+			System.err.println(thrown.getMessage());
 			SwingUtilities.invokeLater(() -> {
 				restore(button);
 				JOptionPane.showMessageDialog(owner, "Could not end the session. Check the server connection.",
@@ -53,8 +57,8 @@ public class EndSession implements ActionListener {
 
 		SwingUtilities.invokeLater(() -> {
 			ExamIntegrityMonitor.stop();
-			MainFrame.disposeFrame();
-			new LoginFrame();
+			MainFrameHolder.disposeFrame();
+			LoginFrameHolder.startFrame();
 		});
 	}
 

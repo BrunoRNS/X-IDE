@@ -1,26 +1,24 @@
 package org.xide.http.controllers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.xide.http.routers.Routers;
-import org.xide.states.CompetitionState;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.javalin.Javalin;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.xide.http.routers.Routers;
+import org.xide.states.CompetitionState;
 
-public class CompetitionControllerTest {
+class CompetitionControllerTest {
 
 	private static final ObjectMapper JSON = new ObjectMapper();
 
@@ -28,14 +26,16 @@ public class CompetitionControllerTest {
 
 	private Javalin app;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	@SuppressWarnings("unused")
+	void setUp() {
 		resetCompetition();
 		app = Javalin.create(Routers::register).start(0);
 	}
 
-	@After
-	public void tearDown() {
+	@AfterEach
+	@SuppressWarnings("unused")
+	void tearDown() {
 		if (app != null) {
 			app.stop();
 		}
@@ -49,7 +49,7 @@ public class CompetitionControllerTest {
 	}
 
 	@Test
-	public void startAcceptsUtcIsoDatesAndStoresThemAsUtcLocalDateTime() throws Exception {
+	void startAcceptsUtcIsoDatesAndStoresThemAsUtcLocalDateTime() throws Exception {
 		HttpResponse<String> response = post("""
 				{"startDate":"2026-11-25T17:30:00Z","endDate":"2026-11-25T19:30:00Z","problemIds":[]}""");
 
@@ -65,7 +65,7 @@ public class CompetitionControllerTest {
 	}
 
 	@Test
-	public void startRejectsLocalDateTimeWithoutOffset() throws Exception {
+	void startRejectsLocalDateTimeWithoutOffset() throws Exception {
 		HttpResponse<String> response = post("""
 				{"startDate":"2026-11-25T17:30:00","endDate":"2026-11-25T19:30:00","problemIds":[]}""");
 
@@ -74,7 +74,7 @@ public class CompetitionControllerTest {
 	}
 
 	@Test
-	public void startRejectsUnparseableDates() throws Exception {
+	void startRejectsUnparseableDates() throws Exception {
 		HttpResponse<String> response = post("""
 				{"startDate":"not-a-date","endDate":"also-bad","problemIds":[]}""");
 

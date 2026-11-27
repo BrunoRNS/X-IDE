@@ -1,0 +1,11 @@
+using System;
+
+// C# runs as a class with an entry point.
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        // Read input: string line = Console.ReadLine();
+        Console.WriteLine("Hello, World!");
+    }
+}

@@ -1,8 +1,7 @@
 package org.xide.models;
 
-import org.xide.utils.SqlUtil;
-
 import jakarta.websocket.Session;
+import org.xide.utils.SqlUtil;
 
 public class User {
 

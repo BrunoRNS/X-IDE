@@ -12,13 +12,13 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.net.URL;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -26,12 +26,13 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.border.MatteBorder;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
+
 import org.xide.actions.EndSession;
 import org.xide.ui.menu.About;
 import org.xide.ui.menu.Editor;
-import org.xide.ui.menu.Problens;
+import org.xide.ui.menu.Problems;
 
-public class TabbeMenu extends JPanel {
+public final class TabbeMenu extends JPanel {
 
 	public static final Color ACCENT_COLOR = new Color(210, 28, 43);
 
@@ -45,14 +46,15 @@ public class TabbeMenu extends JPanel {
 
 	private static final Font TAB_FONT = new Font(Font.SANS_SERIF, Font.PLAIN, 13);
 
+	private static final long serialVersionUID = 1L;
+
 	private final JTabbedPane tabs = new JTabbedPane();
 
-	public TabbeMenu(JFrame jFrame) {
+	public TabbeMenu() {
 		super(new BorderLayout());
 		setBackground(Color.WHITE);
 		add(createHeader(), BorderLayout.NORTH);
 		add(createTabs(), BorderLayout.CENTER);
-		jFrame.setContentPane(this);
 	}
 
 	private JPanel createHeader() {
@@ -109,7 +111,7 @@ public class TabbeMenu extends JPanel {
 
 		addTab("About", new About());
 		addTab("Editor", new Editor());
-		addTab("Problems", new Problens());
+		addTab("Problems", new Problems());
 
 		tabs.addChangeListener(event -> updateTabStyles());
 		updateTabStyles();

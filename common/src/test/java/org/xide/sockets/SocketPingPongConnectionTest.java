@@ -1,8 +1,14 @@
 package org.xide.sockets;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import java.net.URI;
+import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import jakarta.websocket.ClientEndpoint;
 import jakarta.websocket.DeploymentException;
@@ -11,17 +17,13 @@ import jakarta.websocket.OnMessage;
 import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
-import java.net.URI;
-import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import org.glassfish.tyrus.client.ClientManager;
 import org.glassfish.tyrus.server.Server;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
 import org.xide.sockets.annotations.WebSocketController;
@@ -54,28 +56,33 @@ public class SocketPingPongConnectionTest {
 
 	private static URI serverUri;
 
-	@BeforeClass
-	public static void startServer() throws DeploymentException {
+	@BeforeAll
+	@SuppressWarnings("unused")
+	static void startServer() throws DeploymentException {
 		// Port 0 = ephemeral port, so the tests never fight over a fixed port.
 		server = new Server("127.0.0.1", 0, "/ws", null, TestServerEndpoint.class);
 		server.start();
 		serverUri = URI.create("ws://127.0.0.1:" + server.getPort() + "/ws/socket");
 	}
 
-	@AfterClass
-	public static void stopServer() {
+	@AfterAll
+	@SuppressWarnings("unused")
+	static void stopServer() {
 		if (server != null) {
 			server.stop();
 		}
 	}
 
-	@Before
-	public void resetHub() {
+	@BeforeEach
+	@SuppressWarnings("unused")
+	void resetHub() {
 		Hub.reset();
 	}
 
-	@Test(timeout = 30_000)
-	public void serverRespondsWithPongWhenClientSendsPing() throws Exception {
+	@Test
+	@Timeout(30)
+	@SuppressWarnings("ConvertToTryWithResources")
+	void serverRespondsWithPongWhenClientSendsPing() throws Exception {
 		ResponseSink receivedByClient = new ResponseSink();
 		Session session = ClientManager.createClient()
 			.connectToServer(new TestClientEndpoint(receivedByClient), serverUri);
@@ -89,13 +96,15 @@ public class SocketPingPongConnectionTest {
 		}
 	}
 
-	@Test(timeout = 30_000)
-	public void clientRespondsWithPongWhenServerSendsPing() throws Exception {
+	@Test
+	@Timeout(30)
+	@SuppressWarnings("ConvertToTryWithResources")
+	void clientRespondsWithPongWhenServerSendsPing() throws Exception {
 		Session session = ClientManager.createClient()
 			.connectToServer(new TestClientEndpoint(new ResponseSink()), serverUri);
 		try {
-			assertTrue("Server did not accept the connection in time",
-					Hub.serverReady.await(TIMEOUT_SECONDS, TimeUnit.SECONDS));
+			assertTrue(Hub.serverReady.await(TIMEOUT_SECONDS, TimeUnit.SECONDS),
+					"Server did not accept the connection in time");
 
 			send(Hub.clientSessionOnServer, SocketMessage.text("/develop/ping", "ping"));
 
@@ -257,7 +266,7 @@ public class SocketPingPongConnectionTest {
 
 		private String describeError() {
 			Throwable failure = error.get();
-			return failure == null ? "" : ": " + failure;
+			return failure == null ? "" : ": " + failure.getMessage();
 		}
 
 	}

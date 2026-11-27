@@ -1,20 +1,20 @@
 package org.xide.protocol;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class SocketMessageCodecTest {
+class SocketMessageCodecTest {
 
 	@Test
-	public void roundTripsSocketMessages() throws Exception {
+	void roundTripsSocketMessages() throws Exception {
 		SocketMessage message = SocketMessage.text("/develop/ping", "ping");
 
 		assertEquals(message, SocketMessageCodec.decode(SocketMessageCodec.encode(message)));
 	}
 
 	@Test
-	public void convertsObjectPayloadsIntoStructuredJson() throws Exception {
+	void convertsObjectPayloadsIntoStructuredJson() throws Exception {
 		SocketMessage message = SocketMessage.text("/auth/login", new LoginRequest("ada@x.io", "123"));
 
 		assertEquals("ada@x.io", message.payload().get("email").asText());
@@ -24,13 +24,13 @@ public class SocketMessageCodecTest {
 	}
 
 	@Test
-	public void keepsStringPayloadsAsText() {
+	void keepsStringPayloadsAsText() {
 		SocketMessage message = SocketMessage.text("/develop/ping", "ping");
 
 		assertEquals("ping", message.payload().asText());
 	}
 
-	public record LoginRequest(String email, String password) {
+	private record LoginRequest(String email, String password) {
 	}
 
 }

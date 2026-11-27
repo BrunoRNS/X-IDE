@@ -1,9 +1,5 @@
 package org.xide.repository;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
@@ -14,21 +10,27 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.logging.Logger;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.xide.models.User;
 
 public class UserRepoMutationTest {
 
 	private static final JdbcFixture JDBC = new JdbcFixture();
 
-	@BeforeClass
-	public static void installFixtureDriver() throws SQLException {
+	@BeforeAll
+	@SuppressWarnings("unused")
+	static void installFixtureDriver() throws SQLException {
 		DriverManager.registerDriver(JDBC);
 	}
 
 	@Test
-	public void deleteByIdBindsIdAndReportsWhetherARowWasDeleted() throws Exception {
+	void deleteByIdBindsIdAndReportsWhetherARowWasDeleted() throws Exception {
 		JDBC.updatedRows = 1;
 
 		assertTrue(UserRepo.deleteById(42L));
@@ -40,7 +42,7 @@ public class UserRepoMutationTest {
 	}
 
 	@Test
-	public void updateBindsUserFieldsInSqlOrderAndReportsWhetherARowWasUpdated() throws Exception {
+	void updateBindsUserFieldsInSqlOrderAndReportsWhetherARowWasUpdated() throws Exception {
 		JDBC.updatedRows = 1;
 		User user = new User("Ada", "secret", "ada@example.com", 7L);
 

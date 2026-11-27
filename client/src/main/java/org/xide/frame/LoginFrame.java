@@ -10,6 +10,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Insets;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -23,123 +24,181 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.LineBorder;
+
 import org.xide.actions.Login;
 
-public class LoginFrame extends JFrame {
+public final class LoginFrame extends JFrame {
 
-	private static JTextField email;
-
-	private static LoginFrame instance;
-
-	private static JPasswordField password;
-
-	private static JLabel passwordOrEmailMessage;
+	private static final long serialVersionUID = 1L;
 
 	private static final char PASSWORD_ECHO_CHAR = '\u2022';
 
-	private final Color TEXT_COLOR = new Color(34, 41, 52);
+	private static final Color BACKGROUND_COLOR = new Color(241, 244, 249);
+
+	private static final Color CARD_BORDER_COLOR = new Color(222, 227, 235);
+
+	private static final Color FIELD_BORDER_COLOR = new Color(202, 210, 222);
+
+	private static final Color ERROR_COLOR = new Color(190, 40, 50);
+
+	private static final Color TEXT_COLOR = new Color(34, 41, 52);
 
 	private static final Color MUTED_COLOR = new Color(103, 113, 128);
 
 	private static final Color ACCENT_COLOR = new Color(210, 28, 43);
 
+	private JTextField email;
+
+	private JPasswordField password;
+
+	private JLabel passwordOrEmailMessage;
+
 	public LoginFrame() {
-		instance = this;
 		setTitle("X-IDE - Connect");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setResizable(false);
-		setLocationRelativeTo(null);
-		setContentPane(createFrame());
-		pack();
-		setLocationRelativeTo(null);
-		setVisible(true);
+		createContent();
+		finishLayout();
 	}
 
-	private JPanel createFrame() {
-		JPanel background = new JPanel(new BorderLayout());
-		background.setBackground(new Color(241, 244, 249));
-		background.setBorder(BorderFactory.createEmptyBorder(24, 24, 24, 24));
+	private void createContent() {
+		JPanel background = createBackground();
+		background.add(createCard(), BorderLayout.CENTER);
+		setContentPane(background);
+	}
 
+	private JPanel createBackground() {
+		JPanel background = new JPanel(new BorderLayout());
+		background.setBackground(BACKGROUND_COLOR);
+		background.setBorder(BorderFactory.createEmptyBorder(24, 24, 24, 24));
+		return background;
+	}
+
+	private JPanel createCard() {
 		JPanel card = new JPanel();
 		card.setBackground(Color.WHITE);
 		card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-		card.setBorder(new CompoundBorder(new LineBorder(new Color(222, 227, 235), 1, true),
+		card.setBorder(new CompoundBorder(new LineBorder(CARD_BORDER_COLOR, 1, true),
 				BorderFactory.createEmptyBorder(24, 32, 28, 32)));
 
+		card.add(createLogo());
+		card.add(Box.createVerticalStrut(12));
+		card.add(createTitle());
+		card.add(Box.createVerticalStrut(6));
+		card.add(createSubtitle());
+		card.add(Box.createVerticalStrut(28));
+		card.add(createFieldLabel("Email"));
+		card.add(Box.createVerticalStrut(8));
+		card.add(createEmailField());
+		card.add(Box.createVerticalStrut(10));
+		card.add(createFieldLabel("Password"));
+		card.add(Box.createVerticalStrut(10));
+		card.add(createPasswordRow());
+		card.add(Box.createVerticalStrut(10));
+		card.add(createMessageLabel());
+		card.add(Box.createVerticalStrut(12));
+		card.add(createActionButton());
+		return card;
+	}
+
+	private JLabel createLogo() {
 		ImageIcon source = new ImageIcon(getClass().getResource("/org/xide/ui/logo.png"));
 		Image logo = source.getImage().getScaledInstance(190, 107, Image.SCALE_SMOOTH);
 		JLabel logoLabel = new JLabel(new ImageIcon(logo));
 		logoLabel.setAlignmentX(CENTER_ALIGNMENT);
+		return logoLabel;
+	}
 
+	private JLabel createTitle() {
 		JLabel title = new JLabel("Login");
 		title.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 22));
 		title.setForeground(TEXT_COLOR);
 		title.setAlignmentX(CENTER_ALIGNMENT);
+		return title;
+	}
 
+	private JLabel createSubtitle() {
 		JLabel subtitle = new JLabel("Enter your X-IDE.");
 		subtitle.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 14));
 		subtitle.setForeground(MUTED_COLOR);
 		subtitle.setAlignmentX(CENTER_ALIGNMENT);
+		return subtitle;
+	}
 
-		JLabel addressLabel = new JLabel("Email");
-		addressLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 13));
-		addressLabel.setForeground(TEXT_COLOR);
-		addressLabel.setAlignmentX(LEFT_ALIGNMENT);
+	private JLabel createFieldLabel(String text) {
+		JLabel label = new JLabel(text);
+		label.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 13));
+		label.setForeground(TEXT_COLOR);
+		label.setAlignmentX(LEFT_ALIGNMENT);
+		return label;
+	}
 
+	private JTextField createEmailField() {
 		email = new ConnectFrame.PlaceholderTextField("Example: email@gmail.com");
 		email.setColumns(24);
 		email.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 15));
 		email.setForeground(TEXT_COLOR);
 		email.setToolTipText("Enter the server's IPv4 address");
-		email.setBorder(new CompoundBorder(new LineBorder(new Color(202, 210, 222), 1, true),
+		email.setBorder(new CompoundBorder(new LineBorder(FIELD_BORDER_COLOR, 1, true),
 				BorderFactory.createEmptyBorder(10, 12, 10, 12)));
 		email.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
 		email.setAlignmentX(LEFT_ALIGNMENT);
+		return email;
+	}
 
-		JLabel passwordLabel = new JLabel("Password");
-		passwordLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 13));
-		passwordLabel.setForeground(TEXT_COLOR);
-		passwordLabel.setAlignmentX(LEFT_ALIGNMENT);
+	private JPanel createPasswordRow() {
+		JPasswordField passwordField = createPasswordField();
+		JPanel passwordRow = new JPanel(new BorderLayout(4, 0));
+		passwordRow.setOpaque(false);
+		passwordRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+		passwordRow.setAlignmentX(LEFT_ALIGNMENT);
+		passwordRow.add(passwordField, BorderLayout.CENTER);
+		passwordRow.add(createTogglePasswordButton(passwordField), BorderLayout.EAST);
+		return passwordRow;
+	}
 
+	private JPasswordField createPasswordField() {
 		password = new PlaceholderPasswordField("Example: 3123123123");
 		password.setColumns(24);
 		password.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 15));
 		password.setForeground(TEXT_COLOR);
 		password.setToolTipText("Enter your password");
-		password.setBorder(new CompoundBorder(new LineBorder(new Color(202, 210, 222), 1, true),
+		password.setBorder(new CompoundBorder(new LineBorder(FIELD_BORDER_COLOR, 1, true),
 				BorderFactory.createEmptyBorder(10, 12, 10, 12)));
 		password.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
 		password.setAlignmentX(LEFT_ALIGNMENT);
 		password.setEchoChar(PASSWORD_ECHO_CHAR);
+		return password;
+	}
 
-		JButton togglePasswordButton = new JButton("Show");
-		togglePasswordButton.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
-		togglePasswordButton.setForeground(ACCENT_COLOR);
-		togglePasswordButton.setContentAreaFilled(false);
-		togglePasswordButton.setFocusPainted(false);
-		togglePasswordButton.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 0));
-		togglePasswordButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		togglePasswordButton.setToolTipText("Show password");
-		togglePasswordButton.addActionListener(event -> {
-			boolean hidden = password.getEchoChar() != 0;
-			password.setEchoChar(hidden ? (char) 0 : PASSWORD_ECHO_CHAR);
-			togglePasswordButton.setText(hidden ? "Hide" : "Show");
-			togglePasswordButton.setToolTipText(hidden ? "Hide password" : "Show password");
+	private JButton createTogglePasswordButton(JPasswordField passwordField) {
+		JButton button = new JButton("Show");
+		button.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+		button.setForeground(ACCENT_COLOR);
+		button.setContentAreaFilled(false);
+		button.setFocusPainted(false);
+		button.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 0));
+		button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		button.setToolTipText("Show password");
+		button.addActionListener(event -> {
+			boolean hidden = passwordField.getEchoChar() != 0;
+			passwordField.setEchoChar(hidden ? (char) 0 : PASSWORD_ECHO_CHAR);
+			button.setText(hidden ? "Hide" : "Show");
+			button.setToolTipText(hidden ? "Hide password" : "Show password");
 		});
+		return button;
+	}
 
-		JPanel passwordRow = new JPanel(new BorderLayout(4, 0));
-		passwordRow.setOpaque(false);
-		passwordRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
-		passwordRow.setAlignmentX(LEFT_ALIGNMENT);
-		passwordRow.add(password, BorderLayout.CENTER);
-		passwordRow.add(togglePasswordButton, BorderLayout.EAST);
-
+	private JLabel createMessageLabel() {
 		passwordOrEmailMessage = new JLabel();
 		passwordOrEmailMessage.setVisible(false);
 		passwordOrEmailMessage.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
-		passwordOrEmailMessage.setForeground(new Color(190, 40, 50));
+		passwordOrEmailMessage.setForeground(ERROR_COLOR);
 		passwordOrEmailMessage.setAlignmentX(LEFT_ALIGNMENT);
+		return passwordOrEmailMessage;
+	}
 
+	private JButton createActionButton() {
 		JButton button = new JButton("Enter");
 		button.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 14));
 		button.setForeground(Color.WHITE);
@@ -150,30 +209,15 @@ public class LoginFrame extends JFrame {
 		button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
 		button.setAlignmentX(LEFT_ALIGNMENT);
 		button.addActionListener(new Login());
-
-		card.add(logoLabel);
-		card.add(Box.createVerticalStrut(12));
-		card.add(title);
-		card.add(Box.createVerticalStrut(6));
-		card.add(subtitle);
-		card.add(Box.createVerticalStrut(28));
-		card.add(addressLabel);
-		card.add(Box.createVerticalStrut(8));
-		card.add(email);
-		card.add(Box.createVerticalStrut(10));
-		card.add(passwordLabel);
-		card.add(Box.createVerticalStrut(10));
-		card.add(passwordRow);
-		card.add(Box.createVerticalStrut(10));
-		card.add(passwordOrEmailMessage);
-		card.add(Box.createVerticalStrut(12));
-		card.add(button);
-
-		background.add(card, BorderLayout.CENTER);
-		return background;
+		return button;
 	}
 
-	public static void setMessage(String message) {
+	private void finishLayout() {
+		pack();
+		setLocationRelativeTo(null);
+	}
+
+	public void setMessage(String message) {
 		SwingUtilities.invokeLater(() -> {
 			passwordOrEmailMessage.setText(message);
 			passwordOrEmailMessage.setVisible(true);
@@ -182,19 +226,17 @@ public class LoginFrame extends JFrame {
 		});
 	}
 
-	public static String getEmail() {
+	public String getEmail() {
 		return email.getText();
 	}
 
-	public static String getPassword() {
+	public String getPassword() {
 		return new String(password.getPassword());
 	}
 
-	public static void disposeFrame() {
-		SwingUtilities.invokeLater(() -> instance.dispose());
-	}
-
 	private static class PlaceholderPasswordField extends JPasswordField {
+
+		private static final long serialVersionUID = 1L;
 
 		private final String placeholder;
 

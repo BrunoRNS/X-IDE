@@ -1,12 +1,11 @@
 package org.xide.sockets;
 
-import jakarta.websocket.Session;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import jakarta.websocket.Session;
 import org.xide.models.User;
 import org.xide.protocol.SocketMessage;
 

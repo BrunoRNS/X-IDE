@@ -1,18 +1,18 @@
 package org.xide.http.controllers;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CompetitionPageAssetsTest {
+import org.junit.jupiter.api.Test;
+
+class CompetitionPageAssetsTest {
 
 	@Test
-	public void modalScriptSendsUtcIsoDates() throws IOException {
+	void modalScriptSendsUtcIsoDates() throws IOException {
 		String script = resource("/public/problems/modal.js");
 
 		assertTrue(script.contains("new Date(startDate).toISOString()"));
@@ -20,14 +20,14 @@ public class CompetitionPageAssetsTest {
 	}
 
 	@Test
-	public void modalScriptDeclaresTheEndCountdownTimer() throws IOException {
+	void modalScriptDeclaresTheEndCountdownTimer() throws IOException {
 		String script = resource("/public/problems/modal.js");
 
 		assertTrue(script.contains("let endCountdownTimer = null;"));
 	}
 
 	@Test
-	public void modalScriptDefinesTheCountdownLifecycle() throws IOException {
+	void modalScriptDefinesTheCountdownLifecycle() throws IOException {
 		String script = resource("/public/problems/modal.js");
 
 		assertTrue(script.contains("function startCountdown()"));
@@ -38,7 +38,7 @@ public class CompetitionPageAssetsTest {
 	}
 
 	@Test
-	public void competitionTemplateExposesTheCountdownOverlayElements() throws IOException {
+	void competitionTemplateExposesTheCountdownOverlayElements() throws IOException {
 		String html = resource("/templates/competition.html");
 
 		assertTrue(html.contains("id=\"countdownOverlay\""));
@@ -49,7 +49,7 @@ public class CompetitionPageAssetsTest {
 
 	private String resource(String path) throws IOException {
 		try (InputStream stream = getClass().getResourceAsStream(path)) {
-			assertNotNull(path, stream);
+			assertNotNull(stream, path);
 			return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
 		}
 	}

@@ -1,11 +1,12 @@
 package org.xide.client.sockets;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.junit.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
 import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
 import org.xide.sockets.annotations.SocketParam;
@@ -13,10 +14,10 @@ import org.xide.sockets.annotations.WebSocketController;
 import org.xide.sockets.annotations.WebSocketRoute;
 import org.xide.sockets.annotations.WebSocketRouter;
 
-public class WebSocketEndpointTest {
+class WebSocketEndpointTest {
 
 	@Test
-	public void serverResponsesReachClientControllers() throws Exception {
+	void serverResponsesReachClientControllers() throws Exception {
 		WebSocketRouter router = new WebSocketRouter();
 		List<String> handled = new ArrayList<>();
 		router.register(new RecordingController(handled));
@@ -29,7 +30,7 @@ public class WebSocketEndpointTest {
 	}
 
 	@Test
-	public void unknownRoutesAreIgnoredWithoutFailing() throws Exception {
+	void unknownRoutesAreIgnoredWithoutFailing() throws Exception {
 		WebSocketRouter router = new WebSocketRouter();
 		List<String> handled = new ArrayList<>();
 		router.register(new RecordingController(handled));

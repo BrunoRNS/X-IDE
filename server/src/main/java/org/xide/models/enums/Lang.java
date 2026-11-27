@@ -7,7 +7,7 @@ public enum Lang {
 	PYTHON("python"), KOTLIN("kotlin"), JAVA("java"), CPP("cpp"), C("c"), RUST("rust"), GO("go"), GROOVY("groovy"),
 	JAVASCRIPT("javascript");
 
-	private String name;
+	private final String name;
 
 	private Lang(String name) {
 		this.name = name;

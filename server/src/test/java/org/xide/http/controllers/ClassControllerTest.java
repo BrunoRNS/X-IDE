@@ -1,10 +1,5 @@
 package org.xide.http.controllers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -18,19 +13,21 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.xide.http.routers.Routers;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.javalin.Javalin;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.xide.http.routers.Routers;
 
-public class ClassControllerTest {
+class ClassControllerTest {
 
 	private static final ObjectMapper JSON = new ObjectMapper();
 
@@ -48,24 +45,26 @@ public class ClassControllerTest {
 
 	private int firstClassroomPort;
 
-	@Rule
-	public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+	@TempDir
+	Path temporaryFolder;
 
-	@Before
-	public void setUp() throws IOException {
+	@BeforeEach
+	@SuppressWarnings("unused")
+	void setUp() throws IOException {
 		try (ServerSocket socket = new ServerSocket(0)) {
 			firstClassroomPort = socket.getLocalPort();
 		}
 
 		previousUploadsDirectory = System.getProperty(UPLOADS_DIRECTORY_PROPERTY);
 		previousFirstPort = System.getProperty(FIRST_PORT_PROPERTY);
-		System.setProperty(UPLOADS_DIRECTORY_PROPERTY, temporaryFolder.newFolder("uploads").getAbsolutePath());
+		System.setProperty(UPLOADS_DIRECTORY_PROPERTY, temporaryFolder.resolve("uploads").toAbsolutePath().toString());
 		System.setProperty(FIRST_PORT_PROPERTY, String.valueOf(firstClassroomPort));
 		app = Javalin.create(Routers::register).start(0);
 	}
 
-	@After
-	public void tearDown() {
+	@AfterEach
+	@SuppressWarnings("unused")
+	void tearDown() {
 		ClassController.stopAll();
 
 		if (app != null) {
@@ -86,7 +85,7 @@ public class ClassControllerTest {
 	}
 
 	@Test
-	public void uploadsAFolderAndServesHtmlAssetsAndPdfs() throws Exception {
+	void uploadsAFolderAndServesHtmlAssetsAndPdfs() throws Exception {
 		HttpResponse<String> response = postClass(21,
 				List.of(new Upload("index.html", "text/html", "<h1>Hello classroom</h1>"),
 						new Upload("assets/style.css", "text/css", "h1 { color: #dc2626; }"),
@@ -109,7 +108,7 @@ public class ClassControllerTest {
 	}
 
 	@Test
-	public void listsRoomsInIdOrderAndReturnsASingleRoom() throws Exception {
+	void listsRoomsInIdOrderAndReturnsASingleRoom() throws Exception {
 		JsonNode emptyRooms = JSON.readTree(get("/class").body());
 		assertTrue(emptyRooms.isArray());
 		assertEquals(0, emptyRooms.size());
@@ -140,7 +139,7 @@ public class ClassControllerTest {
 	}
 
 	@Test
-	public void uploadingTheSameRoomAgainReplacesItsServerAndFiles() throws Exception {
+	void uploadingTheSameRoomAgainReplacesItsServerAndFiles() throws Exception {
 		JsonNode first = json(postClass(4,
 				List.of(new Upload("index.html", "text/html", "first"), new Upload("old.txt", "text/plain", "old"))));
 		JsonNode second = json(postClass(4, List.of(new Upload("index.html", "text/html", "second"))));
@@ -157,13 +156,13 @@ public class ClassControllerTest {
 	}
 
 	@Test
-	public void rejectsMissingFilesAndInvalidIds() throws Exception {
+	void rejectsMissingFilesAndInvalidIds() throws Exception {
 		assertEquals(400, postClass(3, List.of()).statusCode());
 		assertEquals(400, postClass(0, List.of(new Upload("index.html", "text/html", "zero"))).statusCode());
 	}
 
 	@Test
-	public void rejectsPathsThatEscapeTheRoomDirectory() throws Exception {
+	void rejectsPathsThatEscapeTheRoomDirectory() throws Exception {
 		HttpResponse<String> response = postClass(5, List.of(new Upload("../escaped.txt", "text/plain", "escaped")));
 
 		assertEquals(500, response.statusCode());

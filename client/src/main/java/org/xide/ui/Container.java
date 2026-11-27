@@ -15,7 +15,9 @@ import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 
-public class Container extends JPanel {
+public final class Container extends JPanel {
+
+	private static final long serialVersionUID = 1L;
 
 	private final Color color;
 

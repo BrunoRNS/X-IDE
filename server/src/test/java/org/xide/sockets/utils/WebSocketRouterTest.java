@@ -1,11 +1,13 @@
 package org.xide.sockets.utils;
 
-import static org.junit.Assert.assertEquals;
-
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Map;
 import java.util.Optional;
-import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import org.junit.jupiter.api.Test;
 import org.xide.protocol.SocketMessage;
 import org.xide.protocol.SocketMessageCodec;
 import org.xide.sockets.annotations.SocketParam;
@@ -17,7 +19,7 @@ import org.xide.sockets.controllers.develop.DevelopSocketController;
 public class WebSocketRouterTest {
 
 	@Test
-	public void dispatchesRequestToControllerAndReturnsItsResponse() {
+	void dispatchesRequestToControllerAndReturnsItsResponse() {
 		WebSocketRouter router = new WebSocketRouter();
 		router.register(new DevelopSocketController());
 
@@ -27,7 +29,7 @@ public class WebSocketRouterTest {
 	}
 
 	@Test
-	public void wrapsDtoResultsInTheMessagePayload() {
+	void wrapsDtoResultsInTheMessagePayload() {
 		WebSocketRouter router = new WebSocketRouter();
 		router.register(new ResultController());
 
@@ -38,7 +40,7 @@ public class WebSocketRouterTest {
 	}
 
 	@Test
-	public void allowsRoutesWithoutAResponse() {
+	void allowsRoutesWithoutAResponse() {
 		WebSocketRouter router = new WebSocketRouter();
 		router.register(new ResultController());
 
@@ -47,15 +49,17 @@ public class WebSocketRouterTest {
 		assertEquals(Optional.empty(), response);
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void rejectsDuplicateRoutes() {
+	@Test
+	void rejectsDuplicateRoutes() {
 		WebSocketRouter router = new WebSocketRouter();
 		router.register(new DevelopSocketController());
-		router.register(new DevelopSocketController());
+
+		assertThatThrownBy(() -> router.register(new DevelopSocketController()))
+			.isInstanceOf(IllegalStateException.class);
 	}
 
 	@Test
-	public void injectsPayloadParametersIntoRouteMethod() {
+	void injectsPayloadParametersIntoRouteMethod() {
 		WebSocketRouter router = new WebSocketRouter();
 		router.register(new ParamsController());
 
@@ -65,22 +69,25 @@ public class WebSocketRouterTest {
 		assertEquals(Optional.of(SocketMessage.textResponse("/params", "ada:3")), response);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsRequestMissingAnAnnotatedParameter() {
+	@Test
+	void rejectsRequestMissingAnAnnotatedParameter() {
 		WebSocketRouter router = new WebSocketRouter();
 		router.register(new ParamsController());
 
-		router.dispatch(new SocketMessage("/params", SocketMessageCodec.toJsonNode(Map.of())));
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsRoutesWithUnresolvableParameters() {
-		WebSocketRouter router = new WebSocketRouter();
-		router.register(new UnresolvableController());
+		assertThatThrownBy(() -> router.dispatch(new SocketMessage("/params", SocketMessageCodec.toJsonNode(Map.of()))))
+			.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
-	public void flagsRoutesMarkedAsProtected() {
+	void rejectsRoutesWithUnresolvableParameters() {
+		WebSocketRouter router = new WebSocketRouter();
+
+		assertThatThrownBy(() -> router.register(new UnresolvableController()))
+			.isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
+	void flagsRoutesMarkedAsProtected() {
 		WebSocketRouter router = new WebSocketRouter();
 		router.register(new SecureController());
 
@@ -137,10 +144,10 @@ public class WebSocketRouterTest {
 
 	}
 
-	public record ResultDto(String status) {
+	private record ResultDto(String status) {
 	}
 
-	public record ParamsDto(String name, int attempts) {
+	private record ParamsDto(String name, int attempts) {
 	}
 
 }

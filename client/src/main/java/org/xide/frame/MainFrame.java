@@ -9,27 +9,34 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
+
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+
 import org.xide.DevMode;
 import org.xide.ui.TabbeMenu;
 
-public class MainFrame extends JFrame {
+public final class MainFrame extends JFrame {
 
-	private static MainFrame instance;
+	private static final long serialVersionUID = 1L;
 
 	public static final Color BACKGROUND_COLOR = new Color(241, 244, 249);
 
 	public static final Color ACCENT_COLOR = new Color(210, 28, 43);
 
 	public MainFrame() {
-		instance = this;
 		setUndecorated(true);
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		createFrame();
+		createContent();
+		toggleFullscreen();
+		setAlwaysOnTop(true);
+		addListeners();
+		limitMonitors();
+	}
 
+	private void toggleFullscreen() {
 		GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 		if (device.isFullScreenSupported()) {
 			device.setFullScreenWindow(this);
@@ -39,9 +46,9 @@ public class MainFrame extends JFrame {
 			setSize(size);
 			setLocation(0, 0);
 		}
+	}
 
-		setAlwaysOnTop(true);
-
+	private void addListeners() {
 		addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
@@ -50,7 +57,6 @@ public class MainFrame extends JFrame {
 				}
 			}
 		});
-
 		addWindowFocusListener(new WindowFocusListener() {
 			@Override
 			public void windowLostFocus(WindowEvent e) {
@@ -65,7 +71,9 @@ public class MainFrame extends JFrame {
 			public void windowGainedFocus(WindowEvent e) {
 			}
 		});
+	}
 
+	private void limitMonitors() {
 		int monitores = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices().length;
 
 		if (DevMode.isActive()) {
@@ -76,17 +84,10 @@ public class MainFrame extends JFrame {
 			JOptionPane.showMessageDialog(null, "Disconnect additional monitors to continue.");
 			System.exit(0);
 		}
-		setVisible(true);
 	}
 
-	private void createFrame() {
-		new TabbeMenu(this);
-	}
-
-	public static void disposeFrame() {
-		if (instance != null) {
-			instance.dispose();
-		}
+	private void createContent() {
+		setContentPane(new TabbeMenu());
 	}
 
 }

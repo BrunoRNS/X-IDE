@@ -3,6 +3,7 @@ package org.xide.http.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.javalin.http.Context;
 import org.xide.http.dto.ProblemDtos.CreateOrUpdateProblem;
 import org.xide.http.dto.ProblemDtos.ExampleCode;
 import org.xide.http.dto.ProblemDtos.ExampleIO;
@@ -10,8 +11,6 @@ import org.xide.http.dto.ProblemDtos.Limits;
 import org.xide.models.enums.BalloonColor;
 import org.xide.models.enums.BigO;
 import org.xide.models.enums.Lang;
-
-import io.javalin.http.Context;
 
 /** Converts the multipart problem form into validated application data. */
 public final class ProblemFormParser {

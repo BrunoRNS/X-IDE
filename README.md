@@ -74,7 +74,7 @@ exception: they use plain HTTP on the ports in `CLASSROOM_PORT_RANGE`
 Useful URLs:
 
 | URL | Purpose |
-|---|---|
+| --- | --- |
 | `https://localhost:8443/` | Web UI from the server machine |
 | `https://<LAN-IP>:8443/` | Web UI from a student/other device |
 | `https://<LAN-IP>:8443/students` | Student list |
@@ -111,7 +111,7 @@ monitors is allowed). When running the packaged JAR directly, enable it with
 Run `make` or `make help` to list everything.
 
 | Area | Commands |
-|---|---|
+| --- | --- |
 | Build | `build-common`, `build-client`, `build-server`, `build-integration`, `build-all`, `package-server`, `package-all` |
 | Tests | `test-common`, `test-client`, `test-server`, `test-integration`, `test-all` |
 | Stack | `configure`, `run-server`, `run-dev-server`, `stop-server`, `server-logs`, `stack-status` |
@@ -154,7 +154,7 @@ Nginx edge (inside the app container)
 WebSocket routes currently registered:
 
 | Route | Purpose |
-|---|---|
+| --- | --- |
 | `/auth/login` | Validates `email` + `password` against MySQL |
 | `/auth/logout` | Removes the requesting session from the logged-in set |
 | `/develop/ping` | Returns `pong` |
@@ -177,7 +177,7 @@ WebSocket routes currently registered:
 existing file. Required values:
 
 | Variable | Description |
-|---|---|
+| --- | --- |
 | `DB_NAME`, `DB_USER` | Database name and user created by MySQL. |
 | `DB_PASSWORD`, `DB_ROOT_PASSWORD` | Replace the example values before starting. |
 | `BIND_ADDRESS` | Host interface for the HTTPS port. Use `0.0.0.0` for LAN access. |
@@ -197,6 +197,9 @@ make run-client                                  # opens the server connection w
 make communication-test                          # ping/pong in both directions
 make remote-test URL=wss://192.168.0.42:8443/ws/socket
 ```
+
+Tests wait for asynchronous results with Awaitility instead of `Thread.sleep`; see
+[Waiting in tests](docs/makefile.md#waiting-in-tests).
 
 The client verifies the server certificate on first connection (TOFU) and stores the
 pin in `~/.xide/trusted-certificates.properties`. For automation, set

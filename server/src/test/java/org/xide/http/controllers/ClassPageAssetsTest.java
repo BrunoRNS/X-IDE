@@ -1,24 +1,24 @@
 package org.xide.http.controllers;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Map;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
-public class ClassPageAssetsTest {
+class ClassPageAssetsTest {
 
 	@Test
-	public void templateContainsTheFolderPickerAndRoomsGrid() throws IOException {
+	void templateContainsTheFolderPickerAndRoomsGrid() throws IOException {
 		String html = resource("/templates/class.html");
 
 		assertTrue(html.contains("id=\"folderInput\""));
@@ -29,7 +29,7 @@ public class ClassPageAssetsTest {
 	}
 
 	@Test
-	public void templateRendersTheFolderPickerAndHighlightsTheClassMenu() {
+	void templateRendersTheFolderPickerAndHighlightsTheClassMenu() {
 		ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
 		resolver.setTemplateMode(TemplateMode.HTML);
 		resolver.setSuffix(".html");
@@ -47,7 +47,7 @@ public class ClassPageAssetsTest {
 	}
 
 	@Test
-	public void scriptUploadsThePathManifestAndLoadsRoomsFromTheApi() throws IOException {
+	void scriptUploadsThePathManifestAndLoadsRoomsFromTheApi() throws IOException {
 		String script = resource("/public/classroom.js");
 
 		assertTrue(script.contains("formData.append('paths'"));
@@ -59,7 +59,7 @@ public class ClassPageAssetsTest {
 
 	private String resource(String path) throws IOException {
 		try (InputStream stream = getClass().getResourceAsStream(path)) {
-			assertNotNull(path, stream);
+			assertNotNull(stream, path);
 			return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
 		}
 	}

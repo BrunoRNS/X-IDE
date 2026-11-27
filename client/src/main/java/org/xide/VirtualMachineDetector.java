@@ -7,7 +7,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 /** Best-effort local check used to enforce the exam client's environment policy. */
-final class VirtualMachineDetector {
+public final class VirtualMachineDetector {
 
 	private VirtualMachineDetector() {
 	}

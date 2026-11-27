@@ -25,7 +25,7 @@ import io.simpleide.api.Editors;
 import io.simpleide.ui.editor.Editor;
 import io.simpleide.ui.treefile.TypeFile;
 
-public class About extends JPanel implements Scrollable {
+public final class About extends JPanel implements Scrollable {
 
 	private static final Color WELCOME_COLOR = new Color(255, 241, 242);
 
@@ -48,6 +48,8 @@ public class About extends JPanel implements Scrollable {
 
 			The interface is designed to help you focus on solving problems. When you finish, select **End session** to close your exam session.
 			""";
+
+	private static final long serialVersionUID = 1L;
 
 	public About() {
 		super(new GridBagLayout());

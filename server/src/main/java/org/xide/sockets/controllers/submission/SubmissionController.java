@@ -2,11 +2,10 @@ package org.xide.sockets.controllers.submission;
 
 import java.util.List;
 
+import jakarta.websocket.Session;
 import org.xide.repository.SubmissionRepository;
 import org.xide.sockets.annotations.WebSocketController;
 import org.xide.sockets.annotations.WebSocketRoute;
-
-import jakarta.websocket.Session;
 
 @WebSocketController
 public class SubmissionController {

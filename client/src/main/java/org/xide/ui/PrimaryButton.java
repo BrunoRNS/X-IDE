@@ -1,9 +1,16 @@
 package org.xide.ui;
 
-import java.awt.*;
-import javax.swing.*;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
 
 public final class PrimaryButton extends JButton {
 
@@ -14,6 +21,8 @@ public final class PrimaryButton extends JButton {
 	private static final Color PRESSED = new Color(160, 18, 30);
 
 	private static final Color DISABLED = new Color(214, 160, 166);
+
+	private static final long serialVersionUID = 1L;
 
 	private boolean hovering;
 

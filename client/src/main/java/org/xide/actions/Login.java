@@ -3,7 +3,8 @@ package org.xide.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import org.xide.frame.LoginFrame;
+import org.xide.client.sockets.WebSocketClient;
+import org.xide.frame.holders.LoginFrameHolder;
 
 public class Login implements ActionListener {
 
@@ -12,14 +13,13 @@ public class Login implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		String email = LoginFrame.getEmail();
-		String password = LoginFrame.getPassword();
+		String email = LoginFrameHolder.getEmail();
+		String password = LoginFrameHolder.getPassword();
 		try {
-			org.xide.client.sockets.WebSocketClient.getInstance().sendRequest("/auth/login", new Dto(email, password));
+			WebSocketClient.getInstance().sendRequest("/auth/login", new Dto(email, password));
 		}
 		catch (Exception ea) {
-			ea.printStackTrace();
-			LoginFrame.setMessage(ea.getMessage());
+			LoginFrameHolder.setMessage(ea.getMessage());
 		}
 	}
 
