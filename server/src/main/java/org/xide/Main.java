@@ -20,11 +20,11 @@ import org.xide.repository.InitDatabase;
 import org.xide.sockets.WebSocketServer;
 
 /**
- * Entry point of the X-IDE server. Starts the Javalin HTTP server on port 8081 (Thymeleaf
- * rendering, static assets, routes registered by {@link org.xide.http.routers.Routers}),
- * starts the secure WebSocket server ({@link org.xide.sockets.WebSocketServer}),
- * initializes the MySQL database schema ({@link org.xide.repository.InitDatabase}), and
- * blocks until shutdown.
+ * Entry point of the X-IDE server. Depending on {@link ServerRole}, starts the Javalin
+ * HTTP server on port 8081 (Thymeleaf rendering, static assets, routes registered by
+ * {@link org.xide.http.routers.Routers}) and the secure WebSocket server
+ * ({@link org.xide.sockets.WebSocketServer}), initializes the MySQL database schema
+ * ({@link org.xide.repository.InitDatabase}), and blocks until shutdown.
  *
  * @since v1.0.0
  * @author luisotavio15
@@ -32,7 +32,34 @@ import org.xide.sockets.WebSocketServer;
 public class Main {
 
 	public static void main(String[] args) throws Exception {
-		WebSocketServer server = WebSocketServer.getInstance();
+		ServerRole role = ServerRole.fromEnvironment();
+		WebSocketServer server = role.startsWebSocket() ? WebSocketServer.getInstance() : null;
+		if (role.startsHttp()) {
+			startHttp();
+		}
+		if (server != null) {
+			server.start();
+		}
+		try {
+			java.sql.Connection c = Connection.connect();
+			InitDatabase initDatabase = new InitDatabase(c);
+			initDatabase.init();
+		}
+		catch (NullPointerException e) {
+			System.out.println("DB_NAME or DB_PASSWORD or DB_USER is invalid or not exist");
+			return;
+		}
+		if (server != null) {
+			Runtime.getRuntime().addShutdownHook(new Thread(server::stop, "websocket-shutdown"));
+		}
+		new CountDownLatch(1).await();
+	}
+
+	/**
+	 * Starts the Javalin HTTP site on port 8081 with Thymeleaf rendering, static assets
+	 * and the routes registered by {@link org.xide.http.routers.Routers}.
+	 */
+	private static void startHttp() {
 		Javalin.create(config -> {
 			Path devResources = devResourcesRoot();
 			JavalinThymeleaf thymeleaf = new JavalinThymeleaf(templateEngine(devResources));
@@ -53,18 +80,6 @@ public class Main {
 			}
 			Routers.register(config);
 		}).start(8081);
-		server.start();
-		try {
-			java.sql.Connection c = Connection.connect();
-			InitDatabase initDatabase = new InitDatabase(c);
-			initDatabase.init();
-		}
-		catch (NullPointerException e) {
-			System.out.println("DB_NAME or DB_PASSWORD or DB_USER is invalid or not exist");
-			return;
-		}
-		Runtime.getRuntime().addShutdownHook(new Thread(server::stop, "websocket-shutdown"));
-		new CountDownLatch(1).await();
 	}
 
 	/**

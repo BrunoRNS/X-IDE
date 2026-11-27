@@ -2,6 +2,25 @@
 # X-IDE container entrypoint: WebSocket server (server.jar) + Nginx edge.
 set -eu
 
+ROLE="${XIDE_SERVER_ROLE:-full}"
+case "$ROLE" in
+    full|full-server) ROLE=full ;;
+    site|server-site) ROLE=site ;;
+    websocket|websocket-server|server-websocket) ROLE=websocket ;;
+    *)
+        echo "Unsupported XIDE_SERVER_ROLE=$ROLE (expected full, site or websocket)" >&2
+        exit 1
+        ;;
+esac
+
+NGINX_CONFIG="/opt/xide/nginx/$ROLE.conf"
+if [ ! -f "$NGINX_CONFIG" ]; then
+    echo "Missing nginx configuration: $NGINX_CONFIG" >&2
+    exit 1
+fi
+cp "$NGINX_CONFIG" /etc/nginx/conf.d/default.conf
+printf 'Starting X-IDE server role: %s\n' "$ROLE"
+
 CERT_DIR=/etc/nginx/certs
 CERT_FILE="$CERT_DIR/server.crt"
 KEY_FILE="$CERT_DIR/server.key"
@@ -95,5 +114,5 @@ printf 'WSS certificate covers localhost, 127.0.0.1, and TLS_HOST=%s\n' "$TLS_HO
 printf 'WSS certificate SHA-256 fingerprint: '
 openssl x509 -in "$CERT_FILE" -noout -fingerprint -sha256 | sed 's/.*=//'
 
-java -jar /opt/xide/server.jar &
+XIDE_SERVER_ROLE="$ROLE" java -jar /opt/xide/server.jar &
 exec nginx -g 'daemon off;'

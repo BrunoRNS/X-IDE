@@ -72,7 +72,7 @@ TLS_HOST_VALUE := $(LAN_IP)
 TLS_HOST_AUTO := 1
 endif
 
-.PHONY: all build-client build-server build-server-image build-common build-integration build-all package-all package-server
+.PHONY: all build-client build-server build-server-image build-common build-integration build-all package-all package-server package-client package-server-bundles jpackage
 .PHONY: test-client test-server test-common test-integration test-all
 .PHONY: run-server run-dev-server stop-server server-logs stack-status
 .PHONY: run-client run-clients communication-test communication-test-windows remote-test run-dev-client
@@ -115,7 +115,8 @@ X-IDE project commands
 
 Build scopes (see each module's src/main/java and src/test/java package-info.java):
   build-common | build-client | build-server | build-integration | build-all
-  package-server | package-all
+  package-server | package-all | package-client | package-server-bundles
+  jpackage                              Build native client bundle for the host OS/arch (requires JDK 17+ with jpackage)
 
 JUnit scopes:
   test-common | test-client | test-server | test-integration | test-all
@@ -200,6 +201,16 @@ package-all:
 
 package-server:
 	$(MVNW) $(MVN_ARGS) -B -ntp -pl server -am -DskipTests package
+
+package-server-bundles: package-server
+	python3 scripts/package-server.py --variant all --version 1.0.0 --platforms linux/amd64,linux/arm64 --output-dir dist
+
+package-client:
+	$(MVNW) $(MVN_ARGS) -B -ntp -pl client -am -DskipTests package
+	python3 scripts/package-client.py --target auto --version 1.0.0 --output-dir dist
+
+jpackage: package-client
+	@echo "Client bundle created in dist/"
 
 test-client:
 	$(MVNW) $(MVN_ARGS) -pl client -am test

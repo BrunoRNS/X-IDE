@@ -1,0 +1,29 @@
+# Standalone AI service: Ollama with the configured model pulled at startup.
+# Start with: make run-ai
+name: xide-server-ai
+
+services:
+  server-ai:
+    image: xide-server-ai:local
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.ai
+    restart: unless-stopped
+    environment:
+      OLLAMA_MODEL: ${MODEL_NAME:-qwen2.5-coder:3b}
+      OLLAMA_MAX_LOADED_MODELS: "1"
+      OLLAMA_NUM_PARALLEL: "1"
+      OLLAMA_KEEP_ALIVE: "5m"
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+volumes:
+  ollama_data:

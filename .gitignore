@@ -10,3 +10,6 @@ uploads/*
 .settings/*
 .classpath
 .project
+dist/
+__pycache__/
+*.pyc

@@ -16,7 +16,12 @@ WORKDIR /opt/xide
 COPY server/target/server-1.0-SNAPSHOT.jar /opt/xide/server.jar
 
 
-COPY infra/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+# XIDE_SERVER_ROLE (full, site, websocket) selects one of these configurations at
+# container start; the entrypoint copies the chosen file to
+# /etc/nginx/conf.d/default.conf.
+COPY infra/nginx/nginx.conf /opt/xide/nginx/full.conf
+COPY infra/nginx/nginx-site.conf /opt/xide/nginx/site.conf
+COPY infra/nginx/nginx-websocket.conf /opt/xide/nginx/websocket.conf
 
 
 COPY infra/nginx/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
