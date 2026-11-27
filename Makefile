@@ -169,7 +169,7 @@ Runtime:
                                       RUN_SERVER_BUILD=0 uses a preloaded image.
   stop-server | server-logs | stack-status
   run-dev-server                      Like run-server, but bind-mounts
-                                      server/src/main/resources into the app
+                                      server/src/main/resources into the full-server
                                       container with the Thymeleaf cache off:
                                       edit templates/*.html or public/* and
                                       just refresh the browser (no rebuild).
@@ -307,7 +307,7 @@ endif
 
 
 build-server-image: configure package-server
-	$(COMPOSE) build --no-cache app
+	$(COMPOSE) build --no-cache full-server
 
 run-server: configure
 
@@ -316,27 +316,27 @@ run-server: package-server
 endif
 	$(if $(TLS_HOST_AUTO),$(info TLS_HOST not set; auto-detected LAN IP: $(LAN_IP)),$(if $(TLS_HOST_VALUE),,$(info No LAN IP detected and no TLS_HOST set; the stack will fall back to localhost.)))
 ifeq ($(RUN_SERVER_BUILD),1)
-	$(COMPOSE) build --no-cache app
+	$(COMPOSE) build --no-cache full-server
 endif
 ifeq ($(POSIX_SHELL),1)
-	TLS_HOST='$(TLS_HOST_VALUE)' TLS_HOST_AUTO='$(TLS_HOST_AUTO)' $(COMPOSE) up --force-recreate $(if $(filter 0,$(RUN_SERVER_BUILD)),--no-build,) $(COMPOSE_ARGS) app
+	TLS_HOST='$(TLS_HOST_VALUE)' TLS_HOST_AUTO='$(TLS_HOST_AUTO)' $(COMPOSE) up --force-recreate $(if $(filter 0,$(RUN_SERVER_BUILD)),--no-build,) $(COMPOSE_ARGS) full-server
 else
-	set "TLS_HOST=$(TLS_HOST_VALUE)" && set "TLS_HOST_AUTO=$(TLS_HOST_AUTO)" && $(COMPOSE) up --force-recreate $(if $(filter 0,$(RUN_SERVER_BUILD)),--no-build,) $(COMPOSE_ARGS) app
+	set "TLS_HOST=$(TLS_HOST_VALUE)" && set "TLS_HOST_AUTO=$(TLS_HOST_AUTO)" && $(COMPOSE) up --force-recreate $(if $(filter 0,$(RUN_SERVER_BUILD)),--no-build,) $(COMPOSE_ARGS) full-server
 endif
 
 # Dev loop: same stack as run-server, but the image is built with cache and the
 # server resources directory is bind-mounted (infra/compose.dev.yaml). HTML and
 # static asset edits are picked up on browser refresh; restart is only needed
 # for Java source changes (rebuild with: make package-server && docker compose
-# --env-file .env -f infra/compose.yaml -f infra/compose.dev.yaml build app).
+# --env-file .env -f infra/compose.yaml -f infra/compose.dev.yaml build full-server).
 run-dev-server: configure package-server
 	$(if $(TLS_HOST_AUTO),$(info TLS_HOST not set; auto-detected LAN IP: $(LAN_IP)),$(if $(TLS_HOST_VALUE),,$(info No LAN IP detected and no TLS_HOST set; the stack will fall back to localhost.)))
-	$(COMPOSE) build app
+	$(COMPOSE) build full-server
 	$(info Dev mode: server/src/main/resources is bind-mounted; edit templates/*.html or public/* and refresh the browser.)
 ifeq ($(POSIX_SHELL),1)
-	TLS_HOST='$(TLS_HOST_VALUE)' TLS_HOST_AUTO='$(TLS_HOST_AUTO)' $(COMPOSE_DEV) up --force-recreate $(COMPOSE_ARGS) app
+	TLS_HOST='$(TLS_HOST_VALUE)' TLS_HOST_AUTO='$(TLS_HOST_AUTO)' $(COMPOSE_DEV) up --force-recreate $(COMPOSE_ARGS) full-server
 else
-	set "TLS_HOST=$(TLS_HOST_VALUE)" && set "TLS_HOST_AUTO=$(TLS_HOST_AUTO)" && $(COMPOSE_DEV) up --force-recreate $(COMPOSE_ARGS) app
+	set "TLS_HOST=$(TLS_HOST_VALUE)" && set "TLS_HOST_AUTO=$(TLS_HOST_AUTO)" && $(COMPOSE_DEV) up --force-recreate $(COMPOSE_ARGS) full-server
 endif
 
 run-model: configure
