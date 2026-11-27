@@ -68,30 +68,6 @@ jobs:
       - name: Run module tests
         run: ./mvnw -B -ntp -pl ${{ matrix.module }} -am test
 
-  native-server-build:
-    name: GraalVM native build · server
-    needs:
-      - code-quality
-      - unit-tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: graalvm/setup-graalvm@v1
-        with:
-          java-version: '17'
-          distribution: graalvm-community
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          cache: maven
-
-      - name: Compile server with GraalVM Native Image
-        run: ./mvnw -B -ntp -Pnative -pl server -am -DskipTests package
-
-      - name: Verify native executable
-        run: |
-          test -x server/target/server
-          file server/target/server | grep -q ELF
-
   build-client:
     name: Build · Client bundles
     needs:

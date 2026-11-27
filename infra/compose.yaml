@@ -29,6 +29,9 @@ services:
 
   mysql:
     image: xide-database:local
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.database
     restart: unless-stopped
     command: ["--log-bin-trust-function-creators=1"]
     environment:

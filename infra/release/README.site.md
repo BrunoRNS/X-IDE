@@ -2,7 +2,7 @@
 
 This bundle runs the HTTP site only, without the WebSocket server or a database:
 
-- `server-site`: Javalin HTTP site behind Nginx (TLS 1.3), compiled as a GraalVM native executable
+- `server-site`: Javalin HTTP site behind Nginx (TLS 1.3), running on Java 17
 
 The MySQL database is deployed separately with the `xide-server-database` bundle.
 Set `DB_HOST` in `.env` to the hostname or IP of that database before starting.

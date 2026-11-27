@@ -1,5 +1,5 @@
 #!/bin/sh
-# X-IDE container entrypoint: native WebSocket server + Nginx edge.
+# X-IDE container entrypoint: WebSocket server (server.jar) + Nginx edge.
 set -eu
 
 ROLE="${XIDE_SERVER_ROLE:-full}"
@@ -114,5 +114,5 @@ printf 'WSS certificate covers localhost, 127.0.0.1, and TLS_HOST=%s\n' "$TLS_HO
 printf 'WSS certificate SHA-256 fingerprint: '
 openssl x509 -in "$CERT_FILE" -noout -fingerprint -sha256 | sed 's/.*=//'
 
-XIDE_SERVER_ROLE="$ROLE" /opt/xide/server &
+XIDE_SERVER_ROLE="$ROLE" java -jar /opt/xide/server.jar &
 exec nginx -g 'daemon off;'

@@ -23,16 +23,49 @@ env:
   IMAGE_NAME: ${{ github.repository_owner }}/xide-server
 
 jobs:
-  build-server-bundles:
-    name: Build · Server ZIP bundles
+  build-server-jar:
+    name: Build · Server JAR
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      # The GraalVM native build runs inside a multi-stage Docker build; QEMU is
-      # needed when an architecture other than the runner's is requested.
+      - name: Set up Java 17
+        uses: actions/setup-java@v6
+        with:
+          distribution: zulu
+          java-version: '17'
+          cache: maven
+
+      - name: Package server JAR
+        run: ./mvnw -B -ntp -pl server -am -DskipTests package
+
+      - name: Upload server JAR
+        uses: actions/upload-artifact@v7
+        with:
+          name: xide-server-${{ inputs.version }}
+          path: server/target/server.jar
+          retention-days: 7
+
+  build-server-bundles:
+    name: Build · Server ZIP bundles
+    needs:
+      - build-server-jar
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Download server JAR
+        uses: actions/download-artifact@v8
+        with:
+          name: xide-server-${{ inputs.version }}
+          path: server/target
+
+      # QEMU is only needed when an architecture other than the runner's is
+      # requested; the JAR itself is architecture-independent Java bytecode.
       - name: Set up Docker QEMU
         uses: docker/setup-qemu-action@v4
         with:
@@ -59,9 +92,9 @@ jobs:
           retention-days: 7
 
   publish-server-image:
-    name: Publish · Native server image to GHCR
+    name: Publish · Java server image to GHCR
     needs:
-      - build-server-bundles
+      - build-server-jar
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
 
@@ -72,6 +105,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+
+      - name: Download server JAR
+        uses: actions/download-artifact@v8
+        with:
+          name: xide-server-${{ inputs.version }}
+          path: server/target
 
       - name: Set up Docker QEMU
         uses: docker/setup-qemu-action@v4
@@ -97,7 +136,7 @@ jobs:
             type=raw,value=${{ inputs.version }}
             type=sha
 
-      - name: Build and publish native image
+      - name: Build and publish Java image
         uses: docker/build-push-action@v7
         with:
           context: .

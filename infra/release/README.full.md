@@ -3,7 +3,7 @@
 This bundle runs the complete X-IDE stack with Docker:
 
 - `full-server`: Javalin HTTP site + Tyrus WebSocket server behind Nginx (TLS 1.3),
-  compiled as a GraalVM native executable
+  running on Java 17
 - `mysql`: application database
 - `server-ai`: Ollama with `MODEL_NAME` pulled at startup
 

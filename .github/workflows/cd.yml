@@ -59,7 +59,7 @@ jobs:
       version: ${{ github.ref_name }}
 
   # ==========================================
-  # SERVER BUNDLES (GraalVM native images)
+  # SERVER BUNDLES (Java 17 Docker images)
   # ==========================================
 
   build-server:
@@ -81,7 +81,7 @@ jobs:
   # ==========================================
 
   docker:
-    name: docker · publish native multi-arch image to Docker Hub
+    name: docker · publish multi-arch image to Docker Hub
     needs: test
     runs-on: ubuntu-latest
 
@@ -97,6 +97,15 @@ jobs:
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: zulu
+          java-version: '17'
+          cache: maven
+
+      - name: Package server JAR
+        run: ./mvnw -B -ntp -pl server -am -DskipTests package
 
       - uses: docker/setup-qemu-action@v4
         with:

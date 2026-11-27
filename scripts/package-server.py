@@ -3,8 +3,8 @@
 
 Four bundles are produced:
 
-  xide-server-full-<version>.zip      native server + Ollama + MySQL compose stack
-  xide-server-site-<version>.zip      native HTTP site (database is external)
+  xide-server-full-<version>.zip      Java server + Ollama + MySQL compose stack
+  xide-server-site-<version>.zip      Java HTTP site (database is external)
   xide-server-ai-<version>.zip        Ollama service
   xide-server-database-<version>.zip  standalone MySQL 8.4 database
 
@@ -14,9 +14,9 @@ file without ``build:`` sections, generic launchers (``run.sh``/``run.cmd``/
 that matches the host Docker architecture and then run Compose, so the same ZIP
 works on Linux, macOS and Windows Docker installations.
 
-The site and full servers use the same image, built ahead-of-time with GraalVM 17
-by the multi-stage ``infra/Dockerfile``. It is built once per platform and shared
-by both bundles. Images are built with ``docker buildx build --output type=docker``
+The site and full servers use the same image, built from the regular Java JAR by
+``infra/Dockerfile`` (JRE 17 + Nginx). It is built once per platform and shared by
+both bundles. Images are built with ``docker buildx build --output type=docker``
 because the resulting archive can be loaded with ``docker load`` on any host.
 """
 
@@ -48,7 +48,7 @@ def project_version() -> str:
 
 
 # Canonical images. `full` and `site` intentionally share one server image so the
-# expensive GraalVM native build only runs once per platform.
+# server image only needs to be built once per platform.
 IMAGES = {
     "server": {"tag": "xide-server:local", "dockerfile": "infra/Dockerfile"},
     "ai": {"tag": "xide-server-ai:local", "dockerfile": "infra/Dockerfile.ai"},
@@ -103,6 +103,17 @@ def platform_name(platform: str) -> str:
 def check_docker() -> None:
     if shutil.which("docker") is None:
         raise SystemExit("docker was not found on PATH")
+
+
+def check_server_jar() -> None:
+    # server/pom.xml sets <finalName>server</finalName>, so the jar name does not
+    # change when `make version` updates the POM version.
+    jar = ROOT / "server" / "target" / "server.jar"
+    if not jar.is_file():
+        raise SystemExit(
+            "server JAR not found; run "
+            "'./mvnw -pl server -am -DskipTests package' first"
+        )
 
 
 def build_image(image: str, platform: str, dest: Path) -> None:
@@ -191,6 +202,8 @@ def main() -> None:
     args = parser.parse_args()
 
     check_docker()
+    if any(variant in ("full", "site") for variant in variants):
+        check_server_jar()
 
     variants = VARIANTS if args.variant == "all" else (args.variant,)
     platforms = parse_platforms(args.platforms)

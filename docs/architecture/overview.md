@@ -323,12 +323,12 @@ make package-server-bundles
 Four ZIPs: `full` (server + AI + database), `site` (server only, external DB),
 `ai` (Ollama) and `database` (MySQL). Each contains:
 
-- Pre-built Docker images as `.tar` archives (GraalVM native server, no JVM)
+- Pre-built Docker images as `.tar` archives (Java 17 JRE + Nginx)
 - Compose files without `build:` sections
 - Generic launchers (`run.sh`, `run.cmd`, `run.ps1`)
 - Works on Linux, macOS, Windows with Docker Desktop
 
-The `full` and `site` bundles share one native server image, built once per platform.
+The `full` and `site` bundles share one server image, built once per platform.
 
 ## Network Ports
 

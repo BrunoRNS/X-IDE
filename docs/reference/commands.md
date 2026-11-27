@@ -14,11 +14,10 @@ Complete reference for all Makefile commands.
 | `make build-server` | Compiles `server` and its required modules |
 | `make build-integration` | Compiles the client tests and dependencies without running them |
 | `make build-all` | Compiles all project modules |
-| `make package-server` | Packages the server as a regular JAR (development only) |
-| `make package-native-server` | Compiles the server as a GraalVM native executable (`server/target/server`) |
+| `make package-server` | Packages the server JAR used by the Docker image |
 | `make package-all` | Runs the Maven `package` phase for all modules |
 | `make package-client` | Builds native client bundle for the host OS/arch using jpackage |
-| `make package-server-bundles` | Builds the four multi-arch Docker server release ZIPs (GraalVM native) |
+| `make package-server-bundles` | Builds the four multi-arch Docker server release ZIPs |
 
 ### Test Commands
 

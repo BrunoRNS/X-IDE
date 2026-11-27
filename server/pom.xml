@@ -114,47 +114,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <!--
-        GraalVM Native Image build of the server. Activated explicitly with -Pnative
-        (CI native build and the multi-stage server Dockerfile) so a normal `package`
-        keeps producing the plain JAR on every JDK, including non-GraalVM ones.
-    -->
-    <profiles>
-        <profile>
-            <id>native</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.graalvm.buildtools</groupId>
-                        <artifactId>native-maven-plugin</artifactId>
-                        <version>0.10.6</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <imageName>server</imageName>
-                            <mainClass>org.xide.Main</mainClass>
-                            <fallback>false</fallback>
-                            <buildArgs>
-                                <buildArg>-H:+ReportExceptionStackTraces</buildArg>
-                                <buildArg>-H:+AddAllCharsets</buildArg>
-                            </buildArgs>
-                            <!-- Reflection/resource metadata for Javalin, Jackson, Tyrus, etc. -->
-                            <metadataRepository>
-                                <enabled>true</enabled>
-                            </metadataRepository>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>build-native-server</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>compile-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
