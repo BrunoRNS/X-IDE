@@ -59,11 +59,11 @@ jobs:
       version: ${{ github.ref_name }}
 
   # ==========================================
-  # SERVER PACKAGE
+  # SERVER BUNDLES (GraalVM native images)
   # ==========================================
 
   build-server:
-    name: build · server package
+    name: build · server ZIP bundles
     needs: test
     if: startsWith(github.ref, 'refs/tags/v')
 
@@ -81,7 +81,7 @@ jobs:
   # ==========================================
 
   docker:
-    name: docker · publish multi-arch image to Docker Hub
+    name: docker · publish native multi-arch image to Docker Hub
     needs: test
     runs-on: ubuntu-latest
 
@@ -98,15 +98,6 @@ jobs:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - uses: actions/setup-java@v6
-        with:
-          distribution: zulu
-          java-version: '17'
-          cache: maven
-
-      - name: Package server JAR
-        run: ./mvnw -B -ntp -pl server -am -DskipTests package
-
       - uses: docker/setup-qemu-action@v4
         with:
           platforms: all
@@ -121,7 +112,7 @@ jobs:
       - id: meta
         uses: docker/metadata-action@v6
         with:
-          images: ${{ secrets.DOCKERHUB_USERNAME }}/x-ide
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/xide
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=raw,value=develop-${{ github.run_number }}-${{ github.run_attempt }},enable=${{ github.ref == 'refs/heads/develop' }}
@@ -144,7 +135,7 @@ jobs:
   # ==========================================
 
   release:
-    name: release · native bundles
+    name: release · client + server bundles
     needs:
       - test
       - build-client
@@ -168,11 +159,23 @@ jobs:
           path: dist
           merge-multiple: true
 
-      # Download server JAR.
-      - name: Download server JAR
+      # The fat client JAR is published as a standalone asset. The server is
+      # never published as a JAR: it ships only inside the Docker ZIP bundles.
+      - name: Download fat client JAR
         uses: actions/download-artifact@v8
         with:
-          name: xide-server-${{ github.ref_name }}
+          name: xide-client-${{ github.ref_name }}
+          path: client-jar
+
+      - name: Rename fat client JAR
+        run: |
+          cp client-jar/client-all.jar "dist/xide-client-all-${{ github.ref_name }}.jar"
+
+      # Download the 4 server ZIP bundles (full, site, ai, database).
+      - name: Download server bundles
+        uses: actions/download-artifact@v8
+        with:
+          name: xide-server-bundles-${{ github.ref_name }}
           path: dist
 
       # Ensure everything exists before publishing.
@@ -185,20 +188,34 @@ jobs:
 
           find dist -maxdepth 1 -type f -printf '%f\n' | sort
 
-          ZIP_COUNT=$(find dist -maxdepth 1 -type f -name 'xide-client-*.zip' | wc -l)
-          JAR_COUNT=$(find dist -maxdepth 1 -type f -name '*.jar' | wc -l)
+          CLIENT_ZIPS=$(find dist -maxdepth 1 -type f -name 'xide-client-*.zip' | wc -l)
+          CLIENT_JARS=$(find dist -maxdepth 1 -type f -name 'xide-client-all-*.jar' | wc -l)
+          SERVER_ZIPS=$(find dist -maxdepth 1 -type f -name 'xide-server-*.zip' | wc -l)
 
           echo ""
-          echo "Client bundles: $ZIP_COUNT / 8"
-          echo "Server JARs: $JAR_COUNT"
+          echo "Client bundles: $CLIENT_ZIPS / 8"
+          echo "Fat client JARs: $CLIENT_JARS / 1"
+          echo "Server bundles: $SERVER_ZIPS / 4"
 
-          if [ "$ZIP_COUNT" -ne 8 ]; then
-            echo "::error::Expected 8 client bundles, found $ZIP_COUNT."
+          if [ "$CLIENT_ZIPS" -ne 8 ]; then
+            echo "::error::Expected 8 client bundles, found $CLIENT_ZIPS."
             exit 1
           fi
 
-          if [ "$JAR_COUNT" -lt 1 ]; then
-            echo "::error::Server JAR not found."
+          if [ "$CLIENT_JARS" -ne 1 ]; then
+            echo "::error::Expected the fat client JAR, found $CLIENT_JARS."
+            exit 1
+          fi
+
+          for variant in full site ai database; do
+            if [ ! -f "dist/xide-server-${variant}-${{ github.ref_name }}.zip" ]; then
+              echo "::error::Missing xide-server-${variant}-${{ github.ref_name }}.zip"
+              exit 1
+            fi
+          done
+
+          if [ "$SERVER_ZIPS" -ne 4 ]; then
+            echo "::error::Expected 4 server bundles, found $SERVER_ZIPS."
             exit 1
           fi
 

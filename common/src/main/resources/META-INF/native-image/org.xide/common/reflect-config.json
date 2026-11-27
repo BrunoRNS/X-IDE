@@ -1,0 +1,8 @@
+[
+  {
+    "name": "org.xide.protocol.SocketMessage",
+    "allDeclaredConstructors": true,
+    "allPublicMethods": true,
+    "allDeclaredFields": true
+  }
+]

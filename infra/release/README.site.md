@@ -1,14 +1,16 @@
 # X-IDE site server __VERSION__
 
-This bundle runs the HTTP site only, without the WebSocket server:
+This bundle runs the HTTP site only, without the WebSocket server or a database:
 
-- `server-site`: Javalin HTTP site behind Nginx (TLS 1.3)
-- `mysql`: application database
+- `server-site`: Javalin HTTP site behind Nginx (TLS 1.3), compiled as a GraalVM native executable
+
+The MySQL database is deployed separately with the `xide-server-database` bundle.
+Set `DB_HOST` in `.env` to the hostname or IP of that database before starting.
 
 ## Requirements
 
 - Docker Engine or Docker Desktop with Compose v2.
-- Network access on first run so Docker can pull the `mysql:8.4` image.
+- A reachable MySQL 8.4 server (for example the database bundle) with the credentials from `.env`.
 
 ## Start
 
@@ -20,7 +22,7 @@ On Windows, use `run.cmd` or `run.ps1`. The launcher loads the image archive tha
 matches your Docker architecture, copies `.env.example` to `.env` on first run, and
 starts the stack.
 
-Edit `.env` before the first start to replace `DB_PASSWORD` and
+Edit `.env` before the first start: set `DB_HOST` and replace `DB_PASSWORD` and
 `DB_ROOT_PASSWORD`. `BIND_ADDRESS=0.0.0.0` allows students on the LAN to connect;
 use `127.0.0.1` to keep the stack local.
 
@@ -30,8 +32,8 @@ self-signed; verify the SHA-256 fingerprint printed by
 
 ## Images
 
-- `image-site-linux-amd64.tar`
-- `image-site-linux-arm64.tar`
+- `image-server-linux-amd64.tar`
+- `image-server-linux-arm64.tar`
 
 Load an archive manually with `docker load -i <archive>`.
 

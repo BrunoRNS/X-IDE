@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Build the Docker-based X-IDE server release bundles.
 
-Three bundles are produced:
+Four bundles are produced:
 
-  xide-server-full-<version>.zip   full-server + server-ai + MySQL compose stack
-  xide-server-site-<version>.zip   HTTP site + MySQL compose stack
-  xide-server-ai-<version>.zip     Ollama service
+  xide-server-full-<version>.zip      native server + Ollama + MySQL compose stack
+  xide-server-site-<version>.zip      native HTTP site (database is external)
+  xide-server-ai-<version>.zip        Ollama service
+  xide-server-database-<version>.zip  standalone MySQL 8.4 database
 
 Every bundle contains one Docker image archive per supported platform, a Compose
 file without ``build:`` sections, generic launchers (``run.sh``/``run.cmd``/
@@ -13,8 +14,10 @@ file without ``build:`` sections, generic launchers (``run.sh``/``run.cmd``/
 that matches the host Docker architecture and then run Compose, so the same ZIP
 works on Linux, macOS and Windows Docker installations.
 
-Images are built with ``docker buildx build --output type=docker`` because the
-resulting archive can be loaded with ``docker load`` on any host.
+The site and full servers use the same image, built ahead-of-time with GraalVM 17
+by the multi-stage ``infra/Dockerfile``. It is built once per platform and shared
+by both bundles. Images are built with ``docker buildx build --output type=docker``
+because the resulting archive can be loaded with ``docker load`` on any host.
 """
 
 from __future__ import annotations
@@ -24,13 +27,14 @@ import hashlib
 import re
 import shutil
 import subprocess
-import sys
 import tempfile
 import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 RELEASE = ROOT / "infra" / "release"
+
+VARIANTS = ("full", "site", "ai", "database")
 
 
 def project_version() -> str:
@@ -40,37 +44,40 @@ def project_version() -> str:
         value = version_file.read_text(encoding="utf-8").strip()
         if value:
             return value
-    return "0.0.0"
+    return "v0.0.0"
 
-IMAGE_TAGS = {
-    "full": "xide-full-server:local",
-    "site": "xide-server-site:local",
-    "ai": "xide-server-ai:local",
-}
 
-DOCKERFILES = {
-    "full": "infra/Dockerfile",
-    "site": "infra/Dockerfile",
-    "ai": "infra/Dockerfile.ai",
+# Canonical images. `full` and `site` intentionally share one server image so the
+# expensive GraalVM native build only runs once per platform.
+IMAGES = {
+    "server": {"tag": "xide-server:local", "dockerfile": "infra/Dockerfile"},
+    "ai": {"tag": "xide-server-ai:local", "dockerfile": "infra/Dockerfile.ai"},
+    "database": {
+        "tag": "xide-database:local",
+        "dockerfile": "infra/Dockerfile.database",
+    },
 }
 
 # Images that must be present in each bundle.
 BUNDLE_IMAGES = {
-    "full": ["full", "ai"],
-    "site": ["site"],
+    "full": ["server", "ai", "database"],
+    "site": ["server"],
     "ai": ["ai"],
+    "database": ["database"],
 }
 
 BUNDLE_COMPOSE = {
     "full": "compose.full.yaml",
     "site": "compose.site.yaml",
     "ai": "compose.ai.yaml",
+    "database": "compose.database.yaml",
 }
 
 BUNDLE_README = {
     "full": "README.full.md",
     "site": "README.site.md",
     "ai": "README.ai.md",
+    "database": "README.database.md",
 }
 
 
@@ -80,8 +87,13 @@ def run(cmd: list[object], cwd: Path | None = None) -> None:
 
 
 def safe_version(value: str) -> str:
-    value = (value or "0.0.0").strip().lstrip("vV")
-    return re.sub(r"[^0-9A-Za-z._+-]", "-", value) or "0.0.0"
+    """Normalize to `vX.Y.Z` so local and tagged releases share one naming style."""
+    value = (value or "v0.0.0").strip()
+    if value[:1] in ("v", "V"):
+        value = "v" + value[1:]
+    elif value[:1].isdigit():
+        value = "v" + value
+    return re.sub(r"[^0-9A-Za-z._+-]", "-", value) or "v0.0.0"
 
 
 def platform_name(platform: str) -> str:
@@ -93,19 +105,9 @@ def check_docker() -> None:
         raise SystemExit("docker was not found on PATH")
 
 
-def check_server_jar() -> None:
-    # server pom.xml sets <finalName>server</finalName>, so the jar name does not
-    # change when `make version` updates the POM version.
-    jar = ROOT / "server" / "target" / "server.jar"
-    if not jar.is_file():
-        raise SystemExit(
-            "server JAR not found; run "
-            "'./mvnw -pl server -am -DskipTests package' first"
-        )
-
-
-def build_image(variant: str, platform: str, dest: Path) -> None:
+def build_image(image: str, platform: str, dest: Path) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
+    spec = IMAGES[image]
     command = [
         "docker",
         "buildx",
@@ -113,9 +115,9 @@ def build_image(variant: str, platform: str, dest: Path) -> None:
         "--platform",
         platform,
         "--tag",
-        IMAGE_TAGS[variant],
+        spec["tag"],
         "--file",
-        DOCKERFILES[variant],
+        spec["dockerfile"],
         "--output",
         f"type=docker,dest={dest}",
         ".",
@@ -137,10 +139,7 @@ def make_zip(stage: Path, archive: Path) -> None:
                 if path.suffix == ".tar"
                 else zipfile.ZIP_DEFLATED
             )
-            if path.name.endswith(".sh"):
-                info.external_attr = 0o755 << 16
-            else:
-                info.external_attr = 0o644 << 16
+            info.external_attr = (0o755 if path.name.endswith(".sh") else 0o644) << 16
             with path.open("rb") as source, bundle.open(info, "w") as target:
                 shutil.copyfileobj(source, target)
 
@@ -178,7 +177,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--variant",
-        choices=["full", "site", "ai", "all"],
+        choices=[*VARIANTS, "all"],
         default="all",
         help="bundle to build (default: all)",
     )
@@ -193,10 +192,8 @@ def main() -> None:
 
     check_docker()
 
-    variants = ["full", "site", "ai"] if args.variant == "all" else [args.variant]
+    variants = VARIANTS if args.variant == "all" else (args.variant,)
     platforms = parse_platforms(args.platforms)
-    if any(variant in ("full", "site") for variant in variants):
-        check_server_jar()
 
     out_dir = Path(args.output_dir)
     if not out_dir.is_absolute():

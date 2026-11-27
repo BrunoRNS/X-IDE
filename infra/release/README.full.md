@@ -2,15 +2,15 @@
 
 This bundle runs the complete X-IDE stack with Docker:
 
-- `full-server`: Javalin HTTP site + Tyrus WebSocket server behind Nginx (TLS 1.3)
+- `full-server`: Javalin HTTP site + Tyrus WebSocket server behind Nginx (TLS 1.3),
+  compiled as a GraalVM native executable
 - `mysql`: application database
 - `server-ai`: Ollama with `MODEL_NAME` pulled at startup
 
 ## Requirements
 
 - Docker Engine or Docker Desktop with Compose v2.
-- Network access on first run so Docker can pull the `mysql:8.4` image. The X-IDE
-  images are included in this archive.
+- Network access on first run to download the configured Ollama model.
 - About 4 GB of RAM (Ollama model, MySQL and the server).
 
 ## Start
@@ -33,8 +33,9 @@ self-signed; verify the SHA-256 fingerprint printed by
 
 ## Images
 
-- `image-full-linux-amd64.tar` / `image-full-linux-arm64.tar`
+- `image-server-linux-amd64.tar` / `image-server-linux-arm64.tar`
 - `image-ai-linux-amd64.tar` / `image-ai-linux-arm64.tar`
+- `image-database-linux-amd64.tar` / `image-database-linux-arm64.tar`
 
 Load an archive manually with `docker load -i <archive>`.
 

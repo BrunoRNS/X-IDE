@@ -1,0 +1,10 @@
+{
+  "resources": {
+    "includes": [
+      { "pattern": "templates/.*\\.html" },
+      { "pattern": "public/.*" },
+      { "pattern": "sql/.*\\.sql" },
+      { "pattern": "banners/.*\\.txt" }
+    ]
+  }
+}

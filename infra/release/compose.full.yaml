@@ -1,7 +1,7 @@
 # Full X-IDE stack: HTTP site + WebSocket server, MySQL and Ollama.
 services:
   full-server:
-    image: xide-full-server:local
+    image: xide-server:local
     restart: unless-stopped
     environment:
       XIDE_SERVER_ROLE: full
@@ -28,7 +28,7 @@ services:
       - uploads_data:/opt/xide/uploads
 
   mysql:
-    image: mysql:8.4
+    image: xide-database:local
     restart: unless-stopped
     command: ["--log-bin-trust-function-creators=1"]
     environment:

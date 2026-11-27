@@ -163,15 +163,30 @@ docker compose --env-file .env -f infra/compose.yaml -f infra/compose.dev.yaml b
 Pre-built bundles for offline deployment:
 
 ```bash
-# Client bundles (all platforms via jpackage)
+# Native client executables (all platforms via jpackage)
 make package-client
 
-# Server bundles (multi-arch Docker images)
+# Server ZIP bundles (GraalVM native images, multi-arch Docker archives)
 make package-server-bundles
 ```
 
+A tagged release publishes, for `vX.Y.Z`:
+
+| Asset | Contents |
+|-------|----------|
+| `xide-client-<platform>-vX.Y.Z.zip` | 8 native client executables (jpackage) |
+| `xide-client-all-vX.Y.Z.jar` | standalone fat client JAR |
+| `xide-server-full-vX.Y.Z.zip` | native server + Ollama + MySQL |
+| `xide-server-site-vX.Y.Z.zip` | native HTTP site (database external) |
+| `xide-server-ai-vX.Y.Z.zip` | Ollama API |
+| `xide-server-database-vX.Y.Z.zip` | standalone MySQL 8.4 |
+
+Every server ZIP includes `run.sh`, `run.cmd`, `run.ps1`, `compose.yaml`, `.env.example`
+and a README. No server JAR is published — the server runs as a GraalVM native
+executable inside Docker, so it starts in milliseconds.
+
 GitHub Actions builds on every push:
-- **CI** — Lint, test, package on feature branches
+- **CI** — Lint, test, GraalVM native build and bundle checks on feature branches
 - **Develop CI** — Full matrix on `develop` branch
 - **CD** — Docker Hub publish + GitHub Release on tags
 

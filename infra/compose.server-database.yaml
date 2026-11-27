@@ -1,0 +1,30 @@
+# Standalone MySQL database for the site bundle.
+# Start with: docker compose -f infra/compose.server-database.yaml up
+name: xide-server-database
+
+services:
+  mysql:
+    image: xide-database:local
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.database
+    restart: unless-stopped
+    command: ["--log-bin-trust-function-creators=1"]
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:?Set DB_NAME in the root .env file}
+      MYSQL_USER: ${DB_USER:?Set DB_USER in .env file}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in the root .env file}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD in the root .env file}
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  mysql_data:

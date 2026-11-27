@@ -1,6 +1,6 @@
 services:
   full-server:
-    image: xide-full-server:local
+    image: xide-server:local
     build:
       context: ..
       dockerfile: infra/Dockerfile
@@ -28,7 +28,7 @@ services:
       - uploads_data:/opt/xide/uploads
 
   mysql:
-    image: mysql:8.4
+    image: xide-database:local
     restart: unless-stopped
     command: ["--log-bin-trust-function-creators=1"]
     environment:

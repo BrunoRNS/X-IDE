@@ -98,7 +98,7 @@ TLS_HOST_VALUE := $(LAN_IP)
 TLS_HOST_AUTO := 1
 endif
 
-.PHONY: all build-client build-server build-server-image build-common build-integration build-all package-all package-server package-client package-server-bundles jpackage
+.PHONY: all build-client build-server build-server-image build-common build-integration build-all package-all package-server package-native-server package-client package-server-bundles jpackage
 .PHONY: test-client test-server test-common test-integration test-all
 .PHONY: run-server run-dev-server stop-server server-logs stack-status
 .PHONY: run-client run-clients communication-test communication-test-windows remote-test run-dev-client
@@ -142,6 +142,7 @@ X-IDE project commands
 Build scopes (see each module's src/main/java and src/test/java package-info.java):
   build-common | build-client | build-server | build-integration | build-all
   package-server | package-all | package-client | package-server-bundles
+  package-native-server                 Compile the server as a GraalVM native executable (requires GraalVM 17)
   jpackage                              Build native client bundle for the host OS/arch (requires JDK 17+ with jpackage)
 
 JUnit scopes:
@@ -237,7 +238,12 @@ package-all:
 package-server:
 	$(MVNW) $(MVN_ARGS) -B -ntp -pl server -am -DskipTests package
 
-package-server-bundles: package-server
+package-native-server:
+	$(MVNW) $(MVN_ARGS) -B -ntp -Pnative -pl server -am -DskipTests package
+
+# The GraalVM native build happens inside the multi-stage Docker image, so no
+# local Maven package step is needed before building the ZIP bundles.
+package-server-bundles:
 	python3 scripts/package-server.py --variant all --version $(PROJECT_VERSION) --platforms linux/amd64,linux/arm64 --output-dir dist
 
 package-client:

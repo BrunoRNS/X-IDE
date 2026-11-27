@@ -1,4 +1,4 @@
-name: Server Image Packaging
+name: Server Bundle Packaging
 
 on:
   workflow_call:
@@ -23,35 +23,45 @@ env:
   IMAGE_NAME: ${{ github.repository_owner }}/xide-server
 
 jobs:
-  build-server-jar:
-    name: Build · Server JAR
+  build-server-bundles:
+    name: Build · Server ZIP bundles
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Set up Java 17
-        uses: actions/setup-java@v6
+      # The GraalVM native build runs inside a multi-stage Docker build; QEMU is
+      # needed when an architecture other than the runner's is requested.
+      - name: Set up Docker QEMU
+        uses: docker/setup-qemu-action@v4
         with:
-          distribution: zulu
-          java-version: '17'
-          cache: maven
+          platforms: all
 
-      - name: Package server JAR
-        run: ./mvnw -B -ntp -pl server -am -DskipTests package
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
 
-      - name: Upload server JAR
+      - name: Build server bundles (full, site, ai, database)
+        run: >-
+          python3 scripts/package-server.py --variant all
+          --version '${{ inputs.version }}'
+          --platforms '${{ inputs.platforms }}'
+          --output-dir dist
+
+      - name: List bundles
+        run: find dist -maxdepth 1 -type f -printf '%f\n' | sort
+
+      - name: Upload server bundles
         uses: actions/upload-artifact@v7
         with:
-          name: xide-server-${{ inputs.version }}
-          path: server/target/*.jar
+          name: xide-server-bundles-${{ inputs.version }}
+          path: dist/*.zip
           retention-days: 7
 
   publish-server-image:
-    name: Publish · Server Docker image
+    name: Publish · Native server image to GHCR
     needs:
-      - build-server-jar
+      - build-server-bundles
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
 
@@ -63,11 +73,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Download server JAR
-        uses: actions/download-artifact@v8
+      - name: Set up Docker QEMU
+        uses: docker/setup-qemu-action@v4
         with:
-          name: xide-server-${{ inputs.version }}
-          path: server/target
+          platforms: all
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -88,7 +97,7 @@ jobs:
             type=raw,value=${{ inputs.version }}
             type=sha
 
-      - name: Build and publish Docker image
+      - name: Build and publish native image
         uses: docker/build-push-action@v7
         with:
           context: .
