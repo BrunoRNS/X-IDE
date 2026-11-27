@@ -1,0 +1,1 @@
+SELECT lang, time_ms FROM problem_times WHERE id_problem = ?

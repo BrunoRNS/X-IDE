@@ -1,0 +1,1 @@
+DELETE FROM example WHERE id_problem=?

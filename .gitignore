@@ -1,5 +1,15 @@
 build/
 **/target/
+infra/nginx/certs/*
+!infra/nginx/certs/.gitkeep
 deploy/.env
 deploy/certs/
+.env
 *.log
+uploads/*
+.settings/*
+.classpath
+.project
+dist/
+__pycache__/
+*.pyc

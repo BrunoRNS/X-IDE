@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <th:block th:replace="~{templates/fragments/head :: commonHead('Students | X-IDE')}"></th:block>
+</head>
+
+<body class="min-h-screen bg-white text-zinc-900
+             dark:bg-zinc-950 dark:text-zinc-100
+             transition-colors duration-300">
+
+
+    <div th:replace="~{templates/fragments/menu :: menu}"></div>
+
+    <main class="mx-auto w-full max-w-5xl px-6 py-10">
+
+        <div class="flex flex-wrap items-end justify-between gap-4" data-aos="fade-up">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">
+                    Students
+                </h1>
+                <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+                    Everyone registered in X-IDE.
+                </p>
+            </div>
+            <div>
+
+                <a href="/pdf-users" class="action-button inline-flex items-center justify-center gap-2
+                    rounded-lg border border-zinc-200 bg-white px-5 py-3
+                    text-sm font-semibold text-zinc-700
+                    hover:border-red-600 hover:text-red-600
+                    dark:border-zinc-800 dark:bg-zinc-900
+                    dark:text-zinc-300 dark:hover:border-red-600
+                    dark:hover:text-red-500">
+
+                    <i class="fa-solid fa-file-pdf text-red-600"></i>
+
+                    Download PDF
+
+                    <i class="fa-solid fa-download text-xs opacity-60"></i>
+                </a>
+
+                <button type="button" onclick="openStudentModal()" class="action-button inline-flex items-center justify-center gap-2
+                        rounded-lg bg-red-600 px-5 py-3
+                        text-sm font-semibold text-white
+                        hover:bg-red-700">
+
+                    <i class="fa-solid fa-user-plus"></i>
+                    Register Student
+                </button>
+                <span class="rounded-full border border-zinc-200 px-4 py-1.5
+                         text-xs font-medium text-zinc-500
+                         dark:border-zinc-800 dark:text-zinc-400"
+                    th:text="|${#lists.size(students)} ${#lists.size(students) == 1 ? 'student' : 'students'}|">
+                    0 students
+                </span>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(students)}" class="mt-10 flex flex-col items-center justify-center rounded-xl
+                    border border-dashed border-zinc-200 px-6 py-16 text-center
+                    dark:border-zinc-800" data-aos="fade-up" data-aos-delay="150">
+
+            <span class="flex h-12 w-12 items-center justify-center rounded-full
+                         bg-red-600/10 text-xl text-red-600">
+                <i class="fa-solid fa-user-graduate"></i>
+            </span>
+
+            <h2 class="mt-5 text-lg font-semibold">
+                No students yet
+            </h2>
+
+            <p class="mt-2 max-w-sm text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+                Students will show up here as soon as they create an account.
+            </p>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(students)}" class="mt-8 overflow-hidden rounded-xl border border-zinc-200
+                    dark:border-zinc-800" data-aos="fade-up" data-aos-delay="150">
+
+            <table class="w-full text-left text-sm">
+                <thead class="bg-zinc-50 text-xs uppercase tracking-wide
+              text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
+                    <tr>
+                        <th class="px-5 py-3 font-medium">Student</th>
+                        <th class="px-5 py-3 font-medium">Email</th>
+                        <th class="px-5 py-3 font-medium">Password</th>
+                        <th class="px-5 py-3 font-medium text-right">ID</th>
+                        <th class="px-5 py-3 font-medium text-right">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr th:each="student : ${students}" class="border-t border-zinc-200 transition-colors
+               hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900">
+
+                        <td class="px-5 py-4">
+                            <div class="flex items-center gap-3">
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center
+                             rounded-full bg-red-600/10 text-sm font-semibold
+                             uppercase text-red-600"
+                                    th:text="${#strings.isEmpty(student.name) ? '?' : #strings.substring(student.name, 0, 1)}">
+                                    S
+                                </span>
+
+                                <span class="font-medium" th:text="${student.name}">
+                                    Student
+                                </span>
+                            </div>
+                        </td>
+
+                        <td class="px-5 py-4 text-zinc-500 dark:text-zinc-400" th:text="${student.email}">
+                            student@example.com
+                        </td>
+
+                        <td class="px-5 py-4 text-zinc-500 dark:text-zinc-400" th:text="${student.password}">
+                            ••••••••
+                        </td>
+
+                        <td class="px-5 py-4 text-right text-zinc-400 dark:text-zinc-500" th:text="${student.id}">
+                            0
+                        </td>
+
+
+
+                        <td class="px-5 py-4">
+                            <div class="flex justify-end gap-2">
+
+                                <!-- Edit -->
+                                <button type="button" th:data-id="${student.id}" th:data-name="${student.name}"
+                                    th:data-email="${student.email}" onclick="editStudent(this)" class="action-button flex h-9 w-9 items-center justify-center
+                           rounded-lg border border-zinc-200 text-blue-600
+                           hover:border-blue-600 hover:bg-blue-600/10
+                           dark:border-zinc-800" title="Edit student">
+
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+
+                                <!-- Delete -->
+                                <button type="button" th:data-id="${student.id}" th:data-name="${student.name}"
+                                    onclick="deleteStudent(this)" class="action-button flex h-9 w-9 items-center justify-center
+                           rounded-lg border border-zinc-200 text-red-600
+                           hover:border-red-600 hover:bg-red-600/10
+                           dark:border-zinc-800" title="Delete student">
+
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+
+            </table>
+        </div>
+
+        <div th:replace="~{templates/fragments/modal :: modal(
+    'Register student',
+    'Add a new student',
+    ~{templates/fragments/student-form :: studentForm}
+)}"></div>
+    </main>
+
+    <script src="/public/vendor/aos.js"></script>
+    <script src="/public/students.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,1 @@
+INSERT INTO problem_times(id_problem, lang, time_ms) VALUES(?,?,?)

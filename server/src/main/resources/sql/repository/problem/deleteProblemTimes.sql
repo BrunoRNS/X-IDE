@@ -1,0 +1,1 @@
+DELETE FROM problem_times WHERE id_problem=?

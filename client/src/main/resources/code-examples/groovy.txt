@@ -1,0 +1,3 @@
+// Read input: def line = System.in.newReader().readLine()
+
+println "Hello, World!"

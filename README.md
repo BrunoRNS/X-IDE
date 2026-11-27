@@ -1,73 +1,180 @@
-# X-IDE
+<h1 align="center">X-IDE</h1>
 
-Java 17 Maven multi-module starter for a WebSocket client/server application. The client
-runs as an independent host JAR; the server, MySQL and Nginx run in Docker/Podman Compose.
-Public communication is WSS with TLS 1.3 and a MySQL-backed default-account handshake.
+<p align="center">
+  <img src="server/src/main/resources/public/logo.png" alt="X-IDE Logo" width="160">
+</p>
 
-## Quick start
+<p align="center">
+  <strong>A classroom IDE platform with web UI, WebSocket API, and desktop client</strong>
+</p>
 
-Requirements: JDK 17+, Maven 3.9+, CMake 3.20+, Docker Compose v2 or Podman Compose, and
-OpenSSL (for local credentials/certificate generation).
+<p align="center">
+  <a href="https://github.com/BrunoRNS/X-IDE/actions/workflows/ci.yml"><img src="https://github.com/BrunoRNS/X-IDE/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/BrunoRNS/X-IDE/actions/workflows/develop-ci.yml"><img src="https://github.com/BrunoRNS/X-IDE/actions/workflows/develop-ci.yml/badge.svg" alt="Develop CI"></a>
+  <a href="https://github.com/BrunoRNS/X-IDE/actions/workflows/cd.yml"><img src="https://github.com/BrunoRNS/X-IDE/actions/workflows/cd.yml/badge.svg" alt="CD"></a>
+  <a href="https://github.com/BrunoRNS/X-IDE/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-BSD--3--Clause-blue.svg" alt="License"></a>
+  <a href="https://www.java.com/"><img src="https://img.shields.io/badge/java-17+-orange.svg" alt="Java 17+"></a>
+  <a href="https://maven.apache.org/"><img src="https://img.shields.io/badge/maven-3.9+-red.svg" alt="Maven 3.9+"></a>
+  <a href="https://docker.com/"><img src="https://img.shields.io/badge/docker-20.10+-blue.svg" alt="Docker 20.10+"></a>
+</p>
 
-```sh
-cmake -S . -B build
-./xidew.sh
+---
+
+## Overview
+
+X-IDE is a **Java 17 Maven multi-module platform** designed for classroom programming environments. It provides:
+
+- **Web Interface** — Javalin + Thymeleaf served over HTTPS
+- **Real-time API** — Tyrus WebSocket server for live collaboration
+- **Desktop Client** — Standalone Swing JAR with certificate pinning (TOFU)
+- **Database** — MySQL 8.4 with auto-migration
+- **AI Ready** — Optional Ollama integration for model-backed features
+- **Single-Stack Deploy** — Docker Compose with Nginx TLS termination
+
+All components run in one reproducible Docker/Podman Compose stack.
+
+## Quick Start
+
+```bash
+# 1. Clone and enter
+git clone https://github.com/BrunoRNS/X-IDE.git && cd X-IDE
+
+# 2. Configure (creates .env from template)
+make configure
+
+# 3. Edit .env — REPLACE the example passwords
+# DB_PASSWORD=your_password
+# DB_ROOT_PASSWORD=your_root_password
+
+# 4. Start the stack
+make run-server
 ```
 
-Inside the prompt:
+Open `https://localhost:8443/` (or `https://<LAN-IP>:8443/` from another device).  
+The certificate is self-signed — verify the SHA-256 fingerprint printed at startup before accepting.
 
-```text
-xide> run-server
-Create password for default X-IDE user (default): [hidden input]
-xide> run-client --user default --password 'your-password' --trust-cert deploy/certs/server.crt
-xide> run-clients --user default --password 'your-password' --count 10 --trust-cert deploy/certs/server.crt
-xide> stop-server
+## Architecture
+
+```mermaid
+graph TB
+    Client[Browser / Swing Client]
+    Nginx[Nginx TLS 1.3<br/>Port 8443]
+    Javalin[Javalin + Thymeleaf<br/>Port 8081]
+    Tyrus[Tyrus WebSocket<br/>Port 8082]
+    MySQL[(MySQL 8.4<br/>Port 3306)]
+    Ollama[Ollama<br/>Port 11434]
+    Classroom[Classroom Files<br/>Ports 8083-8102]
+
+    Client -->|HTTPS + WSS| Nginx
+    Nginx -->|/ → HTTP| Javalin
+    Nginx -->|/ws/ → WS| Tyrus
+    Nginx -->|/classroom/ → HTTP| Classroom
+    Javalin --> MySQL
+    Tyrus --> MySQL
+    Javalin -.-> Ollama
 ```
 
-`run-server` asks for a password (minimum 12 characters) or accepts `--password` at runtime.
-It generates random database secrets in ignored `deploy/.env` and a self-signed localhost
-certificate in ignored `deploy/certs/`. The first server start creates the default account
-in MySQL. Later starts verify the supplied password against the existing account and do not
-overwrite it. `communication-test` generates a random temporary password for its test user.
+| Component | Technology | Port |
+|-----------|------------|------|
+| Reverse Proxy | Nginx (TLS 1.3) | 8443 (published) |
+| Web Server | Javalin + Thymeleaf | 8081 (internal) |
+| WebSocket | Tyrus | 8082 (internal) |
+| Database | MySQL 8.4 | 3306 (internal) |
+| AI (optional) | Ollama | 11434 (localhost) |
+| Classroom Files | Static HTTP | 8083–8102 (published) |
 
-The public local endpoint is `wss://localhost:8443/ws` (TLS 1.3 only). Local self-signed
-certificate trust is explicit via `--trust-cert deploy/certs/server.crt`; the wrapper
-adds it automatically for the default localhost client URL. Replace the certificate for
-any public deployment.
+## Project Structure
 
-## CMake/Maven build scopes
+```
+xide/
+├── common/          # Shared protocol (SocketMessage, codec, router)
+├── client/          # Swing desktop client (shaded JAR)
+├── server/          # Web + WebSocket server (Javalin, Tyrus, MySQL)
+├── infra/           # Docker, Compose, Nginx, release templates
+├── scripts/         # Build helpers, release packaging
+├── docs/            # Documentation
+└── Makefile         # Command surface (build, test, run, package)
+```
 
-| Scope | Build | JUnit |
-|---|---|---|
-| Shared protocol | `build-common` | `test-common` |
-| Client JAR | `build-client` | `test-client` |
-| Server JAR + JDBC | `build-server` | `test-server` |
-| External probes | `build-integration` | no JUnit (live integration only) |
-| All modules | `build-all` | `test-all` |
-| Full package lifecycle | `package-all` | includes tests |
+## Key Commands
 
-See [`docs/package-info.md`](docs/package-info.md) for the Java `package-info.java` documentation layout.
-See [`docs/README.md`](docs/README.md) for the CMake targets, wrapper commands, runtime,
-security, deployment and test strategy.
+| Category | Commands |
+|----------|----------|
+| **Build** | `build-all`, `package-server`, `package-client`, `package-server-bundles` |
+| **Test** | `test-all`, `test-common`, `test-client`, `test-server`, `test-integration` |
+| **Stack** | `run-server`, `run-dev-server`, `stop-server`, `server-logs`, `stack-status` |
+| **Client** | `run-client`, `communication-test`, `remote-test URL=...` |
+| **AI** | `run-model` (Ollama, default `qwen2.5-coder:3b`) |
+| **Style** | `format` (rewrite), `lint` (validate), `imports-check` |
 
-## Repository layout
+Run `make help` for the full command list with descriptions.
 
-- `common/`: shared protocol records.
-- `client/`: standalone WSS client JAR with Tyrus.
-- `server/`: WebSocket server JAR, MySQL Connector/J, JDBC user/message repositories.
-- `integration/`: single and concurrent authenticated client probes.
-- `deploy/`: MySQL + server + Nginx TLS 1.3 Compose stack.
-- `cmake/`: CMake build/test/runtime targets.
-- `scripts/`: server/client helpers and cross-platform wrapper helpers.
-- `*/src/main/java/**/package-info.java`: production package documentation aligned to each CMake build scope.
-- `*/src/test/java/**/package-info.java`: documentation for isolated unit-test packages.
+## Configuration
 
-## Security model and limitations
+`make configure` creates `.env` from `.env.example`. Required variables:
 
-The sample account is `default`; multiple simultaneous clients may share it. Authentication
-uses a credential-bearing negotiated WebSocket subprotocol during the TLS-protected handshake and PBKDF2-HMAC-SHA256 hashes stored in MySQL.
-The Nginx edge only permits TLS 1.3. The local self-signed cert is strictly for localhost
-smoke tests. For production, replace it with a trusted certificate, use runtime secrets,
-rotate the default password deliberately, and add account lifecycle, rate limiting, auditing,
-backups and DB TLS as required. This is not yet a sandbox for running untrusted submissions:
-execute submissions only in separately hardened workers.
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DB_PASSWORD` | Application database password | **required** |
+| `DB_ROOT_PASSWORD` | MySQL root password | **required** |
+| `BIND_ADDRESS` | Interface for HTTPS port | `0.0.0.0` |
+| `HTTPS_PORT` | Published HTTPS/WSS port | `8443` |
+| `TLS_HOST` | Fixed certificate host (unset = auto-detect LAN IP) | auto |
+| `CLASSROOM_PORT_RANGE` | Plain HTTP ports for hosted folders | `8083-8102` |
+
+## Development Workflow
+
+```bash
+# Hot-reload for templates/static assets
+make run-dev-server
+
+# Edit server/src/main/resources/templates/*.html or public/*
+# Changes appear on browser refresh (no rebuild)
+
+# Rebuild Java changes
+make package-server
+docker compose --env-file .env -f infra/compose.yaml -f infra/compose.dev.yaml build app
+```
+
+## Security Model
+
+- **TLS 1.3** terminated by Nginx (self-signed certificate, auto-generated)
+- **TOFU pinning** in desktop client (`~/.xide/trusted-certificates.properties`)
+- **Database** isolated in private Compose network
+- **Ollama** bound to localhost only
+
+> **Limitations**: Passwords stored as plain text. No rate limiting, auditing, or database TLS. Designed for trusted classroom LANs only. Do not expose port 8443 to the internet.
+
+## Documentation
+
+| Guide | Description |
+|-------|-------------|
+| [Getting Started](docs/getting-started/index.md) | Step-by-step setup |
+| [Architecture](docs/architecture/overview.md) | System design and data flow |
+| [Configuration](docs/reference/configuration.md) | All environment variables |
+| [Commands](docs/reference/commands.md) | Complete Makefile reference |
+| [WebSocket Protocol](docs/reference/websocket-protocol.md) | SocketMessage format and routes |
+| [Security](docs/guides/security.md) | TLS, authentication, limitations |
+| [Code of Conduct](docs/code_of_conduct.md) | Our Standards and Our Pledge |
+| [Development Guideline](docs/development.md) | How to contribute, Project Patterns |
+
+## Releases
+
+Pre-built bundles for offline deployment:
+
+```bash
+# Client bundles (all platforms via jpackage)
+make package-client
+
+# Server bundles (multi-arch Docker images)
+make package-server-bundles
+```
+
+GitHub Actions builds on every push:
+- **CI** — Lint, test, package on feature branches
+- **Develop CI** — Full matrix on `develop` branch
+- **CD** — Docker Hub publish + GitHub Release on tags
+
+## License
+
+**BSD 3-Clause** — see [LICENSE](LICENSE) for details.

@@ -1,0 +1,1 @@
+INSERT INTO problem(title, balao, big_o, restriction, pdf) VALUES(?,?,?,?,?)

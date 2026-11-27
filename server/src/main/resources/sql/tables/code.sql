@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS code(
+    id INT NOT NULL AUTO_INCREMENT,
+    file TEXT NOT NULL,
+    id_user INT NOT NULL,
+    id_problem INT NOT NULL,
+    PRIMARY KEY(id),
+    CONSTRAINT fk_code_user FOREIGN KEY(id_user)
+    REFERENCES users(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+    CONSTRAINT fk_code_problem FOREIGN KEY(id_problem)
+    REFERENCES problem(id) ON DELETE CASCADE ON UPDATE CASCADE
+);

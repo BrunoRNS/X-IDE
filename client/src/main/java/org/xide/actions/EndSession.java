@@ -1,0 +1,80 @@
+package org.xide.actions;
+
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.concurrent.TimeUnit;
+
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+
+import org.xide.ExamIntegrityMonitor;
+import org.xide.client.sockets.WebSocketClient;
+import org.xide.frame.holders.LoginFrameHolder;
+import org.xide.frame.holders.MainFrameHolder;
+
+/**
+ * Swing action that ends the exam session. Asks for confirmation, sends {@code
+ * /auth/logout} to the server, stops {@link org.xide.ExamIntegrityMonitor}, closes the
+ * main frame, and returns the user to the login screen.
+ *
+ * @since v1.0.0
+ * @author LuisOtavio13
+ */
+public class EndSession implements ActionListener {
+
+	private static final String END_LABEL = "End session";
+
+	@Override
+	public void actionPerformed(ActionEvent event) {
+		JButton button = event.getSource() instanceof JButton source ? source : null;
+		Window owner = button == null ? null : SwingUtilities.getWindowAncestor(button);
+
+		int choice = JOptionPane.showConfirmDialog(owner, "End the exam session and return to the login screen?",
+				"End session", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+		if (choice != JOptionPane.YES_OPTION) {
+			return;
+		}
+
+		if (button != null) {
+			button.setEnabled(false);
+			button.setText("Ending...");
+		}
+
+		Thread worker = new Thread(() -> endSession(button, owner), "end-session");
+		worker.setDaemon(true);
+		worker.start();
+	}
+
+	private static void endSession(JButton button, Window owner) {
+		try {
+			WebSocketClient.getInstance().sendRequest("/auth/logout", "").get(5, TimeUnit.SECONDS);
+		}
+		catch (Exception failure) {
+			Throwable thrown = failure.getCause();
+			// Maybe in future change to LOGGER, now it can still stay as stderr
+			System.err.println(thrown.getMessage());
+			SwingUtilities.invokeLater(() -> {
+				restore(button);
+				JOptionPane.showMessageDialog(owner, "Could not end the session. Check the server connection.",
+						"End session", JOptionPane.ERROR_MESSAGE);
+			});
+			return;
+		}
+
+		SwingUtilities.invokeLater(() -> {
+			ExamIntegrityMonitor.stop();
+			MainFrameHolder.disposeFrame();
+			LoginFrameHolder.startFrame();
+		});
+	}
+
+	private static void restore(JButton button) {
+		if (button != null) {
+			button.setText(END_LABEL);
+			button.setEnabled(true);
+		}
+	}
+
+}

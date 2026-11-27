@@ -1,0 +1,6 @@
+fn main() {
+    // Read input:
+    // let mut line = String::new();
+    // std::io::stdin().read_line(&mut line).unwrap();
+    println!("Hello, World!");
+}

@@ -1,0 +1,4 @@
+// Kotlin runs in script mode (.kts): no main function is required.
+// Read input: val line = readLine()
+
+println("Hello, World!")

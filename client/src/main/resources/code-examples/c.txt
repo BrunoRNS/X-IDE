@@ -1,0 +1,7 @@
+#include <stdio.h>
+
+int main(void) {
+    // Read input: int value; scanf("%d", &value);
+    printf("Hello, World!\n");
+    return 0;
+}

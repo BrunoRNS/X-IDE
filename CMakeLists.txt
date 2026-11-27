@@ -1,5 +1,0 @@
-cmake_minimum_required(VERSION 3.20)
-project(XIDE NONE)
-set(XIDE_CONTAINER_ENGINE "auto" CACHE STRING "auto, docker, or podman")
-set_property(CACHE XIDE_CONTAINER_ENGINE PROPERTY STRINGS auto docker podman)
-include(cmake/ProjectTasks.cmake)

@@ -1,0 +1,16 @@
+FROM ollama/ollama:latest
+
+# Pulled automatically by the entrypoint on first start. Override at runtime with
+# -e OLLAMA_MODEL=... (for example qwen2.5-coder:1.5b on low-memory machines).
+ENV OLLAMA_MODEL=qwen2.5-coder:3b \
+    OLLAMA_MAX_LOADED_MODELS=1 \
+    OLLAMA_NUM_PARALLEL=1 \
+    OLLAMA_KEEP_ALIVE=5m
+
+COPY infra/ai-entrypoint.sh /usr/local/bin/ai-entrypoint.sh
+
+RUN chmod +x /usr/local/bin/ai-entrypoint.sh
+
+EXPOSE 11434
+
+ENTRYPOINT ["/usr/local/bin/ai-entrypoint.sh"]

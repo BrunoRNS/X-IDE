@@ -1,0 +1,132 @@
+<div th:fragment="problemViewModal" id="problemViewModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm"
+    role="dialog" aria-modal="true" aria-labelledby="problemViewTitle">
+
+    <div
+        class="my-auto w-full max-w-4xl overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-950">
+
+        <div
+            class="flex items-start justify-between gap-4 border-b border-zinc-200 px-5 py-4 dark:border-zinc-800 sm:px-6">
+            <div class="min-w-0">
+                <div class="flex items-center gap-3">
+                    <span id="problemViewBalloon" class="flex shrink-0 items-center"></span>
+                    <h2 id="problemViewTitle" class="truncate text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                        Problem
+                    </h2>
+                </div>
+                <p id="problemViewSubtitle" class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                    Loading problem…
+                </p>
+            </div>
+
+            <button type="button" id="closeProblemViewModal" aria-label="Close problem view"
+                class="shrink-0 rounded-lg p-2 text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200">
+                <i class="fa-solid fa-xmark text-lg" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <div class="max-h-[75vh] overflow-y-auto">
+
+            <div id="problemViewLoading"
+                class="flex items-center justify-center gap-3 px-6 py-16 text-sm text-zinc-500 dark:text-zinc-400">
+                <i class="fa-solid fa-circle-notch fa-spin text-red-500" aria-hidden="true"></i>
+                Loading problem…
+            </div>
+
+            <div id="problemViewError" class="hidden px-6 py-16 text-center">
+                <i class="fa-solid fa-circle-exclamation text-2xl text-red-500" aria-hidden="true"></i>
+                <p id="problemViewErrorMessage" class="mt-2 text-sm font-medium text-red-600 dark:text-red-400">
+                    Could not load the problem.
+                </p>
+                <button type="button" id="retryProblemView"
+                    class="mt-3 text-sm font-semibold text-red-600 hover:underline dark:text-red-400">
+                    Try again
+                </button>
+            </div>
+
+            <div id="problemViewContent" class="hidden space-y-6 p-5 sm:p-6">
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <span id="problemViewComplexity"
+                        class="inline-block rounded-md bg-red-50 px-2.5 py-1 text-xs font-bold text-red-600 dark:bg-red-500/10 dark:text-red-400">
+                        —
+                    </span>
+                    <span id="problemViewId"
+                        class="inline-block rounded-md bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300">
+                        #—
+                    </span>
+                </div>
+                <section id="problemViewPdfSection">
+                    <div class="mb-3 flex items-center justify-between gap-3">
+                        <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                            Problem statement (PDF)
+                        </h3>
+
+                        <a id="problemViewPdfDownload" href="#" target="_blank"
+                            class="rounded-lg border px-3 py-2 text-xs font-semibold">
+                            <i class="fa-solid fa-download"></i>
+                            Download PDF
+                        </a>
+                    </div>
+
+                    <div class="overflow-hidden rounded-xl border border-zinc-200">
+                        <iframe id="problemPdfViewer" src="about:blank" title="PDF viewer"
+                            class="block w-full border-0 bg-white" style="height: 650px;">
+                        </iframe>
+                    </div>
+                </section>
+                <section id="problemViewRecommendationSection" class="hidden">
+                    <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                        Recommendation for the AI
+                    </h3>
+                    <p id="problemViewRecommendation"
+                        class="mt-2 whitespace-pre-wrap break-words rounded-xl border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-300">
+                    </p>
+                </section>
+
+                <section>
+                    <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                        Examples
+                    </h3>
+                    <div id="problemViewExamples" class="mt-3 space-y-4"></div>
+                    <p id="problemViewExamplesEmpty"
+                        class="mt-3 rounded-xl border border-dashed border-zinc-300 px-4 py-6 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+                        No examples registered.
+                    </p>
+                </section>
+
+                <section>
+                    <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                        Code examples
+                    </h3>
+                    <div id="problemViewCodeExamples" class="mt-3 space-y-4"></div>
+                    <p id="problemViewCodeExamplesEmpty"
+                        class="mt-3 rounded-xl border border-dashed border-zinc-300 px-4 py-6 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+                        No code examples registered.
+                    </p>
+                </section>
+
+                <section>
+                    <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                        Language limits
+                    </h3>
+                    <div id="problemViewLimits" class="mt-3 flex flex-wrap gap-2"></div>
+                    <p id="problemViewLimitsEmpty"
+                        class="mt-3 rounded-xl border border-dashed border-zinc-300 px-4 py-6 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+                        No language limits registered.
+                    </p>
+                </section>
+
+            </div>
+        </div>
+
+        <div
+            class="flex justify-end border-t border-zinc-200 bg-zinc-50 px-5 py-4 dark:border-zinc-800 dark:bg-zinc-900/50 sm:px-6">
+            <button type="button" id="closeProblemViewFooter"
+                class="rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800">
+                Close
+            </button>
+        </div>
+
+    </div>
+</div>

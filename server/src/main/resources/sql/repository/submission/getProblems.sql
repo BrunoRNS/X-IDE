@@ -1,0 +1,1 @@
+SELECT id, title, balao FROM problem ORDER BY id

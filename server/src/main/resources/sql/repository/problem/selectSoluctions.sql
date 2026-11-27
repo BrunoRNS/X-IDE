@@ -1,0 +1,1 @@
+SELECT id, input, output FROM soluctions WHERE id_problem = ? ORDER BY id
