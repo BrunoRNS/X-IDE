@@ -1,4 +1,4 @@
-name: Develop CI
+name: Development Pipeline
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: develop-ci-${{ github.ref }}
+  group: development-pipeline-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -26,12 +26,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
-          distribution: temurin
+          distribution: zulu
           java-version: '17'
           cache: maven
 
@@ -39,7 +39,7 @@ jobs:
         run: ./mvnw -B -ntp validate
 
   unit-tests:
-    name: Tests · ${{ matrix.module }} · ${{ matrix.os }}
+    name: Unit tests · ${{ matrix.module }} · ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -58,12 +58,12 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
-          distribution: temurin
+          distribution: zulu
           java-version: '17'
           cache: maven
 
@@ -84,6 +84,9 @@ jobs:
     needs:
       - code-quality
       - unit-tests
+    permissions:
+      contents: read
+      packages: write
     uses: ./.github/workflows/package-server.yml
     with:
       version: 0.0.0-dev
